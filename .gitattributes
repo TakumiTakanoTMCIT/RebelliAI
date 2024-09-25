@@ -1,0 +1,2 @@
+Assets/**/*.png !text !filter !merge !diff
+Assets/**/*.pdf !text !filter !merge !diff
