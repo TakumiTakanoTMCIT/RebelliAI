@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using ActionStatusChk;
+using PlayerInfo;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,11 +11,13 @@ namespace PlayerAction
     {
         Rigidbody2D rb;
         ActionStatusChecker actionStatusChecker;
+        PlayerStatus status;
 
         void Awake()
         {
             rb = this.GetComponent<Rigidbody2D>();
             actionStatusChecker = this.GetComponent<ActionStatusChecker>();
+            status = this.GetComponent<PlayerStatus>();
         }
 
         public void Stop()
@@ -24,6 +27,8 @@ namespace PlayerAction
                 Debug.LogError("Rigidbody2D が取得できていません。");
                 EditorApplication.isPaused = true;
             }
+
+            //Debug.Log("Stop");
             rb.velocity = new Vector2(0, rb.velocity.y);
         }
 
@@ -56,6 +61,14 @@ namespace PlayerAction
         public void Jump(float jumpForce)
         {
             rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+        }
+
+        public void Dash(bool direction)
+        {
+            if(direction)
+                rb.velocity = new Vector2(status.DashSpeed,rb.velocity.y);
+            else
+                rb.velocity = new Vector2(-status.DashSpeed,rb.velocity.y);
         }
     }
 }

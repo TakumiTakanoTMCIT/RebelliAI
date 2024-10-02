@@ -8,7 +8,7 @@ namespace ActionStatusChk
     {
         [SerializeField] private GroundChk groundChecker;
 
-        [SerializeField] private SideChecker leftSideChecker, rightSideChecker;
+        [SerializeField] private SideChecker leftSideChecker, rightSideChecker, wallLeftChecker, wallRightChecker;
 
         PlayerStatus playerStatus;
 
@@ -69,6 +69,19 @@ namespace ActionStatusChk
             else //左向きの場合
             {
                 return leftSideChecker.IsEnteredWall;
+            }
+        }
+
+        public bool IsFarWall(bool direction)
+        {
+            //右向きの場合
+            if (direction)
+            {
+                return wallRightChecker.IsEnteredWall;
+            }
+            else //左向きの場合
+            {
+                return wallLeftChecker.IsEnteredWall;
             }
         }
     }

@@ -27,5 +27,8 @@ namespace PlayerInfo
         public float JumpForceLevel = 0.5f;
 
         public float WallFallSpeed = 1.0f;
+
+        public float DashSpeed = 5.0f;
+        public float DashTime = 1.0f;
     }
 }
