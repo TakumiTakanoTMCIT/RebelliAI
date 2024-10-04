@@ -13,6 +13,7 @@ namespace PlayerState
 {
     public class PlayerStateMgr : MonoBehaviour
     {
+        //internal WallDashKickCtrl dashKickCtrl;
         internal ActionStatusChecker actionStatusChk;
 
         internal PlayerStatus playerStatus;
@@ -23,6 +24,12 @@ namespace PlayerState
 
         internal Rigidbody2D rb;
 
+        internal Dash_KickorJump_Manager dash_KickorJump_Manager;
+
+        internal PlayerDashKeepManager dashKeepManager;
+
+        internal WallKickDelayManager wallKickManager;
+
         /// <summary>
         /// Stateをインスタンス化して保持するための変数
         /// </summary>
@@ -32,12 +39,11 @@ namespace PlayerState
         public IState fallState;
         public IState wallFallState;
         public IState wallKick;
+        public IState dashState;
 
-        IState currentState;
+        internal IState currentState;
 
         internal WallKickDelayDicision wallKickHandler;
-
-        internal PlayerDashCtrl dashCtrl;
 
         private void Awake()
         {
@@ -49,7 +55,13 @@ namespace PlayerState
             actionStatusChk = this.GetComponent<ActionStatusChecker>();
 
             wallKickHandler = this.GetComponent<WallKickDelayDicision>();
-            dashCtrl = this.GetComponent<PlayerDashCtrl>();
+            //dashCtrl = this.GetComponent<Dash_KickorJump_Manager>();
+            // dashKickCtrl = this.GetComponent<WallDashKickCtrl>();
+            dash_KickorJump_Manager = this.GetComponent<Dash_KickorJump_Manager>();
+
+            dashKeepManager = this.GetComponent<PlayerDashKeepManager>();
+
+            wallKickManager = this.GetComponent<WallKickDelayManager>();
         }
 
         private void Start()
@@ -73,10 +85,35 @@ namespace PlayerState
 
         public void ChangeState(IState nextState)
         {
+            IState previousState;
+            previousState = currentState;
+
             currentState.Exit(this);
             currentState = nextState;
             currentState.Enter(this);
-            Debug.Log("C: " + currentState);
+
+            /// <summary>
+            /// 前のステートがwallfallで次のステートがfallだったら、
+            /// fallの状態になったとしてもすぐにジャンプキーを押せばwallkickを行えるようにする処理を実行します
+            /// </summary>
+            if (previousState == wallFallState && nextState == fallState)
+            {
+                wallKickManager.Start_JumpKey_AcceptingTime();
+            }
+
+            //Debug.Log("C: " + currentState);
+        }
+
+        public bool IsCurrentState_DashState()
+        {
+            if (currentState == dashState)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
@@ -198,6 +235,26 @@ namespace PlayerState
             }
 
             /// <summary>
+            /// ダッシュに遷移する処理
+            /// </summary>
+            if (stateMgr.inputHandler.IsDashKeyDown())
+            {
+                if (stateMgr.inputHandler.IsMoveLeftKey())
+                {
+                    stateMgr.dashState = new Dash(false);
+                    stateMgr.ChangeState(stateMgr.dashState);
+                    return;
+                }
+
+                if (stateMgr.inputHandler.IsMoveRightKey())
+                {
+                    stateMgr.dashState = new Dash(true);
+                    stateMgr.ChangeState(stateMgr.dashState);
+                    return;
+                }
+            }
+
+            /// <summary>
             /// 上の条件をすべて回避したら歩く処理を実行
             /// </summary>
             ExecuteWalk(stateMgr);
@@ -234,7 +291,7 @@ namespace PlayerState
                     return;
                 }
 
-                stateMgr.actionHandler.Walk(false, stateMgr.playerStatus.MoveSpeed);
+                stateMgr.actionHandler.Walk(false);
             }
             else if (stateMgr.inputHandler.IsMoveRightKey())
             {
@@ -244,7 +301,7 @@ namespace PlayerState
                     return;
                 }
 
-                stateMgr.actionHandler.Walk(true, stateMgr.playerStatus.MoveSpeed);
+                stateMgr.actionHandler.Walk(true);
             }
         }
 
@@ -256,10 +313,14 @@ namespace PlayerState
 
     public class Dash : IState
     {
-        Coroutine dashCoroutine;
+        PlayerDashTimeCtrl dashTimeCtrl;
+
         bool direction;
 
+        bool isExecutable;
+
         //インスタンスした時にdirectionを渡すようにしたい
+        //コンストラクタ
         public Dash(bool direction)
         {
             this.direction = direction;
@@ -267,24 +328,38 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            //ダッシュを開始しt、ダッシュの時間をカウントするコルーチンを開始する
+            /// <summary>
+            /// 初期化
+            /// </summary>
+            isExecutable = true;
+
+            dashTimeCtrl = stateMgr.gameObject.GetComponent<PlayerDashTimeCtrl>();
+
+            //ダッシュを開始して、ダッシュの終了させるまでの時間をカウントするコルーチンを開始する
             stateMgr.actionHandler.Dash(direction);
-            dashCoroutine = stateMgr.StartCoroutine(stateMgr.dashCtrl.DashTimeCounter());
+            dashTimeCtrl.StartDashTimeCtrl();
         }
 
         public void Execute(PlayerStateMgr stateMgr)
         {
             /// <summary>
+            /// Exucuteの最初に書くことで、Executeのバグを回避しています
+            /// Exitしたのにもかかわらず、数フレームだけExecuteが実行されてしまうので、Exitしたらfalseにして、Executeが実行されないようにしています
+            /// </summary>
+            if (!isExecutable)
+                return;
+
+            /// <summary>
             /// ダッシュが終了したときの処理
             /// どこに遷移するか判断します
             /// </summary>
-            if (!stateMgr.dashCtrl.IsDashNow())
+            if (dashTimeCtrl.IsDashNow == false)
             {
                 if (!stateMgr.inputHandler.IsMoveKey())
                     stateMgr.ChangeState(stateMgr.idleState);
-                else if (stateMgr.inputHandler.IsMoveLeftKey() && !direction)
+                else if (stateMgr.inputHandler.IsMoveLeftKey())
                     stateMgr.ChangeState(stateMgr.walkState);
-                else if (stateMgr.inputHandler.IsMoveRightKey() && direction)
+                else if (stateMgr.inputHandler.IsMoveRightKey())
                     stateMgr.ChangeState(stateMgr.walkState);
                 else
                 {
@@ -297,30 +372,64 @@ namespace PlayerState
 
             if (stateMgr.actionStatusChk.IsFallingNow())
             {
+                /// <summary>
+                /// ダッシュしている最中に落下したら、ダッシュを維持したままFallに遷移
+                /// </summary>
+                stateMgr.dashKeepManager.KeepDashSpeed();
+                isExecutable = false;
+
                 stateMgr.ChangeState(stateMgr.fallState);
+                return;
             }
 
-            if(stateMgr.inputHandler.IsJumpKeyDown())
+            if (stateMgr.inputHandler.IsJumpKeyDown())
             {
+                stateMgr.dashKeepManager.KeepDashSpeed();
+                isExecutable = false;
+
                 stateMgr.ChangeState(stateMgr.jumpState);
-                stateMgr.dashCtrl.KeepDash();
+                return;
             }
 
-            //壁にぶつかったら...
-            if(stateMgr.actionStatusChk.IsWall(direction))
+            if (stateMgr.actionStatusChk.IsWall(direction))
             {
-                stateMgr.ChangeState(stateMgr.idleState);
-            }
-        }
+                isExecutable = false;
 
-        void EndDash()
-        {
-            //TODO:ダッシュが終わらすStopCoroutineをするぞ！！！！！！！！！！！！！
+                stateMgr.ChangeState(stateMgr.idleState);
+                return;
+            }
+
+            //ダッシュ中にダッシュキーを押されたら、ダッシュをし直す
+            if (stateMgr.inputHandler.IsDashKeyDown())
+            {
+                isExecutable = false;
+                dashTimeCtrl.StopDashTimeCtrl();
+
+                /// <summary>
+                /// 向きをコンストラクタで渡し、ダッシュのステートに遷移する
+                /// </summary>
+                if (stateMgr.inputHandler.IsMoveLeftKey())
+                {
+                    stateMgr.dashState = new Dash(false);
+                    stateMgr.ChangeState(stateMgr.dashState);
+                    return;
+                }
+
+                if (stateMgr.inputHandler.IsMoveRightKey())
+                {
+                    stateMgr.dashState = new Dash(true);
+                    stateMgr.ChangeState(stateMgr.dashState);
+                    return;
+                }
+            }
         }
 
         public void Exit(PlayerStateMgr stateMgr)
         {
-
+            /// <summary>
+            /// 他のクラスに遷移するときには止める
+            /// </summary>
+            dashTimeCtrl.StopDashTimeCtrl();
         }
     }
 
@@ -346,34 +455,18 @@ namespace PlayerState
 
         public void Execute(PlayerStateMgr stateMgr)
         {
-            ///<summary>
-            /// 地面についたらついたら↓
-            /// 移動中ならWalkに遷移
-            /// 止まっていたらIdleに遷移
-            /// </summary>
             if (stateMgr.actionStatusChk.IsGround())
             {
-                if (stateMgr.actionStatusChk.isJumpingNow())
-                {
-                    /// <summary>
-                    /// 地面についていても上昇中ならジャンプ状態を維持
-                    /// </summary>
-                    return;
-                }
-
                 /// <summary>
-                /// 上の条件を回避したら遷移
+                /// 地面についていても上昇中ならジャンプ状態を維持
                 /// </summary>
-                if (!isWalkNow)
-                {
+                if (stateMgr.actionStatusChk.isJumpingNow())
+                    return;
+
+                if (isWalkNow == false)
                     stateMgr.ChangeState(stateMgr.idleState);
-                    return;
-                }
                 else
-                {
                     stateMgr.ChangeState(stateMgr.walkState);
-                    return;
-                }
             }
 
             /// <summary>
@@ -388,7 +481,7 @@ namespace PlayerState
             //進行方向に壁がある状態で、ジャンプキーが押されたら壁キックを行う
             if (stateMgr.inputHandler.IsJumpKeyDown())
             {
-                if (stateMgr.actionStatusChk.IsWall(false) || stateMgr.actionStatusChk.IsWall(true))
+                if (stateMgr.actionStatusChk.IsFarWall(false) || stateMgr.actionStatusChk.IsFarWall(true))
                     stateMgr.ChangeState(stateMgr.wallKick);
             }
 
@@ -418,11 +511,11 @@ namespace PlayerState
 
             if (stateMgr.inputHandler.IsMoveLeftKey())
             {
-                stateMgr.actionHandler.Walk(false, stateMgr.playerStatus.MoveSpeed);
+                stateMgr.actionHandler.Walk(false);
             }
             else if (stateMgr.inputHandler.IsMoveRightKey())
             {
-                stateMgr.actionHandler.Walk(true, stateMgr.playerStatus.MoveSpeed);
+                stateMgr.actionHandler.Walk(true);
             }
         }
 
@@ -462,11 +555,11 @@ namespace PlayerState
             if (stateMgr.inputHandler.IsMoveLeftKey())
             {
                 /// Debug.Logしていないのでわかりにくいが、移動可能な場合はtrueを返しています
-                isWalkNow = stateMgr.actionHandler.Walk(false, stateMgr.playerStatus.MoveSpeed);
+                isWalkNow = stateMgr.actionHandler.Walk(false);
             }
             else if (stateMgr.inputHandler.IsMoveRightKey())
             {
-                isWalkNow = stateMgr.actionHandler.Walk(true, stateMgr.playerStatus.MoveSpeed);
+                isWalkNow = stateMgr.actionHandler.Walk(true);
             }
         }
 
@@ -475,14 +568,16 @@ namespace PlayerState
             /// <summary>
             /// 壁から離れているときにでも壁キックを行えるような実装を書いています
             /// 落ちたとしても時間以内だったら壁キックを行う処理を書く
+            /// wallfallからfallに遷移する時に時間以内にジャンプしたら多少キーの押し方に問題があっても壁キックを行えるようにするための処理です
             /// </summary>
-            if (stateMgr.inputHandler.IsJumpKeyDown() && stateMgr.wallKickHandler.IsWallKickDelayDicision)
+            /*if (stateMgr.inputHandler.IsJumpKeyDown() && stateMgr.wallKickHandler.IsWallKickDelayDicision)
             {
-                stateMgr.ChangeState(stateMgr.wallKick);
-                stateMgr.wallKickHandler.StopCoroutine(stateMgr.wallKickHandler.wallKickDelayDicision());
+                stateMgr.StopCoroutine(stateMgr.wallKickHandler.wallKickDelayDicision());
                 stateMgr.wallKickHandler.ResetWallKickDelay();
+
+                stateMgr.ChangeState(stateMgr.wallKick);
                 return;
-            }
+            }*/
 
             /// <summary>
             /// ただ地面についたらIdleに遷移
@@ -508,7 +603,7 @@ namespace PlayerState
             /// </summary>
             if (stateMgr.inputHandler.IsMoveLeftKey())
             {
-                if (stateMgr.actionStatusChk.IsWall(false))
+                if (stateMgr.actionStatusChk.IsFarWall(false))
                 {
                     stateMgr.ChangeState(stateMgr.wallFallState);
                     return;
@@ -516,7 +611,7 @@ namespace PlayerState
             }
             else if (stateMgr.inputHandler.IsMoveRightKey())
             {
-                if (stateMgr.actionStatusChk.IsWall(true))
+                if (stateMgr.actionStatusChk.IsFarWall(true))
                 {
                     stateMgr.ChangeState(stateMgr.wallFallState);
                     return;
@@ -541,10 +636,6 @@ namespace PlayerState
 
     public class WallFall : IState
     {
-        //壁キックに関するコルーチンです
-        //壁キックは壁から離れてしまったとしても、一瞬の間なら壁キックを行えるようにするための処理です
-        Coroutine wallkickdelay;
-
         //壁にぶつかっている方向を判定するための変数
         //enterしたら初期化される
         bool wall_facing_which;
@@ -563,18 +654,6 @@ namespace PlayerState
             IsWallFallExecutable = true;
 
             /// <summary>
-            /// どちらの壁にもぶつかっていない場合はFallに遷移
-            /// </summary>
-            DidnotAllWallHit(stateMgr);
-
-            //もし地面についているならIdleに遷移
-            if (stateMgr.actionStatusChk.IsGround())
-            {
-                stateMgr.ChangeState(stateMgr.idleState);
-                return;
-            }
-
-            /// <summary>
             /// 壁にぶつかっている方向を判定
             /// </summary>
             if (stateMgr.actionStatusChk.IsWall(true))
@@ -589,11 +668,6 @@ namespace PlayerState
 
         public void Execute(PlayerStateMgr stateMgr)
         {
-            /// <summary>
-            /// どちらの壁にふれなくなったら問答無用でFallに遷移させる
-            /// </summary>
-            DidnotAllWallHit(stateMgr);
-
             //地面についたらIdleに遷移
             if (stateMgr.actionStatusChk.IsGround())
             {
@@ -646,20 +720,6 @@ namespace PlayerState
             WallFalling(stateMgr);
         }
 
-        /// <summary>
-        /// 壁に触れなくなったらFallに遷移する処理ですが、必要ないかもしれないです。なぜなら、両方の壁に触れなくなったかどうかを判定する必要は
-        /// ないかもしれないからです
-        /// いつか消すかもしれないです
-        /// </summary>
-        private void DidnotAllWallHit(PlayerStateMgr stateMgr)
-        {
-            if (!stateMgr.actionStatusChk.IsWall(true) && !stateMgr.actionStatusChk.IsWall(false))
-            {
-                stateMgr.ChangeState(stateMgr.fallState);
-                return;
-            }
-        }
-
         private void WallFalling(PlayerStateMgr stateMgr)
         {
             if (!IsWallFallExecutable)
@@ -672,20 +732,16 @@ namespace PlayerState
         {
             //ExitしたらfalseにしてWallFallの処理をできないようにする
             IsWallFallExecutable = false;
-
-            //壁キックのコルーチンを止めるて新しく実行する
-            if (wallkickdelay != null)
-            {
-                stateMgr.wallKickHandler.StopCoroutine(wallkickdelay);
-                wallkickdelay = null;
-            }
-            wallkickdelay = stateMgr.wallKickHandler.StartCoroutine(stateMgr.wallKickHandler.wallKickDelayDicision());
         }
     }
 
     public class WallKick : IState, IWalker
     {
+        PlayerDashKickKeyAcceptingHandler dashKickKeyAcceptingHandler;
+
         public bool isWalkNow { get; set; }
+
+        private bool isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
 
         public void Enter(PlayerStateMgr stateMgr)
         {
@@ -693,12 +749,19 @@ namespace PlayerState
             /// 初期化
             /// </summary>
             isWalkNow = false;
+            isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
+            dashKickKeyAcceptingHandler = stateMgr.gameObject.GetComponent<PlayerDashKickKeyAcceptingHandler>();
 
             /// <summary>
             /// スピードを0にして、壁キックを行う
             /// </summary>
             stateMgr.rb.velocity = Vector2.zero;
             stateMgr.actionHandler.Jump(stateMgr.playerStatus.JumpForce);
+
+            /// <summary>
+            /// ダッシュキックの受付を開始する
+            /// </summary>
+            //dashKickKeyAcceptingHandler.Start_DashKickKey_AcceptingTime();
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -711,6 +774,12 @@ namespace PlayerState
 
             if (stateMgr.actionStatusChk.IsGround())
             {
+                //上昇中ならジャンプ状態を維持
+                if (stateMgr.actionStatusChk.isJumpingNow())
+                {
+                    return;
+                }
+
                 /// <summary>
                 /// 歩きながら地面についときと歩かずに地面についたときで遷移先を変える処理
                 /// </summary>
@@ -736,6 +805,21 @@ namespace PlayerState
             }
 
             ExecuteWalk(stateMgr);
+
+            /// <summary>
+            /// どの壁にも触れなくなったとき、ダッシュキーを押されていたらkeepdashにする
+            /// 一度のみ実行可能(重複防止の為)
+            /// </summary>
+            if (!stateMgr.actionStatusChk.IsWall(true) && !stateMgr.actionStatusChk.IsWall(false))
+            {
+                if (stateMgr.inputHandler.IsDashKeyDown() || stateMgr.inputHandler.IsDashKey())
+                {
+                    if (isOneTimeAbleTo_TurnOn_KeepDashSpeed) return;
+
+                    stateMgr.dashKeepManager.KeepDashSpeed();
+                    isOneTimeAbleTo_TurnOn_KeepDashSpeed = true;
+                }
+            }
         }
 
         public void ExecuteWalk(PlayerStateMgr stateMgr)
@@ -746,19 +830,20 @@ namespace PlayerState
                 /// 同時押しの判定を行っています。
                 /// </summary>
                 isWalkNow = false;
+                stateMgr.actionHandler.Stop();
                 return;
             }
 
             if (stateMgr.inputHandler.IsMoveLeftKey())
             {
-                stateMgr.actionHandler.Walk(false, stateMgr.playerStatus.MoveSpeed);
+                stateMgr.actionHandler.Walk(false);
                 isWalkNow = true;
                 return;
             }
 
             if (stateMgr.inputHandler.IsMoveRightKey())
             {
-                stateMgr.actionHandler.Walk(true, stateMgr.playerStatus.MoveSpeed);
+                stateMgr.actionHandler.Walk(true);
                 isWalkNow = true;
                 return;
             }

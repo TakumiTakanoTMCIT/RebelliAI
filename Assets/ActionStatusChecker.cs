@@ -14,9 +14,12 @@ namespace ActionStatusChk
 
         Rigidbody2D rb;
 
+        //Dash_KickorJump_Manager dash_KickorJump_Manager;
+
         private void Awake()
         {
             playerStatus = this.GetComponent<PlayerStatus>();
+            //dash_KickorJump_Manager = this.GetComponent<Dash_KickorJump_Manager>();
 
             rb = this.GetComponent<Rigidbody2D>();
         }
@@ -72,6 +75,12 @@ namespace ActionStatusChk
             }
         }
 
+        public bool IsToushWallNow()
+        {
+            if (rightSideChecker.IsEnteredWall || leftSideChecker.IsEnteredWall) return true;
+            else return false;
+        }
+
         public bool IsFarWall(bool direction)
         {
             //右向きの場合
@@ -83,6 +92,12 @@ namespace ActionStatusChk
             {
                 return wallLeftChecker.IsEnteredWall;
             }
+        }
+
+        public bool WhichDirectionNow()
+        {
+            if (wallRightChecker.IsEnteredWall) return true;
+            else return false;
         }
     }
 }
