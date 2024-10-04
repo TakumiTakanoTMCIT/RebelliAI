@@ -36,6 +36,12 @@ namespace KeyHandler
             if (Input.GetKey(KeyCode.A) && Input.GetKey(KeyCode.D))
                 return false;
 
+            /// <summary>
+            /// どのキーも押されていない場合はfalse
+            /// </summary>
+            if (!Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.D))
+                return false;
+
             if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
             {
                 //Debug.Log("Left or Right key is pressed.");
@@ -47,12 +53,40 @@ namespace KeyHandler
 
         public bool IsJumpKeyDown()
         {
-            if (Input.GetKeyDown(KeyCode.J))
+            if (Input.GetKeyDown(KeyCode.Space))
             {
                 return true;
             }
             else
                 return false;
+        }
+
+        public bool IsDashKeyDown()
+        {
+            if (Input.GetKeyDown(KeyCode.LeftShift))
+            {
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public bool IsDashKey()
+        {
+            if (Input.GetKey(KeyCode.LeftShift)) return true;
+            else return false;
+        }
+
+        public bool IsShootKeyDown()
+        {
+            if (Input.GetKeyDown(KeyCode.J)) return true;
+            else return false;
+        }
+
+        public bool IsShootKeyUp()
+        {
+            if (Input.GetKeyUp(KeyCode.J)) return true;
+            else return false;
         }
     }
 }

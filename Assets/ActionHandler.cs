@@ -12,12 +12,17 @@ namespace PlayerAction
         Rigidbody2D rb;
         ActionStatusChecker actionStatusChecker;
         PlayerStatus status;
+        Dash_KickorJump_Manager dashCtrl;
+        PlayerDashKeepManager dashKeepManager;
 
         void Awake()
         {
             rb = this.GetComponent<Rigidbody2D>();
             actionStatusChecker = this.GetComponent<ActionStatusChecker>();
             status = this.GetComponent<PlayerStatus>();
+            dashCtrl = this.GetComponent<Dash_KickorJump_Manager>();
+
+            dashKeepManager = this.GetComponent<PlayerDashKeepManager>();
         }
 
         public void Stop()
@@ -32,30 +37,34 @@ namespace PlayerAction
             rb.velocity = new Vector2(0, rb.velocity.y);
         }
 
-        public bool Walk(bool direction, float speed)
+        public bool Walk(bool direction)
         {
             /// <summary>
             /// directionで左右を判定し、
             /// 壁にぶつかっていない場合のみ移動
             /// </summary>
 
-            if (!actionStatusChecker.IsWall(direction))
-            {
-                if (direction)
-                {
-                    rb.velocity = new Vector2(speed, rb.velocity.y);
-                }
-                else
-                {
-                    rb.velocity = new Vector2(-speed, rb.velocity.y);
-                }
-                return true;
-            }
-            else
+            if (actionStatusChecker.IsWall(direction))
             {
                 Stop();
                 return false;
             }
+
+            if (direction)
+            {
+                if (dashKeepManager.IsKeepDashSpeed)
+                    rb.velocity = new Vector2(status.DashSpeed, rb.velocity.y);
+                else
+                    rb.velocity = new Vector2(status.MoveSpeed, rb.velocity.y);
+            }
+            else
+            {
+                if (dashKeepManager.IsKeepDashSpeed)
+                    rb.velocity = new Vector2(-status.DashSpeed, rb.velocity.y);
+                else
+                    rb.velocity = new Vector2(-status.MoveSpeed, rb.velocity.y);
+            }
+            return true;
         }
 
         public void Jump(float jumpForce)
@@ -65,10 +74,10 @@ namespace PlayerAction
 
         public void Dash(bool direction)
         {
-            if(direction)
-                rb.velocity = new Vector2(status.DashSpeed,rb.velocity.y);
+            if (direction)
+                rb.velocity = new Vector2(status.DashSpeed, rb.velocity.y);
             else
-                rb.velocity = new Vector2(-status.DashSpeed,rb.velocity.y);
+                rb.velocity = new Vector2(-status.DashSpeed, rb.velocity.y);
         }
     }
 }
