@@ -1,4 +1,5 @@
-using PlayerState;
+using ActionStatusChk;
+using KeyHandler;
 using UnityEngine;
 
 /// <summary>
@@ -8,12 +9,12 @@ using UnityEngine;
 /// </summary>
 public class PlayerDashKeepManager : MonoBehaviour
 {
-    PlayerDashKickKeyAcceptingHandler dashKickKeyAcceptingHandler;
-    PlayerStateMgr stateMgr;
+    ActionStatusChecker actionStatusChk;
+    InputHandler inputHandler;
     private void Start()
     {
-        stateMgr = this.GetComponent<PlayerStateMgr>();
-        dashKickKeyAcceptingHandler = this.GetComponent<PlayerDashKickKeyAcceptingHandler>();
+        actionStatusChk = this.GetComponent<ActionStatusChecker>();
+        inputHandler = this.GetComponent<InputHandler>();
     }
 
     [SerializeField] private bool isKeepDashSpeed = false;
@@ -40,38 +41,24 @@ public class PlayerDashKeepManager : MonoBehaviour
         /// <summary>
         /// 地面についたらダッシュ速度継続を止める
         /// </summary>
-        if (stateMgr.actionStatusChk.IsGround())
+        if (actionStatusChk.IsGround())
         {
-            if (!stateMgr.actionStatusChk.isJumpingNow() && !stateMgr.actionStatusChk.IsFallingNow())
+            if (!actionStatusChk.isJumpingNow() && !actionStatusChk.IsFallingNow())
             {
                 StopDashSpeed();
                 return;
             }
         }
 
-        /// <summary>
-        /// ダッシュキックの受け付け中は以下の処理を行わない
-        /// ダッシュキックの受付中に実行すると、ダッシュキックができなくなる
-        /// なぜならダッシュキックの受付中にも壁に触れることもあるので、ダッシュキーを押したとしてもダッシュキックができなくなるからです。
-        /// </summary>
-        //if (dashKickKeyAcceptingHandler.IsDashKickKey_Accepting) return;
-
-
-        /// <summary>
-        /// 壁に触れたらダッシュ速度継続を止める
-        /// </summary>
-        if (!stateMgr.inputHandler.IsMoveKey())
-        {
-            //同時押し、どちらも押されていないならreturn
+        if (!inputHandler.IsMoveKey())
             return;
-        }
 
-        if (stateMgr.actionStatusChk.IsWall(false) && stateMgr.inputHandler.IsMoveLeftKey())
+        if (actionStatusChk.IsWall(false) && inputHandler.IsMoveLeftKey())
         {
             StopDashSpeed();
             return;
         }
-        else if (stateMgr.actionStatusChk.IsWall(true) && stateMgr.inputHandler.IsMoveRightKey())
+        else if (actionStatusChk.IsWall(true) && inputHandler.IsMoveRightKey())
         {
             StopDashSpeed();
             return;

@@ -3,22 +3,25 @@ using UnityEngine;
 
 public class PlayerWeapon_KeyController : MonoBehaviour
 {
-    [SerializeField] private ChargeShot_TimeHandler chargeShot_TimeHandler;
+    ChargeShot_Handler chargeShotHandler;
     [SerializeField] private ShellManager mameManager;
     InputHandler inputHandler;
+
+    [SerializeField] private GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
 
     private void Start()
     {
         inputHandler = this.GetComponent<InputHandler>();
+        chargeShotHandler = GameObject.Find("ShellHandler").GetComponent<ChargeShot_Handler>();
     }
 
     private void Update()
     {
         if (inputHandler.IsShootKeyDown())
         {
-            if(!chargeShot_TimeHandler.IsCharging)
+            if(!chargeShotHandler.IsCharging)
             {
-                chargeShot_TimeHandler.StartCharge();
+                chargeShotHandler.StartCharge();
             }
             mameManager.ShootMame();
             return;
@@ -26,19 +29,23 @@ public class PlayerWeapon_KeyController : MonoBehaviour
 
         if (inputHandler.IsShootKeyUp())
         {
-            if (!chargeShot_TimeHandler.IsCharged)
+            if (!chargeShotHandler.IsLowCharged)
             {
-                if(chargeShot_TimeHandler.IsMinimumChargeTime)
+                if(chargeShotHandler.IsMinimumChargeTime)
                 {
                     mameManager.ShootMame();
                 }
 
-                chargeShot_TimeHandler.InterruputChaging();
+                chargeShotHandler.InterruputChaging();
                 return;
             }
-            else
+            else if(chargeShotHandler.IsLowCharged && !chargeShotHandler.IsFullCharged)
             {
-                chargeShot_TimeHandler.ShootChargedShell();
+                chargeShotHandler.Shoot_Charged_Shell(levelLower_EnergyBall);
+            }
+            else if(chargeShotHandler.IsFullCharged)
+            {
+                chargeShotHandler.Shoot_Charged_Shell(fullLevel_EnergyBall);
             }
         }
     }

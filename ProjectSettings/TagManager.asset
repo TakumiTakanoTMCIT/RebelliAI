@@ -42,3 +42,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Stage
+    uniqueID: 1009366923
+    locked: 0
+  - name: Object
+    uniqueID: 3923992869
+    locked: 0

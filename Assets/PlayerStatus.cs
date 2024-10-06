@@ -9,16 +9,20 @@ namespace PlayerInfo
 {
     public class PlayerStatus : MonoBehaviour
     {
-        [SerializeField]ChargeShot_TimeHandler chargeShotTimeHandler;
-
         InputHandler inputHandler;
         ActionStatusChecker actionStatusChecker;
 
         private void Awake()
         {
-            chargeShotTimeHandler.Init(this);
+            /// <summary>
+            /// 重要！フレームレートの設定
+            /// </summary>
+            Application.targetFrameRate = 60;
+
             inputHandler = this.GetComponent<InputHandler>();
             actionStatusChecker = this.GetComponent<ActionStatusChecker>();
+
+            PlayerDirection = true;
         }
 
         [SerializeField]
@@ -46,18 +50,22 @@ namespace PlayerInfo
 
         public float delayKey_reception_time = 0.1f;
 
-        public bool playerDirection = true;
+        private bool PlayerDirection = true;
+        public bool playerdirection
+        {
+            get { return PlayerDirection; }
+        }
 
         private void Update()
         {
             if (!inputHandler.IsMoveKey()) return;
 
-            if (inputHandler.IsMoveLeftKey()) playerDirection = false;
+            if (inputHandler.IsMoveLeftKey()) PlayerDirection = false;
 
-            if (inputHandler.IsMoveRightKey()) playerDirection = true;
+            if (inputHandler.IsMoveRightKey()) PlayerDirection = true;
 
-            if (actionStatusChecker.IsToushWallNow())
-                playerDirection = !playerDirection;
+            if (!actionStatusChecker.isJumpingNow() && !actionStatusChecker.IsGround() && actionStatusChecker.IsToushWallNow())
+                PlayerDirection = !PlayerDirection;
         }
     }
 }

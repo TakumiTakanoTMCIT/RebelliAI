@@ -2,20 +2,22 @@ using ActionStatusChk;
 using PlayerInfo;
 using UnityEngine;
 
-public class ChargedShellBodyCtrl : MonoBehaviour
+public interface IDestroyable
+{
+    void DestroyShell();
+}
+
+public class ChargedShellBodyCtrl : MonoBehaviour,IDestroyable
 {
     [SerializeField] private float speed = 5.0f;
-    [SerializeField] PlayerStatus playerStatus;
-    [SerializeField] GameObject player;
 
-    bool direction;
+    PlayerStatus playerStatus;
     Rigidbody2D rb;
     SpriteRenderer spriteRenderer;
 
-    public void Init(bool direction)
+    private void Start()
     {
         GameObject player = GameObject.Find("Player");
-
         playerStatus = player.GetComponent<PlayerStatus>();
 
         MoveShell();
@@ -26,12 +28,17 @@ public class ChargedShellBodyCtrl : MonoBehaviour
         rb = this.GetComponent<Rigidbody2D>();
         spriteRenderer = this.GetComponent<SpriteRenderer>();
 
-        if (playerStatus.playerDirection) rb.velocity = new Vector2(speed, 0);
+        if (playerStatus.playerdirection) rb.velocity = new Vector2(speed, 0);
         else rb.velocity = new Vector2(-speed, 0);
     }
 
     private void Update()
     {
-        if(!spriteRenderer.isVisible) Destroy(this.gameObject);
+        if (!spriteRenderer.isVisible) DestroyShell();
+    }
+
+    public void DestroyShell()
+    {
+        Destroy(this.gameObject);
     }
 }
