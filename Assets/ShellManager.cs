@@ -14,8 +14,6 @@ public class ShellManager : MonoBehaviour
 
     private ObjectPool<GameObject> pool;
 
-    public GameObject chargedShell_LevelHigher_Prefab, chargedShell_LevelLower_Prefab;
-
     private void Start()
     {
         /// <summary>
@@ -50,7 +48,7 @@ public class ShellManager : MonoBehaviour
         shell.SetActive(true);
         var shellMainBodyCtrl = shell.GetComponent<ShellMainBodyCrtl>();
 
-        bool direction = status.playerDirection;
+        bool direction = status.playerdirection;
         shellMainBodyCtrl.SetDirection(direction);
 
         shell.transform.position = player.transform.position;
@@ -76,9 +74,8 @@ public class ShellManager : MonoBehaviour
         pool.Get();
     }
 
-    public void ShootChargedShell(GameObject shell, bool direction)
+    public void ShootChargedShell(GameObject shell)
     {
         var instanceShell = Instantiate(shell, player.transform.position, Quaternion.identity);
-        instanceShell.GetComponent<ChargedShellBodyCtrl>().Init(direction);
     }
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class ShellMainBodyCrtl : MonoBehaviour
+public class ShellMainBodyCrtl : MonoBehaviour,IDestroyable
 {
     Rigidbody2D rb;
     SpriteRenderer spriteRenderer;
@@ -46,5 +46,10 @@ public class ShellMainBodyCrtl : MonoBehaviour
     private void Update()
     {
         if (!spriteRenderer.isVisible) pool.Release(this.gameObject);
+    }
+
+    public void DestroyShell()
+    {
+        pool.Release(this.gameObject);
     }
 }

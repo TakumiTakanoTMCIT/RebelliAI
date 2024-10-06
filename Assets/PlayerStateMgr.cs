@@ -24,8 +24,6 @@ namespace PlayerState
 
         internal Rigidbody2D rb;
 
-        internal Dash_KickorJump_Manager dash_KickorJump_Manager;
-
         internal PlayerDashKeepManager dashKeepManager;
 
         internal WallKickDelayManager wallKickManager;
@@ -43,8 +41,6 @@ namespace PlayerState
 
         internal IState currentState;
 
-        internal WallKickDelayDicision wallKickHandler;
-
         private void Awake()
         {
             rb = this.GetComponent<Rigidbody2D>();
@@ -53,11 +49,6 @@ namespace PlayerState
             inputHandler = this.GetComponent<InputHandler>();
             actionHandler = this.GetComponent<ActionHandler>();
             actionStatusChk = this.GetComponent<ActionStatusChecker>();
-
-            wallKickHandler = this.GetComponent<WallKickDelayDicision>();
-            //dashCtrl = this.GetComponent<Dash_KickorJump_Manager>();
-            // dashKickCtrl = this.GetComponent<WallDashKickCtrl>();
-            dash_KickorJump_Manager = this.GetComponent<Dash_KickorJump_Manager>();
 
             dashKeepManager = this.GetComponent<PlayerDashKeepManager>();
 
@@ -74,7 +65,6 @@ namespace PlayerState
             wallKick = new WallKick();
 
             currentState = idleState;
-            Debug.Log("currentState is " + currentState);
             currentState.Enter(this);
         }
 
@@ -101,7 +91,7 @@ namespace PlayerState
                 wallKickManager.Start_JumpKey_AcceptingTime();
             }
 
-            //Debug.Log("C: " + currentState);
+            Debug.Log("C: " + currentState);
         }
 
         public bool IsCurrentState_DashState()
@@ -188,6 +178,22 @@ namespace PlayerState
                 }
 
                 stateMgr.ChangeState(stateMgr.walkState);
+            }
+
+            if (stateMgr.inputHandler.IsDashKeyDown())
+            {
+                if (stateMgr.playerStatus.playerdirection)
+                {
+                    stateMgr.dashState = new Dash(true);
+                    stateMgr.ChangeState(stateMgr.dashState);
+                    return;
+                }
+                else
+                {
+                    stateMgr.dashState = new Dash(false);
+                    stateMgr.ChangeState(stateMgr.dashState);
+                    return;
+                }
             }
         }
 
@@ -737,20 +743,14 @@ namespace PlayerState
 
     public class WallKick : IState, IWalker
     {
-        PlayerDashKickKeyAcceptingHandler dashKickKeyAcceptingHandler;
-
         public bool isWalkNow { get; set; }
 
         private bool isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            /// <summary>
-            /// 初期化
-            /// </summary>
             isWalkNow = false;
             isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
-            dashKickKeyAcceptingHandler = stateMgr.gameObject.GetComponent<PlayerDashKickKeyAcceptingHandler>();
 
             /// <summary>
             /// スピードを0にして、壁キックを行う

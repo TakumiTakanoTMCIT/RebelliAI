@@ -12,7 +12,6 @@ namespace PlayerAction
         Rigidbody2D rb;
         ActionStatusChecker actionStatusChecker;
         PlayerStatus status;
-        Dash_KickorJump_Manager dashCtrl;
         PlayerDashKeepManager dashKeepManager;
 
         void Awake()
@@ -20,7 +19,6 @@ namespace PlayerAction
             rb = this.GetComponent<Rigidbody2D>();
             actionStatusChecker = this.GetComponent<ActionStatusChecker>();
             status = this.GetComponent<PlayerStatus>();
-            dashCtrl = this.GetComponent<Dash_KickorJump_Manager>();
 
             dashKeepManager = this.GetComponent<PlayerDashKeepManager>();
         }

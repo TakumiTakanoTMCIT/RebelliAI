@@ -18,7 +18,6 @@ public class WallKickDelayManager : MonoBehaviour
         playerStatus = GetComponent<PlayerStatus>();
     }
 
-    //受付中かどうかのフラグ
     private bool isJumpKey_Accepting = false;
 
     /// <summary>
