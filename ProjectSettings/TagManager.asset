@@ -42,9 +42,27 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: FinalEnvironment
+    uniqueID: 3837831119
+    locked: 0
+  - name: BackEnvironment
+    uniqueID: 836062205
+    locked: 0
+  - name: BackStage
+    uniqueID: 453438721
+    locked: 0
+  - name: Enemy
+    uniqueID: 1353990563
+    locked: 0
+  - name: Player
+    uniqueID: 3923992869
+    locked: 0
+  - name: MidEnvironment
+    uniqueID: 2314560851
+    locked: 0
   - name: Stage
     uniqueID: 1009366923
     locked: 0
-  - name: Object
-    uniqueID: 3923992869
+  - name: FrontEnvironment
+    uniqueID: 1590641235
     locked: 0
