@@ -51,6 +51,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Stateパターン実験.sln",
+    "dotnet.defaultSolution": "RebelliAI.sln",
     "codic.case": "hy-phen-a-tion"
 }
