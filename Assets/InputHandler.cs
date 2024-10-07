@@ -43,10 +43,7 @@ namespace KeyHandler
                 return false;
 
             if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
-            {
-                //Debug.Log("Left or Right key is pressed.");
                 return true;
-            }
             else
                 return false;
         }
