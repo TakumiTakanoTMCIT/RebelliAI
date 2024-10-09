@@ -29,12 +29,21 @@ public class ShellManager : MonoBehaviour
             defaultCapacity: 3,
             maxSize: defaultCapacity
         );
+
+        /// <summary>
+        /// デフォルトの容量分だけ先に生成して処理を軽くするぞ！
+        /// </summary>
+        int count;
+        count = 0;
+        while (count < defaultCapacity)
+        {
+            pool.Get();
+            count++;
+        }
     }
 
     private GameObject CreateShell()
     {
-        //Debug.Log("CreateShell");
-
         GameObject shell = Instantiate(shellPrefab);
         shell.GetComponent<ShellMainBodyCrtl>().Init(this, pool, mameSpeed);
 
@@ -43,8 +52,6 @@ public class ShellManager : MonoBehaviour
 
     private void GetShell(GameObject shell)
     {
-        //Debug.Log("Active!!");
-
         shell.SetActive(true);
         var shellMainBodyCtrl = shell.GetComponent<ShellMainBodyCrtl>();
 
