@@ -13,24 +13,15 @@ namespace PlayerState
 {
     public class PlayerStateMgr : MonoBehaviour
     {
-        //internal WallDashKickCtrl dashKickCtrl;
         internal ActionStatusChecker actionStatusChk;
-
         internal PlayerStatus playerStatus;
-
         internal ActionHandler actionHandler;
-
         internal InputHandler inputHandler;
-
         internal Rigidbody2D rb;
-
         internal PlayerDashKeepManager dashKeepManager;
 
-        internal WallKickDelayManager wallKickManager;
+        private WallKickDelayManager wallKickManager;
 
-        /// <summary>
-        /// Stateをインスタンス化して保持するための変数
-        /// </summary>
         public IState idleState;
         public IState walkState;
         public IState jumpState;
@@ -40,6 +31,7 @@ namespace PlayerState
         public IState dashState;
 
         internal IState currentState;
+        internal bool isExecutable;
 
         private void Awake()
         {
@@ -49,9 +41,7 @@ namespace PlayerState
             inputHandler = this.GetComponent<InputHandler>();
             actionHandler = this.GetComponent<ActionHandler>();
             actionStatusChk = this.GetComponent<ActionStatusChecker>();
-
             dashKeepManager = this.GetComponent<PlayerDashKeepManager>();
-
             wallKickManager = this.GetComponent<WallKickDelayManager>();
         }
 
@@ -66,10 +56,13 @@ namespace PlayerState
 
             currentState = idleState;
             currentState.Enter(this);
+
+            isExecutable = true;
         }
 
         private void Update()
         {
+            if (!isExecutable) return;
             currentState.Execute(this);
         }
 
@@ -78,8 +71,11 @@ namespace PlayerState
             IState previousState;
             previousState = currentState;
 
+            isExecutable = false;
             currentState.Exit(this);
             currentState = nextState;
+
+            isExecutable = true;
             currentState.Enter(this);
 
             /// <summary>
@@ -316,8 +312,6 @@ namespace PlayerState
 
         bool direction;
 
-        bool isExecutable;
-
         //インスタンスした時にdirectionを渡すようにしたい
         public Dash(bool direction)
         {
@@ -326,7 +320,6 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            isExecutable = true;
             dashTimeCtrl = stateMgr.gameObject.GetComponent<PlayerDashTimeCtrl>();
 
             stateMgr.actionHandler.Dash(direction);
@@ -335,13 +328,6 @@ namespace PlayerState
 
         public void Execute(PlayerStateMgr stateMgr)
         {
-            /// <summary>
-            /// Exucuteの最初に書くことで、Executeのバグを回避しています
-            /// Exitしたのにもかかわらず、数フレームだけExecuteが実行されてしまうので、Exitしたらfalseにして、Executeが実行されないようにしています
-            /// </summary>
-            if (!isExecutable)
-                return;
-
             /// <summary>
             /// ダッシュが終了したときの処理
             /// どこに遷移するか判断します
@@ -369,7 +355,6 @@ namespace PlayerState
                 /// ダッシュしている最中に落下したら、ダッシュを維持したままFallに遷移
                 /// </summary>
                 stateMgr.dashKeepManager.KeepDashSpeed();
-                isExecutable = false;
 
                 stateMgr.ChangeState(stateMgr.fallState);
                 return;
@@ -378,7 +363,6 @@ namespace PlayerState
             if (stateMgr.inputHandler.IsJumpKeyDown())
             {
                 stateMgr.dashKeepManager.KeepDashSpeed();
-                isExecutable = false;
 
                 stateMgr.ChangeState(stateMgr.jumpState);
                 return;
@@ -386,8 +370,6 @@ namespace PlayerState
 
             if (stateMgr.actionStatusChk.IsWall(direction))
             {
-                isExecutable = false;
-
                 stateMgr.ChangeState(stateMgr.idleState);
                 return;
             }
@@ -395,7 +377,6 @@ namespace PlayerState
             //ダッシュ中にダッシュキーを押されたら、ダッシュをし直す
             if (stateMgr.inputHandler.IsDashKeyDown())
             {
-                isExecutable = false;
                 dashTimeCtrl.StopDashTimeCtrl();
 
                 /// <summary>
