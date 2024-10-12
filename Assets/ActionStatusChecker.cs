@@ -1,4 +1,6 @@
+using System;
 using PlayerInfo;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -6,35 +8,23 @@ namespace ActionStatusChk
 {
     public class ActionStatusChecker : MonoBehaviour
     {
-        [SerializeField] private GroundChk groundChecker;
+        GroundChk groundChecker;
 
-        [SerializeField] private SideChecker leftSideChecker, rightSideChecker, wallLeftChecker, wallRightChecker;
+        SideChecker leftSideChecker, rightSideChecker, wallLeftChecker, wallRightChecker;
 
         PlayerStatus playerStatus;
 
         Rigidbody2D rb;
 
-        //Dash_KickorJump_Manager dash_KickorJump_Manager;
-
-        private void Awake()
+        public void Init(GroundChk groundChk,SideChecker left,SideChecker right,SideChecker wallleft,SideChecker wallright,PlayerStatus playerStatus,Rigidbody2D rb)
         {
-            playerStatus = this.GetComponent<PlayerStatus>();
-            //dash_KickorJump_Manager = this.GetComponent<Dash_KickorJump_Manager>();
-
-            rb = this.GetComponent<Rigidbody2D>();
-        }
-
-        private void Start()
-        {
-            if (groundChecker == null)
-            {
-                Debug.LogError("GroundChecker が取得できていません。");
-
-                /// <summary>
-                /// nullの場合、エディタを一時停止
-                /// </summary>
-                EditorApplication.isPaused = true;
-            }
+            this.groundChecker = groundChk;
+            this.leftSideChecker = left;
+            this.rightSideChecker = right;
+            this.wallLeftChecker = wallleft;
+            this.wallRightChecker = wallright;
+            this.playerStatus = playerStatus;
+            this.rb = rb;
         }
 
         public bool IsFallingNow()

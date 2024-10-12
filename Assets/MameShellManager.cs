@@ -2,17 +2,33 @@ using PlayerInfo;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class ShellManager : MonoBehaviour
+public class MameShellManager : MonoBehaviour
 {
-    [SerializeField] PlayerStatus status;
+    PlayerStatus status;
+    GameObject player;
+    GameObject shellPrefab;
 
-    [SerializeField] private GameObject shellPrefab;
-    [SerializeField] private GameObject player;
-    [SerializeField] private int defaultCapacity = 5;
+    [SerializeField] private int defaultCapacity = 10;
 
-    [SerializeField] private float mameSpeed = 15.0f;
+    [SerializeField] private float mameSpeed = 20f;
 
     private ObjectPool<GameObject> pool;
+
+    private void Awake()
+    {
+        player = transform.parent.gameObject;
+        status = player.GetComponent<PlayerStatus>();
+        shellPrefab = Resources.Load<GameObject>("Shell");
+
+        if (shellPrefab == null)
+            Debug.LogWarning("shellPrefabが設定されていません");
+
+        if (status == null)
+            Debug.LogWarning("statusが設定されていません");
+
+        if (shellPrefab == null)
+            Debug.LogWarning("ShellがResourcesディレクトリにありません。確認してください!!");
+    }
 
     private void Start()
     {

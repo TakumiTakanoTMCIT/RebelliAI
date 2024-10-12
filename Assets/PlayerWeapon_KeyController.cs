@@ -4,22 +4,32 @@ using UnityEngine;
 public class PlayerWeapon_KeyController : MonoBehaviour
 {
     ChargeShot_Handler chargeShotHandler;
-    [SerializeField] private ShellManager mameManager;
+    MameShellManager mameManager;
     InputHandler inputHandler;
 
-    [SerializeField] private GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
+    GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
 
-    private void Start()
+    public void Init(InputHandler inputHandler, ChargeShot_Handler chargeShotHandler, MameShellManager shellManager)
     {
-        inputHandler = this.GetComponent<InputHandler>();
-        chargeShotHandler = GameObject.Find("ShellHandler").GetComponent<ChargeShot_Handler>();
+        this.mameManager = shellManager;
+        this.chargeShotHandler = chargeShotHandler;
+        this.inputHandler = inputHandler;
+
+        levelLower_EnergyBall = Resources.Load<GameObject>("LevelLowerShell");
+        fullLevel_EnergyBall = Resources.Load<GameObject>("FullChargeBall");
+
+        if (levelLower_EnergyBall == null)
+            Debug.Log("LevelLowerShellがResourcesディレクトリにありません。確認してください!!");
+
+        if (fullLevel_EnergyBall == null)
+            Debug.Log("FullChargeBallがResourcesディレクトリにありません。確認してください!!");
     }
 
     private void Update()
     {
         if (inputHandler.IsShootKeyDown())
         {
-            if(!chargeShotHandler.IsCharging)
+            if (!chargeShotHandler.IsCharging)
             {
                 chargeShotHandler.StartCharge();
             }
@@ -31,7 +41,7 @@ public class PlayerWeapon_KeyController : MonoBehaviour
         {
             if (!chargeShotHandler.IsLowCharged)
             {
-                if(chargeShotHandler.IsMinimumChargeTime)
+                if (chargeShotHandler.IsMinimumChargeTime)
                 {
                     mameManager.ShootMame();
                 }
@@ -39,11 +49,11 @@ public class PlayerWeapon_KeyController : MonoBehaviour
                 chargeShotHandler.InterruputChaging();
                 return;
             }
-            else if(chargeShotHandler.IsLowCharged && !chargeShotHandler.IsFullCharged)
+            else if (chargeShotHandler.IsLowCharged && !chargeShotHandler.IsFullCharged)
             {
                 chargeShotHandler.Shoot_Charged_Shell(levelLower_EnergyBall);
             }
-            else if(chargeShotHandler.IsFullCharged)
+            else if (chargeShotHandler.IsFullCharged)
             {
                 chargeShotHandler.Shoot_Charged_Shell(fullLevel_EnergyBall);
             }

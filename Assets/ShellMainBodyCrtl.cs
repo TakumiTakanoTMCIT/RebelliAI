@@ -5,7 +5,7 @@ public class ShellMainBodyCrtl : MonoBehaviour,IDestroyable
 {
     Rigidbody2D rb;
     SpriteRenderer spriteRenderer;
-    ShellManager shellManager;
+    MameShellManager shellManager;
 
     private ObjectPool<GameObject> pool;
 
@@ -22,7 +22,7 @@ public class ShellMainBodyCrtl : MonoBehaviour,IDestroyable
     /// <summary>
     /// InitはShellManagerでCreateShellしたときに呼び出されます
     /// </summary>
-    public void Init(ShellManager shellManager, ObjectPool<GameObject> pool, float speed)
+    public void Init(MameShellManager shellManager, ObjectPool<GameObject> pool, float speed)
     {
         this.shellManager = shellManager;
         this.pool = pool;

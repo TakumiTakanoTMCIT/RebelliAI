@@ -11,10 +11,11 @@ public class PlayerDashKeepManager : MonoBehaviour
 {
     ActionStatusChecker actionStatusChk;
     InputHandler inputHandler;
-    private void Start()
+
+    public void Init(ActionStatusChecker actionStatusChk, InputHandler inputHandler)
     {
-        actionStatusChk = this.GetComponent<ActionStatusChecker>();
-        inputHandler = this.GetComponent<InputHandler>();
+        this.actionStatusChk = actionStatusChk;
+        this.inputHandler = inputHandler;
     }
 
     [SerializeField] private bool isKeepDashSpeed = false;

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class ChargeShot_Handler : MonoBehaviour
 {
-    [SerializeField] PlayerStatus playerStatus;
+    PlayerStatus playerStatus;
 
     private bool isMinimumChargeTime = false;
     public bool IsMinimumChargeTime
@@ -16,11 +16,7 @@ public class ChargeShot_Handler : MonoBehaviour
 
     float timer;
 
-    [SerializeField] private GameObject player;
-
-    InputHandler inputHandler;
-
-    [SerializeField] private ShellManager shellManager;
+    MameShellManager shellManager;
 
     [SerializeField] private float mameCharge_TimeThreshold = 0.5f, lowCharge_TimeThreshold = 1.0f, fullCharge_TimeThreshold = 1.7f;
 
@@ -42,14 +38,11 @@ public class ChargeShot_Handler : MonoBehaviour
         get { return isFullCharged; }
     }
 
-    private void Awake()
+    public void Init(PlayerStatus playerStatus, MameShellManager shellManager)
     {
+        this.shellManager = shellManager;
+        this.playerStatus = playerStatus;
         StopCharge_and_ResetSettings();
-    }
-
-    private void Start()
-    {
-        inputHandler = player.GetComponent<InputHandler>();
     }
 
     private void FixedUpdate()
