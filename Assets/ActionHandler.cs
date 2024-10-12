@@ -14,24 +14,16 @@ namespace PlayerAction
         PlayerStatus status;
         PlayerDashKeepManager dashKeepManager;
 
-        void Awake()
+        public void Init(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerStatus status, PlayerDashKeepManager dashKeepManager)
         {
-            rb = this.GetComponent<Rigidbody2D>();
-            actionStatusChecker = this.GetComponent<ActionStatusChecker>();
-            status = this.GetComponent<PlayerStatus>();
-
-            dashKeepManager = this.GetComponent<PlayerDashKeepManager>();
+            this.rb = rb;
+            this.actionStatusChecker = actionStatusChecker;
+            this.status = status;
+            this.dashKeepManager = dashKeepManager;
         }
 
         public void Stop()
         {
-            if (rb == null)
-            {
-                Debug.LogError("Rigidbody2D が取得できていません。");
-                EditorApplication.isPaused = true;
-            }
-
-            //Debug.Log("Stop");
             rb.velocity = new Vector2(0, rb.velocity.y);
         }
 

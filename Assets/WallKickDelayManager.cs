@@ -12,10 +12,11 @@ public class WallKickDelayManager : MonoBehaviour
 {
     PlayerStatus playerStatus;
     PlayerStateMgr stateMgr;
-    private void Awake()
+
+    public void Init(PlayerStatus playerStatus, PlayerStateMgr stateMgr)
     {
-        stateMgr = GetComponent<PlayerStateMgr>();
-        playerStatus = GetComponent<PlayerStatus>();
+        this.playerStatus = playerStatus;
+        this.stateMgr = stateMgr;
     }
 
     private bool isJumpKey_Accepting = false;
@@ -39,7 +40,7 @@ public class WallKickDelayManager : MonoBehaviour
     /// </summary>
     public void Start_JumpKey_AcceptingTime()
     {
-        if(jumpKey_Accepting_Coroutine != null)
+        if (jumpKey_Accepting_Coroutine != null)
         {
             StopCoroutine(jumpKey_Accepting_Coroutine);
         }
@@ -51,7 +52,7 @@ public class WallKickDelayManager : MonoBehaviour
     /// </summary>
     public void Stop_JumpKey_AcceptingTime()
     {
-        if(jumpKey_Accepting_Coroutine != null)
+        if (jumpKey_Accepting_Coroutine != null)
         {
             StopCoroutine(jumpKey_Accepting_Coroutine);
             jumpKey_Accepting_Coroutine = null;
@@ -62,10 +63,10 @@ public class WallKickDelayManager : MonoBehaviour
     private void Update()
     {
         //受付時間以外なら受け付けない
-        if(!isJumpKey_Accepting) return;
+        if (!isJumpKey_Accepting) return;
 
         //ジャンプキーが押されたら
-        if(stateMgr.inputHandler.IsJumpKeyDown())
+        if (stateMgr.inputHandler.IsJumpKeyDown())
         {
             //コルーチンの受け付け時間を終了する
             Stop_JumpKey_AcceptingTime();

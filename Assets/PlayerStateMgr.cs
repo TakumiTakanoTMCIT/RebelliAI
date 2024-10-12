@@ -6,6 +6,7 @@ using DG.Tweening;
 using KeyHandler;
 using PlayerAction;
 using PlayerInfo;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -19,6 +20,7 @@ namespace PlayerState
         internal InputHandler inputHandler;
         internal Rigidbody2D rb;
         internal PlayerDashKeepManager dashKeepManager;
+        internal PlayerAnimStateHandler animHandler;
 
         private WallKickDelayManager wallKickManager;
 
@@ -31,18 +33,20 @@ namespace PlayerState
         public IState dashState;
 
         internal IState currentState;
-        internal bool isExecutable;
+        [SerializeField] internal bool isExecutable;
 
-        private void Awake()
+        public void Init(Rigidbody2D rb, PlayerStatus playerStatus, ActionHandler actionHandler, ActionStatusChecker actionStatusChk, InputHandler inputHandler, PlayerDashKeepManager dashKeepManager, WallKickDelayManager wallKickManager, PlayerAnimStateHandler animStateHandler)
         {
-            rb = this.GetComponent<Rigidbody2D>();
+            isExecutable = false;
 
-            playerStatus = this.GetComponent<PlayerStatus>();
-            inputHandler = this.GetComponent<InputHandler>();
-            actionHandler = this.GetComponent<ActionHandler>();
-            actionStatusChk = this.GetComponent<ActionStatusChecker>();
-            dashKeepManager = this.GetComponent<PlayerDashKeepManager>();
-            wallKickManager = this.GetComponent<WallKickDelayManager>();
+            this.rb = rb;
+            this.playerStatus = playerStatus;
+            this.actionHandler = actionHandler;
+            this.actionStatusChk = actionStatusChk;
+            this.inputHandler = inputHandler;
+            this.dashKeepManager = dashKeepManager;
+            this.wallKickManager = wallKickManager;
+            this.animHandler = animStateHandler;
         }
 
         private void Start()
@@ -101,6 +105,11 @@ namespace PlayerState
                 return false;
             }
         }
+
+        public IState GetCurrentState()
+        {
+            return currentState;
+        }
     }
 
     public interface IState
@@ -128,6 +137,8 @@ namespace PlayerState
             /// 移動を止める処理を最初に実行し初期化しておく
             /// </summary>
             stateMgr.actionHandler.Stop();
+
+            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.idleState);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -209,6 +220,8 @@ namespace PlayerState
             /// 初期化
             /// </summary>
             isWalkNow = false;
+
+            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.walkState);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -414,15 +427,11 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            /// <summary>
-            /// 初期化
-            /// </summary>
             isWalkNow = false;
 
-            /// <summary>
-            /// ジャンプする
-            /// </summary>
             stateMgr.actionHandler.Jump(stateMgr.playerStatus.JumpForce);
+
+            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.jumpState);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -508,6 +517,8 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
+            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.fallState);
+
             /// <summary>
             /// 初期化
             /// </summary>

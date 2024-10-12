@@ -6,9 +6,9 @@ using PlayerInfo;
 public class PlayerDashTimeCtrl : MonoBehaviour
 {
     PlayerStatus playerStatus;
-    private void Awake()
+    public void Init(PlayerStatus playerStatus)
     {
-        playerStatus = GetComponent<PlayerStatus>();
+        this.playerStatus = playerStatus;
     }
 
     [SerializeField]

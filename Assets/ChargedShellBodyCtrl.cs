@@ -7,7 +7,7 @@ public interface IDestroyable
     void DestroyShell();
 }
 
-public class ChargedShellBodyCtrl : MonoBehaviour,IDestroyable
+public class ChargedShellBodyCtrl : MonoBehaviour, IDestroyable
 {
     [SerializeField] private float speed = 5.0f;
 
@@ -34,6 +34,11 @@ public class ChargedShellBodyCtrl : MonoBehaviour,IDestroyable
 
     private void Update()
     {
+        if (spriteRenderer == null)
+        {
+            MoveShell();
+        }
+
         if (!spriteRenderer.isVisible) DestroyShell();
     }
 

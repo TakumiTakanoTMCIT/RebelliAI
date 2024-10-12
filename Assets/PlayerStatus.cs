@@ -12,28 +12,28 @@ namespace PlayerInfo
         InputHandler inputHandler;
         ActionStatusChecker actionStatusChecker;
 
-        private void Awake()
+        public void Init(InputHandler inputHandler, ActionStatusChecker actionStatusChecker)
         {
+            this.inputHandler = inputHandler;
+            this.actionStatusChecker = actionStatusChecker;
+
             /// <summary>
             /// 重要！フレームレートの設定
             /// </summary>
             Application.targetFrameRate = 60;
 
-            inputHandler = this.GetComponent<InputHandler>();
-            actionStatusChecker = this.GetComponent<ActionStatusChecker>();
-
             PlayerDirection = true;
         }
 
         [SerializeField]
-        private float moveSpeed = 1.0f;
+        private float moveSpeed = 5f;
         public float MoveSpeed
         {
             get { return moveSpeed; }
         }
 
         [SerializeField]
-        private float jumpForce = 20.0f;
+        private float jumpForce = 15f;
         public float JumpForce
         {
             get { return jumpForce; }
@@ -43,12 +43,12 @@ namespace PlayerInfo
 
         public float JumpForceLevel = 0.5f;
 
-        public float WallFallSpeed = 1.0f;
+        public float WallFallSpeed = 2.8f;
 
-        public float DashSpeed = 10.0f;
-        public float DashTime = 1.0f;
+        public float DashSpeed = 11f;
+        public float DashTime = 0.365f;
 
-        public float delayKey_reception_time = 0.1f;
+        public float delayKey_reception_time = 0.15f;
 
         private bool PlayerDirection = true;
         public bool playerdirection
