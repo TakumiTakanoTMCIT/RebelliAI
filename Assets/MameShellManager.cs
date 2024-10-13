@@ -17,17 +17,11 @@ public class MameShellManager : MonoBehaviour
     private void Awake()
     {
         player = transform.parent.gameObject;
-        status = player.GetComponent<PlayerStatus>();
-        shellPrefab = Resources.Load<GameObject>("Shell");
+        status = player.MyGetComponent_NullChker<PlayerStatus>();
 
+        shellPrefab = Resources.Load<GameObject>("Shell");
         if (shellPrefab == null)
             Debug.LogWarning("shellPrefabが設定されていません");
-
-        if (status == null)
-            Debug.LogWarning("statusが設定されていません");
-
-        if (shellPrefab == null)
-            Debug.LogWarning("ShellがResourcesディレクトリにありません。確認してください!!");
     }
 
     private void Start()
