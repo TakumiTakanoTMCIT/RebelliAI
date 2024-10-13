@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 6fb6853423a304b609614f136abc75a5
+guid: 5e509ddd1bf0543b680f894dc69f9041
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -119,18 +119,18 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: prototype_01
+  - name: HighWayBuildings
     originalName: 
-    pivot: {x: 0.5, y: 0}
+    pivot: {x: 0.49568966, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 256
-      height: 128
-    spriteID: a638bfe2895cf40e8abbf119423e3843
+      width: 232
+      height: 121
+    spriteID: ab3724a62140a43a087632ead49ddf48
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -142,20 +142,20 @@ ScriptedImporter:
   spriteSheetImportData: []
   asepriteLayers:
   - layerIndex: 0
-    guid: -940179730
-    name: prototype_01
+    guid: 941179470
+    name: HighWayBuildings
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: prototype_01
+    - name: HighWayBuildings
       frameIndex: 0
       cellRect:
-        x: 0
+        x: 13
         y: 0
-        width: 256
-        height: 128
-      spriteId: a638bfe2895cf40e8abbf119423e3843
+        width: 232
+        height: 121
+      spriteId: ab3724a62140a43a087632ead49ddf48
     linkedCells: []
     parentIndex: -1
   platformSettings: []
