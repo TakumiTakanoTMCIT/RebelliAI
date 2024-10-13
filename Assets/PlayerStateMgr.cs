@@ -35,7 +35,8 @@ namespace PlayerState
         internal IState currentState;
         internal bool isExecutable;
 
-        [SerializeField] internal GameObject dashSparkFactory;
+        [SerializeField] internal DashSparkFactory dashSparkFactory;
+        [SerializeField] internal WallKickFactory wallKickFactory;
 
         public void Init(Rigidbody2D rb, PlayerStatus playerStatus, ActionHandler actionHandler, ActionStatusChecker actionStatusChk, InputHandler inputHandler, PlayerDashKeepManager dashKeepManager, WallKickDelayManager wallKickManager, PlayerAnimStateHandler animStateHandler)
         {
@@ -325,7 +326,6 @@ namespace PlayerState
         public void Exit(PlayerStateMgr stateMgr) { }
     }
 
-    [Serializable]
     public class Dash : IState
     {
         DashSparkFactory dashSparkFactory;
@@ -341,7 +341,11 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            dashSparkFactory = stateMgr.dashSparkFactory.GetOtherObjComponent_NullCheck<DashSparkFactory>(stateMgr.dashSparkFactory.gameObject);
+            if (dashSparkFactory == null)
+            {
+                dashSparkFactory = stateMgr.dashSparkFactory.gameObject.MyGetComponent_NullChker<DashSparkFactory>();
+            }
+
             dashSparkFactory.MakeEffect();
 
             dashTimeCtrl = stateMgr.gameObject.MyGetComponent_NullChker<PlayerDashTimeCtrl>();
@@ -709,6 +713,8 @@ namespace PlayerState
 
     public class WallKick : IState, IWalker
     {
+        WallKickFactory wallKickFactory;
+
         public bool isWalkNow { get; set; }
 
         private bool isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
@@ -719,6 +725,12 @@ namespace PlayerState
             isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
 
             stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.wallKickState);
+
+            if (wallKickFactory == null)
+            {
+                wallKickFactory = stateMgr.wallKickFactory.gameObject.MyGetComponent_NullChker<WallKickFactory>();
+            }
+            wallKickFactory.MakeEffect(stateMgr.transform);
 
             /// <summary>
             /// スピードを0にして、壁キックを行う
@@ -736,14 +748,14 @@ namespace PlayerState
         {
             if (stateMgr.actionStatusChk.IsFallingNow())
             {
-                if(stateMgr.inputHandler.IsMoveLeftKey() && stateMgr.actionStatusChk.IsWall(false))
+                if (stateMgr.inputHandler.IsMoveLeftKey() && stateMgr.actionStatusChk.IsWall(false))
                 {
                     stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.wallFallState);
                     stateMgr.ChangeState(stateMgr.wallFallState);
                     return;
                 }
 
-                if(stateMgr.inputHandler.IsMoveRightKey() && stateMgr.actionStatusChk.IsWall(true))
+                if (stateMgr.inputHandler.IsMoveRightKey() && stateMgr.actionStatusChk.IsWall(true))
                 {
                     stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.wallFallState);
                     stateMgr.ChangeState(stateMgr.wallFallState);
