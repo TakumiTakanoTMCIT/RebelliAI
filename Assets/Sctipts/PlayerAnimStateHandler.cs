@@ -7,8 +7,8 @@ public class PlayerAnimStateHandler : MonoBehaviour
     Animator animator;
     PlayerStateMgr stateMgr;
 
-    internal IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState;
-    IPlayerAnimState currentState;
+    internal IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState;
+    internal IPlayerAnimState currentState;
 
     AnimatorCtrl animatorCtrl;
     PlayerStatus playerStatus;
@@ -30,6 +30,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
         fallState = new FallState(animatorCtrl);
         dashState = new DashState(animatorCtrl);
         wallFallState = new WallFallState(animatorCtrl);
+        wallKickState = new WallKickState(animatorCtrl);
 
         currentState = idleState;
     }
@@ -44,6 +45,8 @@ public class PlayerAnimStateHandler : MonoBehaviour
 
     public void ChangeAnimState(IPlayerAnimState newState)
     {
+        if (currentState == newState) return;
+
         currentState.Exit();
         currentState = newState;
         currentState.Enter();
@@ -197,5 +200,24 @@ public class WallFallState : IPlayerAnimState
     public void Exit()
     {
         AnimatorCtrl.StopAnim("isWallFall");
+    }
+}
+
+public class WallKickState : IPlayerAnimState
+{
+    AnimatorCtrl AnimatorCtrl;
+    public WallKickState(AnimatorCtrl animatorCtrl)
+    {
+        this.AnimatorCtrl = animatorCtrl;
+    }
+
+    public void Enter()
+    {
+        AnimatorCtrl.StartAnim("isWallKick");
+    }
+
+    public void Exit()
+    {
+        AnimatorCtrl.StopAnim("isWallKick");
     }
 }

@@ -126,8 +126,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 108
-      y: 274
+      x: 161
+      y: 4
       width: 22
       height: 51
     spriteID: dea63ec258ed34b9bbb6fe266538f3c9
@@ -138,7 +138,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 108, y: 274}
+    uvTransform: {x: 161, y: 4}
   - name: Player_Sozai_Frame_1
     originalName: 
     pivot: {x: 0.54545456, y: 0}
@@ -146,8 +146,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 108
-      y: 333
+      x: 161
+      y: 63
       width: 22
       height: 51
     spriteID: 636da16eb2a254c49aa2e31ef658f0e0
@@ -158,7 +158,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 108, y: 333}
+    uvTransform: {x: 161, y: 63}
   - name: Player_Sozai_Frame_2
     originalName: 
     pivot: {x: 0.4848485, y: 0}
@@ -166,8 +166,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 108
-      y: 51
+      x: 60
+      y: 235
       width: 33
       height: 46
     spriteID: fe16ef3791057427c8f4a177bbf87f58
@@ -178,7 +178,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 108, y: 51}
+    uvTransform: {x: 60, y: 235}
   - name: Player_Sozai_Frame_3
     originalName: 
     pivot: {x: 0.4857143, y: 0}
@@ -186,8 +186,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 60
-      y: 290
+      x: 106
+      y: 435
       width: 35
       height: 46
     spriteID: 3c80d6e42e1b84303923709ebf2d10f6
@@ -198,7 +198,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 60, y: 290}
+    uvTransform: {x: 106, y: 435}
   - name: Player_Sozai_Frame_4
     originalName: 
     pivot: {x: 0.47058824, y: 0}
@@ -206,8 +206,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 108
-      y: 105
+      x: 60
+      y: 289
       width: 34
       height: 44
     spriteID: 223fdb35865784323a4cbf8c12361e4b
@@ -218,7 +218,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 108, y: 105}
+    uvTransform: {x: 60, y: 289}
   - name: Player_Sozai_Frame_5
     originalName: 
     pivot: {x: 0.4857143, y: 0}
@@ -227,7 +227,7 @@ ScriptedImporter:
     rect:
       serializedVersion: 2
       x: 60
-      y: 344
+      y: 66
       width: 35
       height: 46
     spriteID: a401d39bbc0f644879b92ee8fbb65d5c
@@ -238,7 +238,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 60, y: 344}
+    uvTransform: {x: 60, y: 66}
   - name: Player_Sozai_Frame_6
     originalName: 
     pivot: {x: 0.5208334, y: 0}
@@ -266,8 +266,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 60
-      y: 233
+      x: 106
+      y: 378
       width: 33
       height: 49
     spriteID: 1238e17ccb59c42fb9f1f8bc92f8e641
@@ -278,7 +278,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 60, y: 233}
+    uvTransform: {x: 106, y: 378}
   - name: Player_Sozai_Frame_8
     originalName: 
     pivot: {x: 0.33333334, y: 0}
@@ -286,8 +286,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 108
-      y: 157
+      x: 60
+      y: 341
       width: 30
       height: 49
     spriteID: ff809c9bdfc4948729fa861091f231eb
@@ -298,7 +298,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 108, y: 157}
+    uvTransform: {x: 60, y: 341}
   - name: Player_Sozai_Frame_9
     originalName: 
     pivot: {x: 0.47727275, y: -0.2}
@@ -306,8 +306,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 4
-      y: 463
+      x: 106
+      y: 166
       width: 44
       height: 40
     spriteID: a7c2b97f86aba468f8d3e8d44c359e30
@@ -318,7 +318,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 4, y: 463}
+    uvTransform: {x: 106, y: 166}
   - name: Player_Sozai_Frame_10
     originalName: 
     pivot: {x: 0.5106383, y: -0.11904762}
@@ -326,8 +326,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 4
-      y: 413
+      x: 106
+      y: 4
       width: 47
       height: 42
     spriteID: add291261d4dd48d6b51d1d6bc1f7a8e
@@ -338,7 +338,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 4, y: 413}
+    uvTransform: {x: 106, y: 4}
   - name: Player_Sozai_Frame_11
     originalName: 
     pivot: {x: 0.5208334, y: 0}
@@ -366,8 +366,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 60
-      y: 59
+      x: 106
+      y: 109
       width: 37
       height: 49
     spriteID: 82d35685995504cf4b7bc3d9e97a591d
@@ -378,7 +378,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 60, y: 59}
+    uvTransform: {x: 106, y: 109}
   - name: Player_Sozai_Frame_13
     originalName: 
     pivot: {x: 0.4375, y: 0}
@@ -387,7 +387,7 @@ ScriptedImporter:
     rect:
       serializedVersion: 2
       x: 60
-      y: 398
+      y: 120
       width: 32
       height: 50
     spriteID: 99e86973d65444a45af85a6551c6d5b6
@@ -398,7 +398,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 60, y: 398}
+    uvTransform: {x: 60, y: 120}
   - name: Player_Sozai_Frame_14
     originalName: 
     pivot: {x: 0.37142858, y: -0.04}
@@ -406,8 +406,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 60
-      y: 116
+      x: 106
+      y: 214
       width: 35
       height: 50
     spriteID: 5283b825b9ba041dba6dd931fab24c9d
@@ -418,7 +418,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 60, y: 116}
+    uvTransform: {x: 106, y: 214}
   - name: Player_Sozai_Frame_15
     originalName: 
     pivot: {x: 0.475, y: -0.10638297}
@@ -426,8 +426,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 60
-      y: 4
+      x: 106
+      y: 54
       width: 40
       height: 47
     spriteID: 7cca5245901fb4b7783f59d8f25ed155
@@ -438,7 +438,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 60, y: 4}
+    uvTransform: {x: 106, y: 54}
   - name: Player_Sozai_Frame_16
     originalName: 
     pivot: {x: 0.5208334, y: -0.1590909}
@@ -546,8 +546,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 108
-      y: 4
+      x: 106
+      y: 272
       width: 44
       height: 39
     spriteID: 97bc9ce71eb2a498c8d8bf2635a224ff
@@ -558,7 +558,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 108, y: 4}
+    uvTransform: {x: 106, y: 272}
   - name: Player_Sozai_Frame_3
     originalName: 
     pivot: {x: 0.4375, y: -0.020408163}
@@ -567,7 +567,7 @@ ScriptedImporter:
     rect:
       serializedVersion: 2
       x: 60
-      y: 456
+      y: 178
       width: 32
       height: 49
     spriteID: 518234ad909e14267845b71627d0ea2e
@@ -578,7 +578,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 60, y: 456}
+    uvTransform: {x: 60, y: 178}
   - name: Player_Sozai_Frame_3
     originalName: 
     pivot: {x: 0.4375, y: 0}
@@ -586,8 +586,8 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 60
-      y: 174
+      x: 106
+      y: 319
       width: 32
       height: 51
     spriteID: 2c68e809cf3044ed687bc7fa7d5406d5
@@ -598,18 +598,18 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 60, y: 174}
+    uvTransform: {x: 106, y: 319}
   - name: Player_Sozai_Frame_2
     originalName: 
-    pivot: {x: 0.54545456, y: 0}
+    pivot: {x: 0.6052632, y: -0.018518519}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 108
-      y: 392
-      width: 22
-      height: 51
+      x: 4
+      y: 413
+      width: 38
+      height: 54
     spriteID: 295387fe993c14d86a3be9b4ca31c234
     spriteBone: []
     spriteOutline: []
@@ -618,18 +618,18 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 108, y: 392}
+    uvTransform: {x: 4, y: 413}
   - name: Player_Sozai_Frame_3
     originalName: 
-    pivot: {x: 0.54545456, y: 0}
+    pivot: {x: 0.6052632, y: -0.018518519}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 108
-      y: 214
-      width: 22
-      height: 52
+      x: 60
+      y: 4
+      width: 38
+      height: 54
     spriteID: ac93cb4df477447e98900fadbbbbcfef
     spriteBone: []
     spriteOutline: []
@@ -638,7 +638,47 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 108, y: 214}
+    uvTransform: {x: 60, y: 4}
+  - name: Player_Sozai_Frame_2
+    originalName: 
+    pivot: {x: 0.54545456, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 161
+      y: 122
+      width: 22
+      height: 51
+    spriteID: a8c680929422b476db35deb7bce72241
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 161, y: 122}
+  - name: Player_Sozai_Frame_3
+    originalName: 
+    pivot: {x: 0.54545456, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 60
+      y: 398
+      width: 22
+      height: 52
+    spriteID: c06467541d1754106b149bf813be23fb
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 60, y: 398}
   spriteSheetImportData: []
   asepriteLayers:
   - layerIndex: 0
@@ -840,6 +880,22 @@ ScriptedImporter:
         width: 32
         height: 51
       spriteId: 2c68e809cf3044ed687bc7fa7d5406d5
+    - name: Player_Sozai_Frame_26
+      frameIndex: 26
+      cellRect:
+        x: 9
+        y: 1
+        width: 38
+        height: 54
+      spriteId: 295387fe993c14d86a3be9b4ca31c234
+    - name: Player_Sozai_Frame_27
+      frameIndex: 27
+      cellRect:
+        x: 9
+        y: 1
+        width: 38
+        height: 54
+      spriteId: ac93cb4df477447e98900fadbbbbcfef
     - name: Player_Sozai_Frame_2
       frameIndex: 2
       cellRect:
@@ -847,7 +903,7 @@ ScriptedImporter:
         y: 0
         width: 22
         height: 51
-      spriteId: 295387fe993c14d86a3be9b4ca31c234
+      spriteId: a8c680929422b476db35deb7bce72241
     - name: Player_Sozai_Frame_3
       frameIndex: 3
       cellRect:
@@ -855,7 +911,7 @@ ScriptedImporter:
         y: 0
         width: 22
         height: 52
-      spriteId: ac93cb4df477447e98900fadbbbbcfef
+      spriteId: c06467541d1754106b149bf813be23fb
     linkedCells: []
     parentIndex: -1
   platformSettings: []

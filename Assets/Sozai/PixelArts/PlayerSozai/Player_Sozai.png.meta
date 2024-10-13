@@ -650,6 +650,48 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Player_Sozai_26
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 0
+        width: 64
+        height: 64
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 401f38311d11944a3a0c3afad57071db
+      internalID: 1286256071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player_Sozai_27
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 0
+        width: 64
+        height: 64
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d9617d21f4a8419295671308fad1864
+      internalID: -1023236878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
@@ -680,6 +722,8 @@ TextureImporter:
       Player_Sozai_23: -709532601
       Player_Sozai_24: 859293695
       Player_Sozai_25: -1223581842
+      Player_Sozai_26: 1286256071
+      Player_Sozai_27: -1023236878
       Player_Sozai_3: 1202391765
       Player_Sozai_4: -1830175435
       Player_Sozai_5: -675005379

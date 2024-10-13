@@ -73,7 +73,7 @@ public class PlayerInitializer : MonoBehaviour
         playerStateMgr.Init(rb, playerStatus, actionHandler, actionStatusChecker, inputHandler, dashKeepManager, wallKickDelayManager,animHandler);
         actionStatusChecker.Init(groundChk, leftside, rightside, wallleftside, wallrightside, playerStatus, rb);
         actionHandler.Init(rb, actionStatusChecker, playerStatus, dashKeepManager);
-        playerStatus.Init(inputHandler, actionStatusChecker, playerStateMgr);
+        playerStatus.Init(inputHandler, actionStatusChecker, playerStateMgr, animHandler);
         wallKickDelayManager.Init(playerStatus, playerStateMgr);
         playerDashTimeCtrl.Init(playerStatus);
         dashKeepManager.Init(actionStatusChecker, inputHandler);
