@@ -346,6 +346,8 @@ namespace PlayerState
 
             stateMgr.actionHandler.Dash(direction);
             dashTimeCtrl.StartDashTimeCtrl();
+
+            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.dashState);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
