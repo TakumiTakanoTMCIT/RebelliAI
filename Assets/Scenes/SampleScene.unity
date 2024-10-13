@@ -5409,7 +5409,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 906999080}
-  DefaultCapacity: 3
+  DefaultCapacity: 10
 --- !u!4 &1599515778
 Transform:
   m_ObjectHideFlags: 0
