@@ -14,7 +14,7 @@ public class DashSparkBody : MonoBehaviour
 
         this.pool = pool;
         this.playerTransform = playerTransform;
-        spriteRenderer.flipX = direction;
+        spriteRenderer.flipX = !direction;
         this.transform.position = playerTransform.position;
     }
 
