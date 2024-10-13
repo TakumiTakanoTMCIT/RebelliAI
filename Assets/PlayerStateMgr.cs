@@ -622,6 +622,8 @@ namespace PlayerState
             /// </summary>
             IsWallFallExecutable = true;
 
+            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.wallFallState);
+
             /// <summary>
             /// 壁にぶつかっている方向を判定
             /// </summary>
