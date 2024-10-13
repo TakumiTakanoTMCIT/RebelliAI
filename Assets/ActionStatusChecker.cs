@@ -27,6 +27,14 @@ namespace ActionStatusChk
             this.rb = rb;
         }
 
+        public bool IsMovingNow()
+        {
+            if (rb.velocity.x > 0.5f || rb.velocity.x < -0.5f)
+                return true;
+            else
+                return false;
+        }
+
         public bool IsFallingNow()
         {
             if (rb.velocity.y < playerStatus.FallSpeedLevel)
