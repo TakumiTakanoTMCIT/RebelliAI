@@ -10,8 +10,6 @@ public class MameShellManager : MonoBehaviour
 
     [SerializeField] private int defaultCapacity = 10;
 
-    [SerializeField] private float mameSpeed = 20f;
-
     private ObjectPool<GameObject> pool;
 
     private void Awake()
@@ -55,7 +53,7 @@ public class MameShellManager : MonoBehaviour
     private GameObject CreateShell()
     {
         GameObject shell = Instantiate(shellPrefab);
-        shell.GetComponent<ShellMainBodyCrtl>().Init(this, pool, mameSpeed);
+        shell.GetComponent<ShellMainBodyCrtl>().Init(pool);
 
         return shell;
     }
