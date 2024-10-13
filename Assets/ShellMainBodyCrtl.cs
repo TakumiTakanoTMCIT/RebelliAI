@@ -45,7 +45,7 @@ public class ShellMainBodyCrtl : MonoBehaviour,IDestroyable
 
     private void Update()
     {
-        if (!spriteRenderer.isVisible) pool.Release(this.gameObject);
+        if (!spriteRenderer.isVisible) DestroyShell();
     }
 
     public void DestroyShell()

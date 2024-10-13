@@ -33,7 +33,9 @@ namespace PlayerState
         public IState dashState;
 
         internal IState currentState;
-        [SerializeField] internal bool isExecutable;
+        internal bool isExecutable;
+
+        [SerializeField] internal GameObject dashSparkFactory;
 
         public void Init(Rigidbody2D rb, PlayerStatus playerStatus, ActionHandler actionHandler, ActionStatusChecker actionStatusChk, InputHandler inputHandler, PlayerDashKeepManager dashKeepManager, WallKickDelayManager wallKickManager, PlayerAnimStateHandler animStateHandler)
         {
@@ -51,6 +53,8 @@ namespace PlayerState
 
         private void Start()
         {
+            //Debug.Log("dash.dashsparkfactory: " + dash.dashSparkFactory);
+
             idleState = new Idle();
             walkState = new Walk();
             jumpState = new Jump();
@@ -319,8 +323,10 @@ namespace PlayerState
         public void Exit(PlayerStateMgr stateMgr) { }
     }
 
+    [Serializable]
     public class Dash : IState
     {
+        DashSparkFactory dashSparkFactory;
         PlayerDashTimeCtrl dashTimeCtrl;
 
         bool direction;
@@ -333,7 +339,10 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            dashTimeCtrl = stateMgr.gameObject.GetComponent<PlayerDashTimeCtrl>();
+            dashSparkFactory = stateMgr.dashSparkFactory.GetOtherObjComponent_NullCheck<DashSparkFactory>(stateMgr.dashSparkFactory.gameObject);
+            dashSparkFactory.MakeEffect();
+
+            dashTimeCtrl = stateMgr.gameObject.MyGetComponent_NullChker<PlayerDashTimeCtrl>();
 
             stateMgr.actionHandler.Dash(direction);
             dashTimeCtrl.StartDashTimeCtrl();
