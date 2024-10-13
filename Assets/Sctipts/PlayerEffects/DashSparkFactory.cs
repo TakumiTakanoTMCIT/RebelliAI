@@ -9,7 +9,7 @@ public class DashSparkFactory : MonoBehaviour
     GameObject dashSparkPrefab;
     PlayerStatus status;
     [SerializeField] private GameObject player;
-    [SerializeField] private int DefaultCapacity = 3;
+    [SerializeField] private int DefaultCapacity = 5;
 
     private ObjectPool<GameObject> pool;
 
@@ -23,7 +23,7 @@ public class DashSparkFactory : MonoBehaviour
             actionOnDestroy: DestroyEffect,
             collectionCheck: true,
             defaultCapacity: DefaultCapacity,
-            maxSize: 3
+            maxSize: DefaultCapacity
         );
 
         dashSparkPrefab = Resources.Load<GameObject>("DashSpark");
