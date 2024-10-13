@@ -11,11 +11,13 @@ namespace PlayerInfo
     {
         InputHandler inputHandler;
         ActionStatusChecker actionStatusChecker;
+        PlayerStateMgr playerStateMgr;
 
-        public void Init(InputHandler inputHandler, ActionStatusChecker actionStatusChecker)
+        public void Init(InputHandler inputHandler, ActionStatusChecker actionStatusChecker, PlayerStateMgr stateMgr)
         {
             this.inputHandler = inputHandler;
             this.actionStatusChecker = actionStatusChecker;
+            this.playerStateMgr = stateMgr;
 
             /// <summary>
             /// 重要！フレームレートの設定
@@ -58,6 +60,8 @@ namespace PlayerInfo
 
         private void Update()
         {
+            if (playerStateMgr.currentState == playerStateMgr.dashState) return;
+
             if (!inputHandler.IsMoveKey()) return;
 
             if (inputHandler.IsMoveLeftKey()) PlayerDirection = false;
