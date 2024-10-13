@@ -7,7 +7,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
     Animator animator;
     PlayerStateMgr stateMgr;
 
-    internal IPlayerAnimState idleState, walkState, jumpState, fallState, dashState;
+    internal IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState;
     IPlayerAnimState currentState;
 
     AnimatorCtrl animatorCtrl;
@@ -29,6 +29,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
         jumpState = new JumpState(animatorCtrl);
         fallState = new FallState(animatorCtrl);
         dashState = new DashState(animatorCtrl);
+        wallFallState = new WallFallState(animatorCtrl);
 
         currentState = idleState;
     }
@@ -177,5 +178,24 @@ public class DashState : IPlayerAnimState
     public void Exit()
     {
         AnimatorCtrl.StopAnim("isDash");
+    }
+}
+
+public class WallFallState : IPlayerAnimState
+{
+    AnimatorCtrl AnimatorCtrl;
+    public WallFallState(AnimatorCtrl animatorCtrl)
+    {
+        this.AnimatorCtrl = animatorCtrl;
+    }
+
+    public void Enter()
+    {
+        AnimatorCtrl.StartAnim("isWallFall");
+    }
+
+    public void Exit()
+    {
+        AnimatorCtrl.StopAnim("isWallFall");
     }
 }
