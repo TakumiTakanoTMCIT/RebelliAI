@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class ChargeShot_Handler : MonoBehaviour
 {
+    internal GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
     PlayerStatus playerStatus;
 
     private bool isMinimumChargeTime = false;
@@ -43,6 +44,15 @@ public class ChargeShot_Handler : MonoBehaviour
         this.shellManager = shellManager;
         this.playerStatus = playerStatus;
         StopCharge_and_ResetSettings();
+
+        levelLower_EnergyBall = Resources.Load<GameObject>("LevelLowerShell");
+        fullLevel_EnergyBall = Resources.Load<GameObject>("FullChargeBall");
+
+        if (levelLower_EnergyBall == null)
+            Debug.Log("LevelLowerShellがResourcesディレクトリにありません。確認してください!!");
+
+        if (fullLevel_EnergyBall == null)
+            Debug.Log("FullChargeBallがResourcesディレクトリにありません。確認してください!!");
     }
 
     private void FixedUpdate()

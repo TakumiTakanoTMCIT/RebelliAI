@@ -6,29 +6,24 @@ public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
 {
     Rigidbody2D rb;
     SpriteRenderer spriteRenderer;
-    MameShellManager shellManager;
-    Animator animator;
 
     private ObjectPool<GameObject> pool;
 
     bool direction;
 
-    float speed;
+    [SerializeField] private float speed = 20.0f;
 
     bool isMoveable = true;
 
     /// <summary>
     /// InitはShellManagerでCreateShellしたときに呼び出されます
     /// </summary>
-    public void Init(MameShellManager shellManager, ObjectPool<GameObject> pool, float speed)
+    public void Init(ObjectPool<GameObject> pool)
     {
-        animator = this.gameObject.MyGetComponent_NullChker<Animator>();
         rb = this.gameObject.MyGetComponent_NullChker<Rigidbody2D>();
         spriteRenderer = this.gameObject.MyGetComponent_NullChker<SpriteRenderer>();
 
-        this.shellManager = shellManager;
         this.pool = pool;
-        this.speed = speed;
     }
 
     private void OnEnable()

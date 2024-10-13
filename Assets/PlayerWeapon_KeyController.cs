@@ -7,22 +7,13 @@ public class PlayerWeapon_KeyController : MonoBehaviour
     MameShellManager mameManager;
     InputHandler inputHandler;
 
-    GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
+    //GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
 
     public void Init(InputHandler inputHandler, ChargeShot_Handler chargeShotHandler, MameShellManager shellManager)
     {
         this.mameManager = shellManager;
         this.chargeShotHandler = chargeShotHandler;
         this.inputHandler = inputHandler;
-
-        levelLower_EnergyBall = Resources.Load<GameObject>("LevelLowerShell");
-        fullLevel_EnergyBall = Resources.Load<GameObject>("FullChargeBall");
-
-        if (levelLower_EnergyBall == null)
-            Debug.Log("LevelLowerShellがResourcesディレクトリにありません。確認してください!!");
-
-        if (fullLevel_EnergyBall == null)
-            Debug.Log("FullChargeBallがResourcesディレクトリにありません。確認してください!!");
     }
 
     private void Update()
@@ -51,11 +42,11 @@ public class PlayerWeapon_KeyController : MonoBehaviour
             }
             else if (chargeShotHandler.IsLowCharged && !chargeShotHandler.IsFullCharged)
             {
-                chargeShotHandler.Shoot_Charged_Shell(levelLower_EnergyBall);
+                chargeShotHandler.Shoot_Charged_Shell(chargeShotHandler.levelLower_EnergyBall);
             }
             else if (chargeShotHandler.IsFullCharged)
             {
-                chargeShotHandler.Shoot_Charged_Shell(fullLevel_EnergyBall);
+                chargeShotHandler.Shoot_Charged_Shell(chargeShotHandler.fullLevel_EnergyBall);
             }
         }
     }
