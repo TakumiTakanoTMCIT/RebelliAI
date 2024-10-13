@@ -15,8 +15,6 @@ public class PlayerAnimStateHandler : MonoBehaviour
 
     SpriteRenderer spriteRenderer;
 
-    bool isExutable;
-
     private void Awake()
     {
         animator = GetComponent<Animator>();
@@ -32,8 +30,6 @@ public class PlayerAnimStateHandler : MonoBehaviour
         fallState = new FallState(animatorCtrl);
 
         currentState = idleState;
-
-        isExutable = true;
     }
 
     private void Update()
@@ -46,13 +42,9 @@ public class PlayerAnimStateHandler : MonoBehaviour
 
     public void ChangeAnimState(IPlayerAnimState newState)
     {
-        isExutable = false;
-
         currentState.Exit();
         currentState = newState;
         currentState.Enter();
-
-        isExutable = true;
     }
 
 }
