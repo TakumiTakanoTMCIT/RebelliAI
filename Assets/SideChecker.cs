@@ -7,12 +7,13 @@ public class SideChecker : MonoBehaviour
 {
     BoxCollider2D boxCollider;
 
+    [SerializeField]
     bool isEnteredWall = false;
     public bool IsEnteredWall { get { return isEnteredWall; } private set { isEnteredWall = value; } }
 
     private void Awake()
     {
-        boxCollider = GetComponent<BoxCollider2D>();
+        boxCollider = this.gameObject.MyGetComponent_NullChker<BoxCollider2D>();
         boxCollider.isTrigger = true;
     }
 
@@ -20,15 +21,15 @@ public class SideChecker : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Ground"))
         {
-            IsEnteredWall = true;
+            isEnteredWall = true;
         }
     }
 
-    public void OnTriggerStay2D(Collider2D other)
+    private void OnTriggerStay2D(Collider2D other)
     {
         if (other.gameObject.CompareTag("Ground"))
         {
-            IsEnteredWall = true;
+            isEnteredWall = true;
         }
     }
 
@@ -36,7 +37,7 @@ public class SideChecker : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Ground"))
         {
-            IsEnteredWall = false;
+            isEnteredWall = false;
         }
     }
 }

@@ -38,6 +38,8 @@ namespace PlayerState
         [SerializeField] internal DashSparkFactory dashSparkFactory;
         [SerializeField] internal WallKickFactory wallKickFactory;
 
+        [SerializeField] bool isDebugCurrentState = false;
+
         public void Init(Rigidbody2D rb, PlayerStatus playerStatus, ActionHandler actionHandler, ActionStatusChecker actionStatusChk, InputHandler inputHandler, PlayerDashKeepManager dashKeepManager, WallKickDelayManager wallKickManager, PlayerAnimStateHandler animStateHandler)
         {
             isExecutable = false;
@@ -98,7 +100,8 @@ namespace PlayerState
                 wallKickManager.Start_JumpKey_AcceptingTime();
             }
 
-            //Debug.Log("C: " + currentState);
+            if (isDebugCurrentState)
+                Debug.Log("C: " + currentState);
         }
 
         public bool IsCurrentState_DashState()
