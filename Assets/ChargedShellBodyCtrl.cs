@@ -76,7 +76,7 @@ public class ChargedShellAnimatorCtrl
 
     public void TakeDamage()
     {
-        Debug.Log("TakeDamage。チャージシェルのアニメーションを再生します");
+        //Debug.Log("TakeDamage。チャージシェルのアニメーションを再生します");
         bodyCtrl.StopMove();
         animator.SetTrigger("isHit");
     }
