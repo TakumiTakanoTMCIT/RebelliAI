@@ -12,12 +12,14 @@ namespace PlayerInfo
         InputHandler inputHandler;
         ActionStatusChecker actionStatusChecker;
         PlayerStateMgr playerStateMgr;
+        PlayerAnimStateHandler animStateHandler;
 
-        public void Init(InputHandler inputHandler, ActionStatusChecker actionStatusChecker, PlayerStateMgr stateMgr)
+        public void Init(InputHandler inputHandler, ActionStatusChecker actionStatusChecker, PlayerStateMgr stateMgr, PlayerAnimStateHandler animStateHandler)
         {
             this.inputHandler = inputHandler;
             this.actionStatusChecker = actionStatusChecker;
             this.playerStateMgr = stateMgr;
+            this.animStateHandler = animStateHandler;
 
             /// <summary>
             /// 重要！フレームレートの設定
@@ -67,6 +69,8 @@ namespace PlayerInfo
             if (inputHandler.IsMoveLeftKey()) PlayerDirection = false;
 
             if (inputHandler.IsMoveRightKey()) PlayerDirection = true;
+
+            if (animStateHandler.currentState == animStateHandler.wallKickState) return;
 
             if (!actionStatusChecker.isJumpingNow() && !actionStatusChecker.IsGround() && actionStatusChecker.IsToushWallNow())
                 PlayerDirection = !PlayerDirection;

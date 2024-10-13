@@ -53,6 +53,8 @@ namespace PlayerState
 
         private void Start()
         {
+            //Time.timeScale = 0.1f;
+
             //Debug.Log("dash.dashsparkfactory: " + dash.dashSparkFactory);
 
             idleState = new Idle();
@@ -716,6 +718,8 @@ namespace PlayerState
             isWalkNow = false;
             isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
 
+            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.wallKickState);
+
             /// <summary>
             /// スピードを0にして、壁キックを行う
             /// </summary>
@@ -732,6 +736,21 @@ namespace PlayerState
         {
             if (stateMgr.actionStatusChk.IsFallingNow())
             {
+                if(stateMgr.inputHandler.IsMoveLeftKey() && stateMgr.actionStatusChk.IsWall(false))
+                {
+                    stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.wallFallState);
+                    stateMgr.ChangeState(stateMgr.wallFallState);
+                    return;
+                }
+
+                if(stateMgr.inputHandler.IsMoveRightKey() && stateMgr.actionStatusChk.IsWall(true))
+                {
+                    stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.wallFallState);
+                    stateMgr.ChangeState(stateMgr.wallFallState);
+                    return;
+                }
+
+
                 stateMgr.ChangeState(stateMgr.fallState);
                 return;
             }
