@@ -44,7 +44,6 @@ public class DashSparkFactory : MonoBehaviour
 
     private void GetEffect(GameObject effect)
     {
-        Debug.Log("GetEffect");
         effect.SetActive(true);
         effect.gameObject.GetComponent<DashSparkBody>().Init(pool, player.transform, status.playerdirection);
     }
