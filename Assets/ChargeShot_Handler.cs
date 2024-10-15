@@ -67,19 +67,19 @@ public class ChargeShot_Handler : MonoBehaviour
         if (!isMinimumChargeTime && timer >= mameCharge_TimeThreshold)
         {
             isMinimumChargeTime = true;
-            Debug.LogWarning("最低限のチャージ時間を超えた");
+            //Debug.LogWarning("最低限のチャージ時間を超えた");
         }
 
         if (!isLowCharged && timer >= lowCharge_TimeThreshold)
         {
             isLowCharged = true;
-            Debug.LogWarning("低チャージ完了！！");
+            //Debug.LogWarning("低チャージ完了！！");
         }
 
         if (!isFullCharged && (timer - lowCharge_TimeThreshold) >= fullCharge_TimeThreshold)
         {
             isFullCharged = true;
-            Debug.LogWarning("フルチャージ完了！！");
+            //Debug.LogWarning("フルチャージ完了！！");
         }
     }
 
