@@ -4,43 +4,48 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot
 {
     [SerializeField]
     private int hp = 3;
-    bool isAlive;
+    bool isAlivingNow;
 
     EnemySpawnerHandler spawnerHandler;
 
     private void Awake()
     {
+        isAlivingNow = false;
         spawnerHandler = GameObject.Find("EnemyFactory").MyGetComponent_NullChker<EnemySpawnerHandler>();
     }
 
     public void MyAwake(EnemySpawnPoser spawnPoser, Vector3 position, int initialHp)
     {
-        isAlive = true;
+        Debug.LogAssertion("MyAwake");
+        isAlivingNow = true;
         transform.position = position;
         hp = initialHp;
     }
 
     private void OnBecameInvisible()
     {
-        if (isAlive) ReturnEnemy();
-    }
+        if (!isAlivingNow)
+            return;
+        isAlivingNow = false;
 
-    //自作関数
-    private void ReturnEnemy()
-    {
-        if (gameObject != null)//←この状況ってありえるのか？しらんけど追加しとけば安定するっしょ笑笑
-            spawnerHandler.ReturnEnemy(this.gameObject);
+        Debug.Log("EnemyInvisible");
+        spawnerHandler.ReturnEnemy(this.gameObject);
     }
 
     //インターフェース実装
     public void TakeDamage(int damage)
     {
+        if (!isAlivingNow)
+            return;
+
         hp -= damage;
+        Debug.Log("TakeDamage");
         if (hp <= 0)
         {
+            Debug.LogWarning("ReturnEnemy");
+            isAlivingNow = false;
             hp = 0;
-            isAlive = false;
-            ReturnEnemy();
+            spawnerHandler.ReturnEnemy(this.gameObject);
         }
     }
 }
