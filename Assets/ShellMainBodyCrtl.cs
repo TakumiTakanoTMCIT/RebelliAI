@@ -79,7 +79,6 @@ public class MameAnimator
     {
         animator.SetTrigger("isTakeDamage");
         mainbody.StopMove();
-        Debug.Log("SetTrigger");
     }
 
     public void RefrectShell()
