@@ -1,51 +1,59 @@
 using UnityEngine;
 
-public class EnemyBody : MonoBehaviour, IDamageableFromShot
+public interface IDamageableFromShot
 {
+    bool IsAlivingNow { get; set; }
+    void TakeDamage(int damage);
+}
+
+public interface IPrefabEnemyBody
+{
+    void OnBecameInvisible();
+    void MyAwake(Vector3 position, Transform parent);
+}
+
+public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody
+{
+    [SerializeField] int initialHp = 3;
+
     [SerializeField]
     private int hp = 3;
-    bool isAlivingNow;
+    public bool IsAlivingNow { get; set; }
 
-    EnemySpawnerHandler spawnerHandler;
-
+    ExamplePoolHandler poolHandler;
     private void Awake()
     {
-        isAlivingNow = false;
-        spawnerHandler = GameObject.Find("EnemyFactory").MyGetComponent_NullChker<EnemySpawnerHandler>();
+        IsAlivingNow = false;
+        poolHandler = GameObject.Find("EnemyFactory").MyGetComponent_NullChker<ExamplePoolHandler>();
     }
 
-    public void MyAwake(EnemySpawnPoser spawnPoser, Vector3 position, int initialHp)
+    //インターフェース実装------------------------------
+    public void MyAwake(Vector3 position, Transform parent)
     {
-        Debug.LogAssertion("MyAwake");
-        isAlivingNow = true;
-        transform.position = position;
+        IsAlivingNow = true;
         hp = initialHp;
+        transform.position = position;
+        transform.parent = parent;
     }
 
-    private void OnBecameInvisible()
+    public void OnBecameInvisible()
     {
-        if (!isAlivingNow)
-            return;
-        isAlivingNow = false;
-
-        Debug.Log("EnemyInvisible");
-        spawnerHandler.ReturnEnemy(this.gameObject);
+        if (!IsAlivingNow) return;
+        IsAlivingNow = false;
+        poolHandler.ReturnEnemy(this.gameObject);
     }
 
-    //インターフェース実装
     public void TakeDamage(int damage)
     {
-        if (!isAlivingNow)
+        if (!IsAlivingNow)
             return;
-
         hp -= damage;
-        Debug.Log("TakeDamage");
+
         if (hp <= 0)
         {
-            Debug.LogWarning("ReturnEnemy");
-            isAlivingNow = false;
+            IsAlivingNow = false;
             hp = 0;
-            spawnerHandler.ReturnEnemy(this.gameObject);
+            poolHandler.ReturnEnemy(this.gameObject);
         }
     }
 }

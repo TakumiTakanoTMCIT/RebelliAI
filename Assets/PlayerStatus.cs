@@ -60,6 +60,12 @@ namespace PlayerInfo
             get { return PlayerDirection; }
         }
 
+        //DashStateの開始時にプレイヤーの向きを設定する
+        public void SetPlayerDiresctionFromDashStateBigin(bool direction)
+        {
+            PlayerDirection = direction;
+        }
+
         private void Update()
         {
             if (playerStateMgr.currentState == playerStateMgr.dashState) return;

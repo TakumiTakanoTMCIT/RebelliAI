@@ -9,6 +9,7 @@ public class AfterGrowFactory : MonoBehaviour
     [SerializeField] private GameObject player;
     [SerializeField] float maxTime = 0.3f, minTime = 0.1f;
     [SerializeField] int defaultCapacity = 10;
+    [SerializeField] private Transform parentTransform;
 
     private GameObject effect;
     bool isInstantiable = true;
@@ -67,6 +68,14 @@ public class AfterGrowFactory : MonoBehaviour
             defaultCapacity: defaultCapacity,
             maxSize: 99
         );
+
+        for (int count = 0; count < defaultCapacity; count++)
+        {
+            var instance = CreateEffect();
+            instance.transform.SetParent(parentTransform);
+            instance.SetActive(false);
+            pool.Release(instance);
+        }
     }
 
     private GameObject CreateEffect()

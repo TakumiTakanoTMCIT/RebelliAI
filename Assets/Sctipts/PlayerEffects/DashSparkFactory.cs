@@ -13,7 +13,7 @@ public class DashSparkFactory : MonoBehaviour
 
     private ObjectPool<GameObject> pool;
 
-    void Start()
+    private void Awake()
     {
         pool = new ObjectPool<GameObject>
         (
@@ -36,9 +36,21 @@ public class DashSparkFactory : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        for (int count = 0; count < DefaultCapacity; count++)
+        {
+            var instance = CreateEffect();
+            instance.SetActive(false);
+            pool.Release(instance);
+        }
+    }
+
     private GameObject CreateEffect()
     {
-        var instance = Instantiate(dashSparkPrefab, transform.position, Quaternion.identity);
+        var instance = Instantiate(dashSparkPrefab);
+        instance.transform.SetParent(transform);
+        //instance.SetActive(false);
         return instance;
     }
 
@@ -58,8 +70,8 @@ public class DashSparkFactory : MonoBehaviour
         Destroy(effect);
     }
 
-    public void MakeEffect()
+    public GameObject MakeEffect()
     {
-        pool.Get();
+        return pool.Get();
     }
 }

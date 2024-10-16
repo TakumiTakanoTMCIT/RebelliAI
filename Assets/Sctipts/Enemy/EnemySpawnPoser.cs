@@ -1,21 +1,47 @@
 using UnityEngine;
 
-public class EnemySpawnPoser : MonoBehaviour
+public interface IEnemyPosController
 {
-    [SerializeField] int initial_EnemyHp;
-    EnemySpawnerHandler enemySpawnerHandler;
+    void GetSpawnHandler();
+    void OnBecameVisible();
+    void MakeInstance();
+}
+
+public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
+{
+    IEnemySpawnerHandler enemySpawnerHandler;
     GameObject instance;
 
     private void Awake()
     {
-        enemySpawnerHandler = GameObject.Find("EnemyFactory").MyGetComponent_NullChker<EnemySpawnerHandler>();
+        GetSpawnHandler();
     }
 
-    private void OnBecameVisible()
+    public void GetSpawnHandler()
     {
-        if(instance != null && instance.activeSelf)
-            return;
+        enemySpawnerHandler = GameObject.Find("EnemyFactory").GetComponent<IEnemySpawnerHandler>();
+        if (enemySpawnerHandler == null)
+        {
+            Debug.Log("enemySpaenerHandlerがnullです");
+        }
+    }
+
+    public void MakeInstance()
+    {
+        /*if(instance == null) return;
+        if (instance.activeSelf) return;*/
         instance = enemySpawnerHandler.GetEnemy();
-        instance.gameObject.MyGetComponent_NullChker<EnemyBody>().MyAwake(this, transform.position, initial_EnemyHp);
+        instance.gameObject.MyGetComponent_NullChker<EnemyBody>().MyAwake(transform.position, transform);
+    }
+
+    public void ReturnGameObject(GameObject obj)
+    {
+        enemySpawnerHandler.ReturnEnemy(obj);
+    }
+
+    public void OnBecameVisible()
+    {
+        Debug.Log("表示された！");
+        MakeInstance();
     }
 }
