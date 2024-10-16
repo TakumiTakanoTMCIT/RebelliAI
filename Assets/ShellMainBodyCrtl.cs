@@ -22,7 +22,6 @@ public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
     {
         rb = this.gameObject.MyGetComponent_NullChker<Rigidbody2D>();
         spriteRenderer = this.gameObject.MyGetComponent_NullChker<SpriteRenderer>();
-
         this.pool = pool;
     }
 
@@ -34,10 +33,11 @@ public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
     /// <summary>
     /// GetShellのタイミングで呼ばれます
     /// </summary>
-    public void SetDirection(bool direction)
+    public void GetShellAndSetDirection(bool direction, bool isDashExtraDamage)
     {
         this.direction = direction;
         spriteRenderer.flipX = !direction;
+        gameObject.MyGetComponent_NullChker<DamageAbleFinder>().SetDamageAmount(isDashExtraDamage);
     }
 
     private void FixedUpdate()

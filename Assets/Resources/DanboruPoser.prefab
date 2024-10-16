@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9141108563020165949}
   - component: {fileID: 386399584550161687}
   m_Layer: 0
-  m_Name: EnemyPoser
+  m_Name: DanboruPoser
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

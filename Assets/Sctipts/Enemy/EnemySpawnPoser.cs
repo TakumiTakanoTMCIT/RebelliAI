@@ -39,9 +39,10 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
         enemySpawnerHandler.ReturnEnemy(obj);
     }
 
+    //Unityから呼び出されます
     public void OnBecameVisible()
     {
-        Debug.Log("表示された！");
+        //Debug.Log("表示された！");
         MakeInstance();
     }
 }

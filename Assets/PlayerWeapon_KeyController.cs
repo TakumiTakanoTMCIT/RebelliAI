@@ -4,12 +4,12 @@ using UnityEngine;
 public class PlayerWeapon_KeyController : MonoBehaviour
 {
     ChargeShot_Handler chargeShotHandler;
-    MameShellManager mameManager;
+    AllShellManager mameManager;
     InputHandler inputHandler;
 
     //GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
 
-    public void Init(InputHandler inputHandler, ChargeShot_Handler chargeShotHandler, MameShellManager shellManager)
+    public void Init(InputHandler inputHandler, ChargeShot_Handler chargeShotHandler, AllShellManager shellManager)
     {
         this.mameManager = shellManager;
         this.chargeShotHandler = chargeShotHandler;

@@ -3,9 +3,9 @@ using PlayerInfo;
 using UnityEngine;
 using UnityEngine.Pool;
 
-public class MameShellManager : MonoBehaviour
+public class AllShellManager : MonoBehaviour
 {
-    [SerializeField] private Transform parentTransform;
+    [SerializeField] private Transform mameParentTransform;
     [SerializeField] private int defaultCapacity = 10;
     [SerializeField] private float shootMameInterval = 0.5f;
 
@@ -59,7 +59,7 @@ public class MameShellManager : MonoBehaviour
     {
         GameObject shell = Instantiate(shellPrefab);
         shell.GetComponent<ShellMainBodyCrtl>().Init(pool);
-        shell.transform.parent = parentTransform;
+        shell.transform.parent = mameParentTransform;
 
         return shell;
     }
@@ -67,10 +67,10 @@ public class MameShellManager : MonoBehaviour
     private void GetShell(GameObject shell)
     {
         shell.SetActive(true);
-        var shellMainBodyCtrl = shell.GetComponent<ShellMainBodyCrtl>();
+        var shellMainBodyCtrl = shell.MyGetComponent_NullChker<ShellMainBodyCrtl>();
 
         bool direction = status.playerdirection;
-        shellMainBodyCtrl.SetDirection(direction);
+        shellMainBodyCtrl.GetShellAndSetDirection(direction, status.IsDashNow());
 
         shell.transform.position = player.transform.position;
     }

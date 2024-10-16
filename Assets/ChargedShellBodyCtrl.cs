@@ -30,6 +30,8 @@ public class ChargedShellBodyCtrl : MonoBehaviour, IDestroyable
 
     private void MoveShell()
     {
+        gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().IsExtraDamage(playerStatus.IsDashNow());
+
         if (playerStatus.playerdirection)
         {
             rb.velocity = new Vector2(speed, 0);

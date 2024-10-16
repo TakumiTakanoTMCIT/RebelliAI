@@ -37,7 +37,7 @@ public class PlayerInitializer : MonoBehaviour
 
     GroundChk groundChk;
     SideChecker leftside, rightside, wallleftside, wallrightside;
-    MameShellManager shellManager;
+    AllShellManager shellManager;
     ChargeShot_Handler chargeShotHandler;
 
     //Unity側のコンポーネント-------------------------------------
@@ -67,7 +67,7 @@ public class PlayerInitializer : MonoBehaviour
         rightside = this.gameObject.GetOtherObjComponent_NullCheck<SideChecker>(rightsideObj);
         wallleftside = this.gameObject.GetOtherObjComponent_NullCheck<SideChecker>(wallLeftObj);
         wallrightside = this.gameObject.GetOtherObjComponent_NullCheck<SideChecker>(wallRightObj);
-        shellManager = this.gameObject.GetOtherObjComponent_NullCheck<MameShellManager>(shellManagerObj);
+        shellManager = this.gameObject.GetOtherObjComponent_NullCheck<AllShellManager>(shellManagerObj);
         chargeShotHandler =  this.gameObject.GetOtherObjComponent_NullCheck<ChargeShot_Handler>(chargeShotHandlerObj);
 
         playerStateMgr.Init(rb, playerStatus, actionHandler, actionStatusChecker, inputHandler, dashKeepManager, wallKickDelayManager,animHandler);
