@@ -3757,8 +3757,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 712863550}
-  - component: {fileID: 712863549}
   - component: {fileID: 712863548}
+  - component: {fileID: 712863551}
   m_Layer: 0
   m_Name: ShellMgr
   m_TagString: Untagged
@@ -3781,21 +3781,6 @@ MonoBehaviour:
   mameCharge_TimeThreshold: 0.5
   lowCharge_TimeThreshold: 0.65
   fullCharge_TimeThreshold: 1
---- !u!114 &712863549
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 712863547}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b2f7d58e4897d4577858b8ec6a291691, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parentTransform: {fileID: 1143615741}
-  defaultCapacity: 5
-  shootMameInterval: 0.105
 --- !u!4 &712863550
 Transform:
   m_ObjectHideFlags: 0
@@ -3811,6 +3796,21 @@ Transform:
   m_Father: {fileID: 906999094}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &712863551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 712863547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68c64f0625e684c4c9ad96941d1d8cd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mameParentTransform: {fileID: 1143615741}
+  defaultCapacity: 5
+  shootMameInterval: 0.105
 --- !u!1 &734507190
 GameObject:
   m_ObjectHideFlags: 0

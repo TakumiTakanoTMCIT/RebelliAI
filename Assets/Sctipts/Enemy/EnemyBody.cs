@@ -21,10 +21,12 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody
     public bool IsAlivingNow { get; set; }
 
     ExamplePoolHandler poolHandler;
+    DanboruAnimStateMgr animStateMgr;
     private void Awake()
     {
         IsAlivingNow = false;
         poolHandler = GameObject.Find("EnemyFactory").MyGetComponent_NullChker<ExamplePoolHandler>();
+        animStateMgr = gameObject.MyGetComponent_NullChker<DanboruAnimStateMgr>();
     }
 
     //インターフェース実装------------------------------
@@ -34,8 +36,11 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody
         hp = initialHp;
         transform.position = position;
         transform.parent = parent;
+
+        animStateMgr.MyAwake();
     }
 
+    //Unityから呼び出されます
     public void OnBecameInvisible()
     {
         if (!IsAlivingNow) return;

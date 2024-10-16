@@ -2,10 +2,12 @@ using UnityEngine;
 
 public class ChargedShellDamageAbleFinder : MonoBehaviour
 {
-    [SerializeField] private int damageAmount = 5;
+    [SerializeField] private int damageAmount = 5, extraDamageAmount = 7;
     Animator animator;
     ChargedShellAnimatorCtrl animatorCtrl;
     ChargedShellBodyCtrl bodyCtrl;
+
+    bool isExtraDamage = false;
 
     private void Awake()
     {
@@ -15,6 +17,11 @@ public class ChargedShellDamageAbleFinder : MonoBehaviour
         animatorCtrl = new ChargedShellAnimatorCtrl(animator, bodyCtrl);
     }
 
+    public void IsExtraDamage(bool isExtraDamage)
+    {
+        this.isExtraDamage = isExtraDamage;
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         IDamageableFromShot damageable = other.GetComponent<IDamageableFromShot>();
@@ -22,7 +29,8 @@ public class ChargedShellDamageAbleFinder : MonoBehaviour
         if (damageable == null)
             return;
 
-        damageable.TakeDamage(damageAmount);
+        if (isExtraDamage) damageable.TakeDamage(extraDamageAmount);
+        else damageable.TakeDamage(damageAmount);
         animatorCtrl.TakeDamage();
     }
 }

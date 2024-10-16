@@ -17,7 +17,7 @@ public class ChargeShot_Handler : MonoBehaviour
 
     float timer;
 
-    MameShellManager shellManager;
+    AllShellManager shellManager;
 
     [SerializeField] private float mameCharge_TimeThreshold = 0.5f, lowCharge_TimeThreshold = 1.0f, fullCharge_TimeThreshold = 1.7f;
 
@@ -39,7 +39,7 @@ public class ChargeShot_Handler : MonoBehaviour
         get { return isFullCharged; }
     }
 
-    public void Init(PlayerStatus playerStatus, MameShellManager shellManager)
+    public void Init(PlayerStatus playerStatus, AllShellManager shellManager)
     {
         this.shellManager = shellManager;
         this.playerStatus = playerStatus;

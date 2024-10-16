@@ -70,9 +70,9 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0.5
-    functionName: Jump
+    functionName: ReadyToJump
     data: 
-    objectReferenceParameter: {fileID: 11500000, guid: cc36678e8f10a42c3b009107d4675c5a, type: 3}
+    objectReferenceParameter: {fileID: 11500000, guid: 499d270aa359242ddb588c3a0fa19429, type: 3}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0

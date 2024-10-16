@@ -66,6 +66,11 @@ namespace PlayerInfo
             PlayerDirection = direction;
         }
 
+        public bool IsDashNow()
+        {
+            return playerStateMgr.currentState == playerStateMgr.dashState;
+        }
+
         private void Update()
         {
             if (playerStateMgr.currentState == playerStateMgr.dashState) return;

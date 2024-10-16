@@ -5,7 +5,8 @@ public class DamageAbleFinder : MonoBehaviour
     Animator animator;
     MameAnimator mamaeAnimator;
 
-    [SerializeField] private int damageAmount = 1;
+    [SerializeField] private int damageAmount = 1, dashExtraDamageAmount = 2;
+    bool isDashExtraDamage;
 
     private void Awake()
     {
@@ -13,13 +14,22 @@ public class DamageAbleFinder : MonoBehaviour
         mamaeAnimator = new MameAnimator(animator);
     }
 
+    public void SetDamageAmount(bool isDashExtraDamage)
+    {
+        if (isDashExtraDamage)
+            this.isDashExtraDamage = true;
+        else
+            this.isDashExtraDamage = false;
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         IDamageableFromShot damageable = other.GetComponent<IDamageableFromShot>();
+        if (damageable == null) return;
 
-        if (damageable == null)
-            return;
-        damageable.TakeDamage(damageAmount);
+        if (!isDashExtraDamage) damageable.TakeDamage(damageAmount);
+        else damageable.TakeDamage(dashExtraDamageAmount);
+
         mamaeAnimator.TakeDamage();
     }
 }
