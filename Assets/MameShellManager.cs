@@ -1,19 +1,24 @@
+using System.Collections;
 using PlayerInfo;
 using UnityEngine;
 using UnityEngine.Pool;
 
 public class MameShellManager : MonoBehaviour
 {
+    [SerializeField] private Transform parentTransform;
+    [SerializeField] private int defaultCapacity = 10;
+    [SerializeField] private float shootMameInterval = 0.5f;
+
+    private ObjectPool<GameObject> pool;
     PlayerStatus status;
     GameObject player;
     GameObject shellPrefab;
 
-    [SerializeField] private int defaultCapacity = 10;
-
-    private ObjectPool<GameObject> pool;
+    bool isMameShootable;
 
     private void Awake()
     {
+        isMameShootable = true;
         player = transform.parent.gameObject;
         status = player.MyGetComponent_NullChker<PlayerStatus>();
 
@@ -54,6 +59,7 @@ public class MameShellManager : MonoBehaviour
     {
         GameObject shell = Instantiate(shellPrefab);
         shell.GetComponent<ShellMainBodyCrtl>().Init(pool);
+        shell.transform.parent = parentTransform;
 
         return shell;
     }
@@ -86,11 +92,23 @@ public class MameShellManager : MonoBehaviour
         /// </summary>
         if (pool.CountActive >= defaultCapacity) return;
 
+        /// <summary>
+        /// インターバルを設ける
+        /// </summary>
+        if(!isMameShootable) return;
         pool.Get();
+        StartCoroutine(mameIntervalCoroutine());
     }
 
     public void ShootChargedShell(GameObject shell)
     {
-        var instanceShell = Instantiate(shell, player.transform.position, Quaternion.identity);
+        Instantiate(shell, player.transform.position, Quaternion.identity);
+    }
+
+    IEnumerator mameIntervalCoroutine()
+    {
+        isMameShootable = false;
+        yield return new WaitForSeconds(shootMameInterval);
+        isMameShootable = true;
     }
 }

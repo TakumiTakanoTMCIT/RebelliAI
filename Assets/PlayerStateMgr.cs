@@ -344,6 +344,8 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
+            stateMgr.playerStatus.SetPlayerDiresctionFromDashStateBigin(direction);
+
             if (dashSparkFactory == null)
             {
                 dashSparkFactory = stateMgr.dashSparkFactory.gameObject.MyGetComponent_NullChker<DashSparkFactory>();

@@ -10,12 +10,17 @@ public class WallKickFactory : MonoBehaviour
 
     [SerializeField] private GameObject player;
     [SerializeField] float YPosAdd = 0.5f;
+    [SerializeField] private Transform parentTransform;
     GameObject preafab;
     PlayerStatus playerStatus;
 
     private ObjectPool<GameObject> pool;
     private void Awake()
     {
+        preafab = Resources.Load<GameObject>("WallKickSparkBody");
+
+        playerStatus = player.MyGetComponent_NullChker<PlayerStatus>();
+
         pool = new ObjectPool<GameObject>(
             createFunc: CreateEffect,
             actionOnGet: OnGetEffect,
@@ -25,15 +30,19 @@ public class WallKickFactory : MonoBehaviour
             defaultCapacity: maxCapacity
         );
 
-        preafab = Resources.Load<GameObject>("WallKickSparkBody");
-
-        playerStatus = player.MyGetComponent_NullChker<PlayerStatus>();
+        for (int i = 0; i < maxCapacity; i++)
+        {
+            var effect = CreateEffect();
+            effect.transform.SetParent(parentTransform);
+            effect.SetActive(false);
+            pool.Release(effect);
+        }
     }
 
     private GameObject CreateEffect()
     {
         var effect = Instantiate(preafab);
-        effect.gameObject.MyGetComponent_NullChker<WallKickSparkBody>().Init(this,player.transform, YPosAdd);
+        effect.gameObject.MyGetComponent_NullChker<WallKickSparkBody>().Init(this, player.transform, YPosAdd);
 
         //Falseにするのは初期化が終わったあとでやれよ！！！きょうくんだ！
         effect.SetActive(false);
