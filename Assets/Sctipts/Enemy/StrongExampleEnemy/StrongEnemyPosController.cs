@@ -9,6 +9,7 @@ public class StrongEnemyPosController : MonoBehaviour, IEnemyPosController
         GetSpawnHandler();
     }
 
+    //インターフェース実装
     public void GetSpawnHandler()
     {
         spawnHandler = GameObject.Find("StrongEnemyFactory").MyGetComponent_NullChker<StrongExamplePoolHandler>();
@@ -18,18 +19,24 @@ public class StrongEnemyPosController : MonoBehaviour, IEnemyPosController
         }
     }
 
+    //Unityから呼び出されます
     public void OnBecameVisible()
     {
-        Debug.Log("表示された！");
         MakeInstance();
     }
 
+    //インターフェース実装
     public void MakeInstance()
     {
-        /*if (instance != null) return;
-        if (!instance.activeInHierarchy) return;*/
-        instance = spawnHandler.GetEnemy();
-        instance.MyGetComponent_NullChker<StrongEnemyBody>().MyAwake(this.transform.position, transform);
+        if (instance == null)
+        {
+            instance = spawnHandler.GetEnemy();
+            instance.MyGetComponent_NullChker<StrongEnemyBody>().MyAwake(this.transform.position, transform);
+        }
+        else
+        {
+            Debug.Log($"すでに画面内に生成されているので生成しません{gameObject.name}");
+        }
     }
 
     /// <summary>
@@ -39,5 +46,11 @@ public class StrongEnemyPosController : MonoBehaviour, IEnemyPosController
     {
         Gizmos.color = Color.red;
         Gizmos.DrawSphere(transform.position, 0.5f);
+    }
+
+    //インターフェース実装
+    public void ResetInstance()
+    {
+        instance = null;
     }
 }

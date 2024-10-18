@@ -5,6 +5,7 @@ public class StrongEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyB
     [SerializeField] int hp = 5, initialHp = 5;
     public bool IsAlivingNow { get; set; }
     StrongExamplePoolHandler spawnHandler;
+    StrongEnemyPosController posController;
 
     private void Awake()
     {
@@ -18,6 +19,7 @@ public class StrongEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyB
         IsAlivingNow = true;
         transform.position = pos;
         transform.parent = parent;
+        posController = parent.gameObject.MyGetComponent_NullChker<StrongEnemyPosController>();
     }
 
     //インターフェース実装--------------------
@@ -30,6 +32,7 @@ public class StrongEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyB
             if (!IsAlivingNow) return;
             IsAlivingNow = false;
             spawnHandler.ReturnEnemy(gameObject);
+            posController.ResetInstance();
         }
     }
 
@@ -38,5 +41,6 @@ public class StrongEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyB
         if (!IsAlivingNow) return;
         IsAlivingNow = false;
         spawnHandler.ReturnEnemy(gameObject);
+        posController.ResetInstance();
     }
 }

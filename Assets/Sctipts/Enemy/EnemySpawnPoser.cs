@@ -5,6 +5,7 @@ public interface IEnemyPosController
     void GetSpawnHandler();
     void OnBecameVisible();
     void MakeInstance();
+    void ResetInstance();
 }
 
 public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
@@ -26,23 +27,31 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
         }
     }
 
+    //インターフェース
     public void MakeInstance()
     {
-        /*if(instance == null) return;
-        if (instance.activeSelf) return;*/
-        instance = enemySpawnerHandler.GetEnemy();
-        instance.gameObject.MyGetComponent_NullChker<EnemyBody>().MyAwake(transform.position, transform);
-    }
-
-    public void ReturnGameObject(GameObject obj)
-    {
-        enemySpawnerHandler.ReturnEnemy(obj);
+        if (instance == null)
+        {
+            instance = enemySpawnerHandler.GetEnemy();
+            instance.gameObject.MyGetComponent_NullChker<EnemyBody>().MyAwake(transform.position, transform);
+            return;
+        }
+        else
+        {
+            Debug.Log($"instanceはすでに生成されていて、画面内にいるから生成しません!{gameObject.name}");
+            return;
+        }
     }
 
     //Unityから呼び出されます
     public void OnBecameVisible()
     {
-        //Debug.Log("表示された！");
+        Debug.Log($"表示された！ : {gameObject.name}");
         MakeInstance();
+    }
+
+    public void ResetInstance()
+    {
+        instance = null;
     }
 }

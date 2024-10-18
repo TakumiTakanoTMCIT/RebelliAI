@@ -20,6 +20,8 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody
     private int hp = 3;
     public bool IsAlivingNow { get; set; }
 
+    EnemySpawnPoser spawnPoser;
+
     ExamplePoolHandler poolHandler;
     DanboruAnimStateMgr animStateMgr;
     private void Awake()
@@ -36,6 +38,7 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody
         hp = initialHp;
         transform.position = position;
         transform.parent = parent;
+        spawnPoser = parent.gameObject.MyGetComponent_NullChker<EnemySpawnPoser>();
 
         animStateMgr.MyAwake();
     }
@@ -46,11 +49,12 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody
         if (!IsAlivingNow) return;
         IsAlivingNow = false;
         poolHandler.ReturnEnemy(this.gameObject);
+        spawnPoser.ResetInstance();
     }
 
     public void TakeDamage(int damage)
     {
-        if (!IsAlivingNow)
+        if (!gameObject.activeSelf)
             return;
         hp -= damage;
 
@@ -59,6 +63,7 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody
             IsAlivingNow = false;
             hp = 0;
             poolHandler.ReturnEnemy(this.gameObject);
+            spawnPoser.ResetInstance();
         }
     }
 }

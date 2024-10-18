@@ -88,6 +88,7 @@ GameObject:
   - component: {fileID: 2220792732723760594}
   - component: {fileID: -8722044449463879784}
   - component: {fileID: -8135519409333641069}
+  - component: {fileID: -1821565658413789008}
   m_Layer: 0
   m_Name: DanboruEnemy
   m_TagString: Untagged
@@ -152,7 +153,7 @@ SpriteRenderer:
   m_SortingLayerID: 1353990563
   m_SortingLayer: 7
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 1354770739, guid: e80a1c7fad7f8433e8cd97b6c5a20cc9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -223,7 +224,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 4
+  m_Constraints: 5
 --- !u!95 &2220792732723760594
 Animator:
   serializedVersion: 5
@@ -273,3 +274,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a45676fba0ab40778d140b13a1474fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fallThreshold: 0.1
+--- !u!114 &-1821565658413789008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8219334441116636386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 505f156ce018c41ddb3e8c3cb30e9407, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabMissile: {fileID: 2279729814845690351, guid: 36688eba84a27404a8387cb466f855c8, type: 3}
