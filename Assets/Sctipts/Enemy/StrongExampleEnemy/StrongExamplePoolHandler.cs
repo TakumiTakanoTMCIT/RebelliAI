@@ -14,7 +14,7 @@ public class StrongExamplePoolHandler : MonoBehaviour, IEnemySpawnerHandler
     private void Awake()
     {
         wannaInstanceEnemy = enemyprefab;
-        spawnerHandler = new SpawnerHandler(maxEnemyCount, wannaInstanceEnemy, parentTransform);
+        spawnerHandler = new SpawnerHandler(maxEnemyCount, wannaInstanceEnemy);
     }
 
     public GameObject GetEnemy()

@@ -11,7 +11,6 @@ public interface IEnemySpawnerHandler
 
 public class ExamplePoolHandler : MonoBehaviour, IEnemySpawnerHandler
 {
-    [SerializeField] private Transform parentTransform;
     [SerializeField] private int maxEnemyCount;
     [SerializeField] private GameObject enmeyPrefab;
     public GameObject wannaInstanceEnemy { get; set; }
@@ -20,7 +19,7 @@ public class ExamplePoolHandler : MonoBehaviour, IEnemySpawnerHandler
     private void Awake()
     {
         wannaInstanceEnemy = enmeyPrefab;
-        spawnerHandler = new SpawnerHandler(maxEnemyCount, wannaInstanceEnemy, parentTransform);
+        spawnerHandler = new SpawnerHandler(maxEnemyCount, wannaInstanceEnemy);
     }
 
     public GameObject GetEnemy()
@@ -38,11 +37,9 @@ public class SpawnerHandler
 {
     ObjectPool<GameObject> objectPool;
     GameObject wannaInstanceEnemy;
-    Transform parentTransform;
-    public SpawnerHandler(int maxEnemyCount, GameObject wannaInstanceEnemy, Transform parentTransform)
+    public SpawnerHandler(int maxEnemyCount, GameObject wannaInstanceEnemy)
     {
         this.wannaInstanceEnemy = wannaInstanceEnemy;
-        this.parentTransform = parentTransform;
 
         objectPool = new ObjectPool<GameObject>(
             createFunc: OnCreateObj,
@@ -56,16 +53,17 @@ public class SpawnerHandler
 
         for (int count = 0; count < maxEnemyCount; count++)
         {
-            var instance = objectPool.Get();
+            var instance = OnCreateObj();
             instance.SetActive(false);
+            objectPool.Release(instance);
         }
     }
 
     private GameObject OnCreateObj()
     {
         var instance = GameObject.Instantiate(wannaInstanceEnemy);
-        instance.transform.SetParent(parentTransform);
-        //instance.SetActive(false);
+        //instance.transform.SetParent(parentTransform);
+        instance.SetActive(false);
         return instance;
     }
 

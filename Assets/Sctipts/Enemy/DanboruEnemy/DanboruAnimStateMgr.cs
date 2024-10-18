@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using PlayerState;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ public class DanboruAnimStateMgr : MonoBehaviour
 
     [SerializeField] float idlingTime = 5f, chargeTime = 3f;
     [SerializeField] internal float jumpForce = 10f, jumpForceThreshold = 0.1f;
-    internal IEnemyAnimState currentState, IdleState, ChargeState, JumpState;
+    internal IEnemyAnimState currentState, IdleState, ChargeState, ReleaseState;
     private void Awake()
     {
         isExucutable = false;
@@ -24,7 +25,7 @@ public class DanboruAnimStateMgr : MonoBehaviour
 
         IdleState = new Idle(this, animHandler, idlingTime);
         ChargeState = new Charge(this, animHandler, chargeTime);
-        JumpState = new Release(this, animHandler, actMgr);
+        ReleaseState = new Release(this, animHandler, actMgr);
     }
 
     //Bodyから呼び出される。SetActive(true)されたときに呼び出される
@@ -166,7 +167,7 @@ public class Charge : IEnemyAnimState
     {
         if (coutDownTime >= chargeTime)
         {
-            animStateMgr.ChangeState(animStateMgr.JumpState);
+            animStateMgr.ChangeState(animStateMgr.ReleaseState);
         }
     }
 
@@ -192,12 +193,13 @@ public class Release : IEnemyAnimState
 
     public void OnEnter()
     {
+        Debug.Log("ジャンプします");
         animHandler.SetTrigger("OnRelease");
     }
 
     public void OnFixedUpdate()
     {
-        if (actMgr.IsJumping(animStateMgr.jumpForceThreshold)) return;
+        if (!actMgr.IsFalling()) return;
         if (groundChk.IsGround())
         {
             animStateMgr.ChangeState(animStateMgr.IdleState);
