@@ -4,6 +4,7 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Threading.Tasks;
+using PlayerState;
 
 public class HPBarHandler : MonoBehaviour
 {
@@ -15,6 +16,8 @@ public class HPBarHandler : MonoBehaviour
     [SerializeField] GameObject Top;
     [SerializeField] GameObject hpUnit;
     [SerializeField] float barHeight = 6;
+    [SerializeField] PlayerStateMgr stateMgr;
+    [SerializeField] bool isDebugMode = false;
 
     RectTransform topTransform;
 
@@ -38,8 +41,11 @@ public class HPBarHandler : MonoBehaviour
         Heal(InitialCurrentLife);
     }
 
+    //デバッグ用です
     private void Update()
     {
+        if(!isDebugMode) return;
+
         if (Input.GetKeyDown(KeyCode.C))
         {
             Damage(healAndDamageAmount);
@@ -117,17 +123,19 @@ public class HPBarHandler : MonoBehaviour
         Debug.Log("DamageLife関数が呼ばれました");
         for (int count = 0; count < damageAmount; count++)
         {
-            if (currentLife <= 0)
-            {
-                Debug.Log("HPが0以下になるとダメージを受けません。つまり死んでいます");
-                return;
-            }
-
             currentLife--;
 
             Destroy(hpUnitList[hpUnitList.Count - 1]);
             hpUnitList.RemoveAt(hpUnitList.Count - 1);
 
+            if (currentLife <= 0)
+            {
+                Debug.Log("死んだ！！！");
+                stateMgr.OnDeath();
+                return;
+            }
+
+            stateMgr.OnDamage();
             await UniTask.Delay(TimeSpan.FromSeconds(intervalTime));
         }
     }

@@ -44,7 +44,7 @@ public class GarbageCanEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEn
         {
             hp = 0;
             IsAlivingNow = false;
-            poolHandler.ReturnEnemy(gameObject);
+            poolHandler.ReturnObjct(gameObject);
             posController.ResetInstance();
             explosionSpawner.MakeExplosion(new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z));
         }
@@ -54,7 +54,7 @@ public class GarbageCanEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEn
     {
         if (!IsAlivingNow) return;
         IsAlivingNow = false;
-        poolHandler.ReturnEnemy(gameObject);
+        poolHandler.ReturnObjct(gameObject);
         posController.ResetInstance();
     }
 }

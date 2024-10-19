@@ -215,6 +215,69 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3d2901f8fc20541c68a66984cfde366c, type: 3}
+--- !u!1 &131556712
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 131556715}
+  - component: {fileID: 131556714}
+  - component: {fileID: 131556713}
+  m_Layer: 0
+  m_Name: DeathEffector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &131556713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 131556712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8af262993a7284c8aaf23c44620d3cd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  intervalTime: 0.01
+  addYpos: 0.5
+  playerTransform: {fileID: 906999094}
+  PushThisBool_WillMakeEffects: 0
+--- !u!114 &131556714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 131556712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 051b3a251305d47e6b97a2d3980d4960, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  deathSparkPrefab: {fileID: 1548409017283322006, guid: 2ff27b0d8e6324870a3232b768964df2, type: 3}
+  maxInstanceCount: 40
+--- !u!4 &131556715
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 131556712}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.029526152, y: 3.2489629, z: -0.04809813}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 27
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &430539227
 GameObject:
   m_ObjectHideFlags: 0
@@ -965,7 +1028,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b016016e09974bd39fa1448df7be659, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 906999080}
+  playerTransform: {fileID: 906999094}
 --- !u!1 &523439752
 GameObject:
   m_ObjectHideFlags: 0
@@ -1133,8 +1196,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b76350e4fbed4055ad7c9cb77226919, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  InitialMaxLife: 10
-  InitialCurrentLife: 10
+  InitialMaxLife: 2
+  InitialCurrentLife: 2
   healAndDamageAmount: 5
   intervalTime: 0.025
   Base: {fileID: 523439752}
@@ -1142,6 +1205,8 @@ MonoBehaviour:
   Top: {fileID: 2035044711}
   hpUnit: {fileID: 5212956201096586392, guid: 9760c61caeafa41619eb017104c2c7e8, type: 3}
   barHeight: 12
+  stateMgr: {fileID: 906999089}
+  isDebugMode: 0
   hpUnitList: []
   playerMaxLife: 0
   currentLife: 0
@@ -4460,18 +4525,18 @@ GameObject:
   - component: {fileID: 906999093}
   - component: {fileID: 906999092}
   - component: {fileID: 906999091}
+  - component: {fileID: 906999095}
   - component: {fileID: 906999090}
   - component: {fileID: 906999089}
+  - component: {fileID: 906999096}
   - component: {fileID: 906999088}
   - component: {fileID: 906999087}
   - component: {fileID: 906999086}
   - component: {fileID: 906999085}
   - component: {fileID: 906999084}
   - component: {fileID: 906999083}
-  - component: {fileID: 906999096}
   - component: {fileID: 906999082}
   - component: {fileID: 906999081}
-  - component: {fileID: 906999095}
   - component: {fileID: 906999097}
   m_Layer: 0
   m_Name: Player
@@ -4599,6 +4664,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dashSparkFactory: {fileID: 1599515777}
   wallKickFactory: {fileID: 1337993094}
+  damageTimeHandler: {fileID: 1792343772}
   isDebugCurrentState: 0
 --- !u!114 &906999090
 MonoBehaviour:
@@ -4620,6 +4686,9 @@ MonoBehaviour:
   DashSpeed: 11
   DashTime: 0.37
   delayKey_reception_time: 0.15
+  damagingTime: 1.25
+  damageForce: {x: 2, y: 10}
+  isDeath: 0
 --- !u!50 &906999091
 Rigidbody2D:
   serializedVersion: 4
@@ -4737,6 +4806,7 @@ Transform:
   - {fileID: 1621815169}
   - {fileID: 1943970040}
   - {fileID: 712863550}
+  - {fileID: 1792343771}
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4773,6 +4843,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eccac50b870ab4692b42122dfcbcb483, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  deathGlitchSparkFactory: {fileID: 131556713}
 --- !u!114 &906999097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4786,6 +4857,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hPBarHandler: {fileID: 585496183}
+  damageTimeHandler: {fileID: 1792343772}
 --- !u!1001 &931561902
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11711,6 +11783,51 @@ Transform:
   m_Father: {fileID: 906999094}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1792343770
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1792343771}
+  - component: {fileID: 1792343772}
+  m_Layer: 0
+  m_Name: DamageTimeHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1792343771
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1792343770}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 906999094}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1792343772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1792343770}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da723a191c77f499483f0de478060691, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerStatus: {fileID: 906999090}
 --- !u!1 &1818086143
 GameObject:
   m_ObjectHideFlags: 0

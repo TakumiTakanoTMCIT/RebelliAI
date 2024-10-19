@@ -7,13 +7,13 @@ public class ExplosionSpawner : MonoBehaviour
 
     public void MakeExplosion(Vector3 position)
     {
-        var explosion = GetComponent<IPoolHandler>().GetEnemy();
+        var explosion = GetComponent<IPoolHandler>().GetObject();
         explosion.gameObject.MyGetComponent_NullChker<ExplosionBody>().MyAwake(this,position);
     }
 
     public void ReturnExplosion(GameObject explosion)
     {
-        explosionPoolMgr.ReturnEnemy(explosion);
+        explosionPoolMgr.ReturnObjct(explosion);
     }
 
     private void Update()

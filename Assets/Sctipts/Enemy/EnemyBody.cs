@@ -61,7 +61,7 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody,IC
     {
         if (!IsAlivingNow) return;
         IsAlivingNow = false;
-        poolHandler.ReturnEnemy(this.gameObject);
+        poolHandler.ReturnObjct(this.gameObject);
         spawnPoser.ResetInstance();
     }
 
@@ -75,7 +75,7 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody,IC
         {
             IsAlivingNow = false;
             hp = 0;
-            poolHandler.ReturnEnemy(this.gameObject);
+            poolHandler.ReturnObjct(this.gameObject);
             spawnPoser.ResetInstance();
             explosionSpawner.MakeExplosion(transform.position);
         }

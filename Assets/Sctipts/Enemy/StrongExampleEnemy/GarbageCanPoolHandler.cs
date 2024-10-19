@@ -17,12 +17,12 @@ public class GarbageCanPoolHandler : MonoBehaviour, IPoolHandler
         spawnerHandler = new PoolHadnler(maxEnemyCount, wannaInstanceEnemy);
     }
 
-    public GameObject GetEnemy()
+    public GameObject GetObject()
     {
         return spawnerHandler.Get();
     }
 
-    public void ReturnEnemy(GameObject obj)
+    public void ReturnObjct(GameObject obj)
     {
         spawnerHandler.Return(obj);
     }

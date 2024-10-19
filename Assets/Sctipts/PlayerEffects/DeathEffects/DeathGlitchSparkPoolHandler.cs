@@ -2,27 +2,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ExplosionPoolMgr : MonoBehaviour, IPoolHandler
+public class DeathGlitchSparkPoolHandler : MonoBehaviour, IPoolHandler
 {
-    [SerializeField] GameObject explosionPrefab;
-    [SerializeField] int maxInstanceCount = 10;
+    [SerializeField] GameObject deathSparkPrefab;
+    [SerializeField] public int maxInstanceCount = 20;
 
     //インターフェース実装-----------------------------↓↓↓
     public PoolHadnler spawnerHandler { get; set; }
     public GameObject wannaInstanceEnemy { get; set; }
 
-    //初期化のために使用してください。インスタンスの取得以外はStartを使用してください。
     private void Awake()
     {
-        wannaInstanceEnemy = explosionPrefab;
+        wannaInstanceEnemy = deathSparkPrefab;
         spawnerHandler = new PoolHadnler(maxInstanceCount, wannaInstanceEnemy);
     }
 
-    //インターフェース実装-----------------------------↓↓↓
-
+    //インターフェース実装↓↓↓
     public GameObject GetObject()
     {
-        return spawnerHandler.Get();
+        var obj = spawnerHandler.Get();
+        obj.SetActive(true);
+        obj.transform.SetParent(transform);
+        return obj;
     }
 
     public void ReturnObjct(GameObject obj)

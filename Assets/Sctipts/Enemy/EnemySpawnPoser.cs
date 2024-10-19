@@ -35,7 +35,7 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
     {
         if (instance == null)
         {
-            instance = enemySpawnerHandler.GetEnemy();
+            instance = enemySpawnerHandler.GetObject();
             instance.gameObject.MyGetComponent_NullChker<EnemyBody>().MyAwake(transform.position, transform, explosionSpawner);
             return;
         }

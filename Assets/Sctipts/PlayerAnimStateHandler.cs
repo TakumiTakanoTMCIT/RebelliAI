@@ -1,13 +1,16 @@
+using PlayerAction;
 using PlayerInfo;
 using PlayerState;
 using UnityEngine;
 
 public class PlayerAnimStateHandler : MonoBehaviour
 {
+    [SerializeField] private DeathGlitchSparkFactory deathGlitchSparkFactory;
+    ActionHandler actionHandler;
     Animator animator;
     PlayerStateMgr stateMgr;
 
-    internal IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState;
+    internal IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState, damageState, deathState;
     internal IPlayerAnimState currentState;
 
     AnimatorCtrl animatorCtrl;
@@ -21,6 +24,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
         stateMgr = GetComponent<PlayerStateMgr>();
         playerStatus = GetComponent<PlayerStatus>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        actionHandler = GetComponent<ActionHandler>();
 
         animatorCtrl = new AnimatorCtrl(animator);
 
@@ -31,12 +35,16 @@ public class PlayerAnimStateHandler : MonoBehaviour
         dashState = new DashState(animatorCtrl);
         wallFallState = new WallFallState(animatorCtrl);
         wallKickState = new WallKickState(animatorCtrl);
+        damageState = new DamageState(animatorCtrl, playerStatus, spriteRenderer);
+        deathState = new DeathState(animatorCtrl);
 
         currentState = idleState;
     }
 
     private void Update()
     {
+        if (currentState == damageState) return;
+
         if (playerStatus.playerdirection)
             spriteRenderer.flipX = false;
         else
@@ -52,6 +60,12 @@ public class PlayerAnimStateHandler : MonoBehaviour
         currentState.Enter();
     }
 
+    // アニメーションイベント
+    public async void EndAnimDeath()
+    {
+        await deathGlitchSparkFactory.MakeDeathEffects();
+        actionHandler.OnDeathAnimEnd();
+    }
 }
 
 public class AnimatorCtrl
@@ -219,5 +233,50 @@ public class WallKickState : IPlayerAnimState
     public void Exit()
     {
         AnimatorCtrl.StopAnim("isWallKick");
+    }
+}
+
+public class DamageState : IPlayerAnimState
+{
+    AnimatorCtrl animatorCtrl;
+    PlayerStatus playerStatus;
+    SpriteRenderer spriteRenderer;
+    public DamageState(AnimatorCtrl animatorCtrl, PlayerStatus playerStatus, SpriteRenderer spriteRenderer)
+    {
+        this.animatorCtrl = animatorCtrl;
+        this.playerStatus = playerStatus;
+        this.spriteRenderer = spriteRenderer;
+    }
+
+    public void Enter()
+    {
+        animatorCtrl.StartAnim("isDamaging");
+
+        spriteRenderer.flipX = !playerStatus.playerdirection;
+    }
+
+    public void Exit()
+    {
+        animatorCtrl.StopAnim("isDamaging");
+    }
+}
+
+public class DeathState : IPlayerAnimState
+{
+    AnimatorCtrl animatorCtrl;
+    public DeathState(AnimatorCtrl animatorCtrl)
+    {
+        this.animatorCtrl = animatorCtrl;
+    }
+
+    public void Enter()
+    {
+        Debug.Log("死亡アニメーションが再生されました");
+        animatorCtrl.StartAnim("isDeath");
+    }
+
+    public void Exit()
+    {
+        animatorCtrl.StopAnim("isDeath");
     }
 }
