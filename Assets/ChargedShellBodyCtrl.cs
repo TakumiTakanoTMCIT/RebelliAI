@@ -17,13 +17,15 @@ public class ChargedShellBodyCtrl : MonoBehaviour, IDestroyable
 
     private void Awake()
     {
-        GameObject player = GameObject.Find("Player");
-        playerStatus = player.GetComponent<PlayerStatus>();
-        rb = this.GetComponent<Rigidbody2D>();
-        spriteRenderer = this.GetComponent<SpriteRenderer>();
+        playerStatus = GameObject.Find("Player").MyGetComponent_NullChker<PlayerStatus>();
+        rb = gameObject.MyGetComponent_NullChker<Rigidbody2D>();
+        spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
     }
 
-    private void Start()
+    /// <summary>
+    /// AnimationEventから呼び出される。アニメーションが終わったらシェルを動かす
+    /// </summary>
+    public void End_BiginingAnim()
     {
         MoveShell();
     }

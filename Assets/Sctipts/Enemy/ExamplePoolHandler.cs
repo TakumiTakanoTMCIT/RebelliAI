@@ -1,25 +1,25 @@
 using UnityEngine;
 using UnityEngine.Pool;
 
-public interface IEnemySpawnerHandler
+public interface IPoolHandler
 {
-    SpawnerHandler spawnerHandler { get; set; }
+    PoolHadnler spawnerHandler { get; set; }
     GameObject wannaInstanceEnemy { get; set; }
     GameObject GetEnemy();
     void ReturnEnemy(GameObject obj);
 }
 
-public class ExamplePoolHandler : MonoBehaviour, IEnemySpawnerHandler
+public class ExamplePoolHandler : MonoBehaviour, IPoolHandler
 {
     [SerializeField] private int maxEnemyCount;
     [SerializeField] private GameObject enmeyPrefab;
     public GameObject wannaInstanceEnemy { get; set; }
 
-    public SpawnerHandler spawnerHandler { get; set; }
+    public PoolHadnler spawnerHandler { get; set; }
     private void Awake()
     {
         wannaInstanceEnemy = enmeyPrefab;
-        spawnerHandler = new SpawnerHandler(maxEnemyCount, wannaInstanceEnemy);
+        spawnerHandler = new PoolHadnler(maxEnemyCount, wannaInstanceEnemy);
     }
 
     //インターフェース実装
@@ -35,11 +35,11 @@ public class ExamplePoolHandler : MonoBehaviour, IEnemySpawnerHandler
     }
 }
 
-public class SpawnerHandler
+public class PoolHadnler
 {
     ObjectPool<GameObject> objectPool;
     GameObject wannaInstanceEnemy;
-    public SpawnerHandler(int maxEnemyCount, GameObject wannaInstanceEnemy)
+    public PoolHadnler(int maxEnemyCount, GameObject wannaInstanceEnemy)
     {
         this.wannaInstanceEnemy = wannaInstanceEnemy;
 

@@ -1,9 +1,9 @@
 using UnityEngine;
 
-public class GarbageCanPoolHandler : MonoBehaviour, IEnemySpawnerHandler
+public class GarbageCanPoolHandler : MonoBehaviour, IPoolHandler
 {
     //インターフェース
-    public SpawnerHandler spawnerHandler { get; set; }
+    public PoolHadnler spawnerHandler { get; set; }
     public GameObject wannaInstanceEnemy { get; set; }
 
     //インスペクタから弄りたい変数
@@ -14,7 +14,7 @@ public class GarbageCanPoolHandler : MonoBehaviour, IEnemySpawnerHandler
     private void Awake()
     {
         wannaInstanceEnemy = enemyprefab;
-        spawnerHandler = new SpawnerHandler(maxEnemyCount, wannaInstanceEnemy);
+        spawnerHandler = new PoolHadnler(maxEnemyCount, wannaInstanceEnemy);
     }
 
     public GameObject GetEnemy()

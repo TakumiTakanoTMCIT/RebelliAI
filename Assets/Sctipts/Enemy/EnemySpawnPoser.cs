@@ -10,8 +10,9 @@ public interface IEnemyPosController
 
 public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
 {
-    IEnemySpawnerHandler enemySpawnerHandler;
+    IPoolHandler enemySpawnerHandler;
     GameObject instance;
+    ExplosionSpawner explosionSpawner;
 
     private void Awake()
     {
@@ -21,7 +22,8 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
     //インターフェース実装
     public void GetSpawnHandler()
     {
-        enemySpawnerHandler = GameObject.Find("EnemyFactory").GetComponent<IEnemySpawnerHandler>();
+        explosionSpawner = GameObject.Find("ExplosionFactory").MyGetComponent_NullChker<ExplosionSpawner>();
+        enemySpawnerHandler = GameObject.Find("EnemyFactory").GetComponent<IPoolHandler>();
         if (enemySpawnerHandler == null)
         {
             Debug.Log("enemySpaenerHandlerがnullです");
@@ -34,7 +36,7 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
         if (instance == null)
         {
             instance = enemySpawnerHandler.GetEnemy();
-            instance.gameObject.MyGetComponent_NullChker<EnemyBody>().MyAwake(transform.position, transform);
+            instance.gameObject.MyGetComponent_NullChker<EnemyBody>().MyAwake(transform.position, transform, explosionSpawner);
             return;
         }
         else

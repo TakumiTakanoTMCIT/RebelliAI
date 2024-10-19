@@ -16,7 +16,7 @@ public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
     bool isMoveable = true;
 
     /// <summary>
-    /// InitはShellManagerでCreateShellしたときに呼び出されます
+    /// InitはAllShellManagerでCreateShellしたときに呼び出されます
     /// </summary>
     public void Init(ObjectPool<GameObject> pool)
     {
