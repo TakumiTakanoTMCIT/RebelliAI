@@ -1,16 +1,16 @@
 using UnityEngine;
 
-public class StrongEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody
+public class GarbageCanEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody
 {
     [SerializeField] int hp = 5, initialHp = 5;
     public bool IsAlivingNow { get; set; }
-    StrongExamplePoolHandler spawnHandler;
-    StrongEnemyPosController posController;
+    GarbageCanPoolHandler poolHandler;
+    GarbageCanEnemyPoser posController;
 
     private void Awake()
     {
         IsAlivingNow = false;
-        spawnHandler = GameObject.Find("StrongEnemyFactory").MyGetComponent_NullChker<StrongExamplePoolHandler>();
+        poolHandler = GameObject.Find("GarbageCanFactory").MyGetComponent_NullChker<GarbageCanPoolHandler>();
     }
 
     public void MyAwake(Vector3 pos, Transform parent)
@@ -19,19 +19,21 @@ public class StrongEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyB
         IsAlivingNow = true;
         transform.position = pos;
         transform.parent = parent;
-        posController = parent.gameObject.MyGetComponent_NullChker<StrongEnemyPosController>();
+        posController = parent.gameObject.MyGetComponent_NullChker<GarbageCanEnemyPoser>();
     }
 
     //インターフェース実装--------------------
     public void TakeDamage(int damage)
     {
+        if (!gameObject.activeSelf)
+            return;
         hp -= damage;
+
         if (hp <= 0)
         {
             hp = 0;
-            if (!IsAlivingNow) return;
             IsAlivingNow = false;
-            spawnHandler.ReturnEnemy(gameObject);
+            poolHandler.ReturnEnemy(gameObject);
             posController.ResetInstance();
         }
     }
@@ -40,7 +42,7 @@ public class StrongEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyB
     {
         if (!IsAlivingNow) return;
         IsAlivingNow = false;
-        spawnHandler.ReturnEnemy(gameObject);
+        poolHandler.ReturnEnemy(gameObject);
         posController.ResetInstance();
     }
 }

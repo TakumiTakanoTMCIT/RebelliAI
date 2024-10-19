@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class StrongExamplePoolHandler : MonoBehaviour, IEnemySpawnerHandler
+public class GarbageCanPoolHandler : MonoBehaviour, IEnemySpawnerHandler
 {
     //インターフェース
     public SpawnerHandler spawnerHandler { get; set; }

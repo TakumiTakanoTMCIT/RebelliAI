@@ -664,6 +664,7 @@ namespace PlayerState
                 if (!stateMgr.actionStatusChk.IsWall(true))
                 {
                     stateMgr.ChangeState(stateMgr.fallState);
+                    stateMgr.actionHandler.StopY();
                     return;
                 }
 
@@ -671,6 +672,7 @@ namespace PlayerState
                 if (!stateMgr.inputHandler.IsMoveRightKey())
                 {
                     stateMgr.ChangeState(stateMgr.fallState);
+                    stateMgr.actionHandler.StopY();
                     return;
                 }
             }
@@ -680,6 +682,7 @@ namespace PlayerState
                 if (!stateMgr.actionStatusChk.IsWall(false))
                 {
                     stateMgr.ChangeState(stateMgr.fallState);
+                    stateMgr.actionHandler.StopY();
                     return;
                 }
 
@@ -687,6 +690,7 @@ namespace PlayerState
                 if (!stateMgr.inputHandler.IsMoveLeftKey())
                 {
                     stateMgr.ChangeState(stateMgr.fallState);
+                    stateMgr.actionHandler.StopY();
                     return;
                 }
             }

@@ -22,11 +22,13 @@ public class ExamplePoolHandler : MonoBehaviour, IEnemySpawnerHandler
         spawnerHandler = new SpawnerHandler(maxEnemyCount, wannaInstanceEnemy);
     }
 
+    //インターフェース実装
     public GameObject GetEnemy()
     {
         return spawnerHandler.Get();
     }
 
+    //インターフェース実装
     public void ReturnEnemy(GameObject obj)
     {
         spawnerHandler.Return(obj);

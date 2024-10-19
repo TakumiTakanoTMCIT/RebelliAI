@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6877530536156205281}
   - component: {fileID: 386399584550161687}
-  - component: {fileID: -6811680089671300822}
+  - component: {fileID: 2089355546620992928}
   m_Layer: 0
-  m_Name: StrongEnemyPoser
+  m_Name: GarbageCanPoser
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -85,7 +85,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &-6811680089671300822
+--- !u!114 &2089355546620992928
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -94,6 +94,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1527303299213518181}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5128311a9ffd49b79d379b2922c0c0b, type: 3}
+  m_Script: {fileID: 11500000, guid: 7b55b3609731a40f1be334957031f5d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

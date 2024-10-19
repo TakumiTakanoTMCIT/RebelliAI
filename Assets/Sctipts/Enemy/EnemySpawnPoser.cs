@@ -18,6 +18,7 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
         GetSpawnHandler();
     }
 
+    //インターフェース実装
     public void GetSpawnHandler()
     {
         enemySpawnerHandler = GameObject.Find("EnemyFactory").GetComponent<IEnemySpawnerHandler>();
@@ -27,7 +28,7 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
         }
     }
 
-    //インターフェース
+    //インターフェース実装
     public void MakeInstance()
     {
         if (instance == null)
@@ -43,13 +44,14 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
         }
     }
 
-    //Unityから呼び出されます
+    //Unityから呼び出されます(インターフェース実装)
     public void OnBecameVisible()
     {
         Debug.Log($"表示された！ : {gameObject.name}");
         MakeInstance();
     }
 
+    //インターフェース実装
     public void ResetInstance()
     {
         instance = null;
