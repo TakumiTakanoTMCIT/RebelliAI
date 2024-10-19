@@ -27,6 +27,11 @@ namespace PlayerAction
             rb.velocity = new Vector2(0, rb.velocity.y);
         }
 
+        public void StopY()
+        {
+            rb.velocity = new Vector2(rb.velocity.x, 0);
+        }
+
         public bool Walk(bool direction)
         {
             /// <summary>

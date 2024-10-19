@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class StrongEnemyPosController : MonoBehaviour, IEnemyPosController
+public class GarbageCanEnemyPoser : MonoBehaviour, IEnemyPosController
 {
-    StrongExamplePoolHandler spawnHandler;
+    GarbageCanPoolHandler poolHandler;
     GameObject instance;
     private void Awake()
     {
@@ -12,8 +12,8 @@ public class StrongEnemyPosController : MonoBehaviour, IEnemyPosController
     //インターフェース実装
     public void GetSpawnHandler()
     {
-        spawnHandler = GameObject.Find("StrongEnemyFactory").MyGetComponent_NullChker<StrongExamplePoolHandler>();
-        if (spawnHandler == null)
+        poolHandler = GameObject.Find("GarbageCanFactory").MyGetComponent_NullChker<GarbageCanPoolHandler>();
+        if (poolHandler == null)
         {
             Debug.Log("SpawnerHandlerがnullです" + gameObject);
         }
@@ -30,12 +30,14 @@ public class StrongEnemyPosController : MonoBehaviour, IEnemyPosController
     {
         if (instance == null)
         {
-            instance = spawnHandler.GetEnemy();
-            instance.MyGetComponent_NullChker<StrongEnemyBody>().MyAwake(this.transform.position, transform);
+            instance = poolHandler.GetEnemy();
+            instance.MyGetComponent_NullChker<GarbageCanEnemyBody>().MyAwake(this.transform.position, transform);
+            return;
         }
         else
         {
-            Debug.Log($"すでに画面内に生成されているので生成しません{gameObject.name}");
+            Debug.Log($"すでに生成されているので生成しません{gameObject.name}");
+            return;
         }
     }
 
