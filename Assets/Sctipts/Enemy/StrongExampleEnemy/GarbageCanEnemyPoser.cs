@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class GarbageCanEnemyPoser : MonoBehaviour, IEnemyPosController
 {
+    ExplosionSpawner explosionSpawner;
     GarbageCanPoolHandler poolHandler;
     GameObject instance;
     private void Awake()
@@ -12,6 +13,7 @@ public class GarbageCanEnemyPoser : MonoBehaviour, IEnemyPosController
     //インターフェース実装
     public void GetSpawnHandler()
     {
+        explosionSpawner = GameObject.Find("ExplosionFactory").MyGetComponent_NullChker<ExplosionSpawner>();
         poolHandler = GameObject.Find("GarbageCanFactory").MyGetComponent_NullChker<GarbageCanPoolHandler>();
         if (poolHandler == null)
         {
@@ -31,7 +33,7 @@ public class GarbageCanEnemyPoser : MonoBehaviour, IEnemyPosController
         if (instance == null)
         {
             instance = poolHandler.GetEnemy();
-            instance.MyGetComponent_NullChker<GarbageCanEnemyBody>().MyAwake(this.transform.position, transform);
+            instance.MyGetComponent_NullChker<GarbageCanEnemyBody>().MyAwake(this.transform.position, transform, explosionSpawner);
             return;
         }
         else

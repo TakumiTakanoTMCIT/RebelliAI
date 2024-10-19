@@ -79,6 +79,8 @@ public class HPBarHandler : MonoBehaviour
 
     public async void Damage(int damageAmount)
     {
+        Debug.Log($"ダメージの値は{damageAmount}です");
+
         if (damageAmount <= 0)
         {
             Debug.Log("プラスの値を入力しないとダメージを受けません");
@@ -112,6 +114,7 @@ public class HPBarHandler : MonoBehaviour
 
     async Task DamageLife(int damageAmount)
     {
+        Debug.Log("DamageLife関数が呼ばれました");
         for (int count = 0; count < damageAmount; count++)
         {
             if (currentLife <= 0)
@@ -131,7 +134,6 @@ public class HPBarHandler : MonoBehaviour
 
     async Task MakeMidBar()
     {
-        Debug.Log("AddLife");
         var instance = (GameObject)Instantiate(midPrefab);
         instance.transform.SetParent(Base.transform);
         instance.transform.position = new Vector3(Base.transform.position.x, Base.transform.position.y + (playerMaxLife * barHeight));
@@ -147,7 +149,6 @@ public class HPBarHandler : MonoBehaviour
 
     async Task HealLife()
     {
-        Debug.Log("HealLife");
         var instance = (GameObject)Instantiate(hpUnit);
         instance.transform.SetParent(Base.transform);
         var rectTrasnform = instance.MyGetComponent_NullChker<RectTransform>();

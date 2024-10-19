@@ -1,25 +1,36 @@
 using UnityEngine;
 
-public class GarbageCanEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody
+[RequireComponent(typeof(ConflictPlayerFinder))]
+public class GarbageCanEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody,IConflictableAndAttackableToPlayer
 {
-    [SerializeField] int hp = 5, initialHp = 5;
+    //インターフェース実装--------------------
+    [SerializeField] int hp = 5, initialHp = 5,conflictDamage = 1;
+
     public bool IsAlivingNow { get; set; }
     GarbageCanPoolHandler poolHandler;
     GarbageCanEnemyPoser posController;
+    ExplosionSpawner explosionSpawner;
+
+    //インターフェース実装--------------------
+    public ConflictPlayerFinder conflictPlayerFinder { get; set; }
 
     private void Awake()
     {
         IsAlivingNow = false;
         poolHandler = GameObject.Find("GarbageCanFactory").MyGetComponent_NullChker<GarbageCanPoolHandler>();
+
+        conflictPlayerFinder = gameObject.MyGetComponent_NullChker<ConflictPlayerFinder>();
+        conflictPlayerFinder.Init(conflictDamage);
     }
 
-    public void MyAwake(Vector3 pos, Transform parent)
+    public void MyAwake(Vector3 pos, Transform parent, ExplosionSpawner explosionSpawner)
     {
         hp = initialHp;
         IsAlivingNow = true;
         transform.position = pos;
         transform.parent = parent;
         posController = parent.gameObject.MyGetComponent_NullChker<GarbageCanEnemyPoser>();
+        this.explosionSpawner = explosionSpawner;
     }
 
     //インターフェース実装--------------------
@@ -35,6 +46,7 @@ public class GarbageCanEnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEn
             IsAlivingNow = false;
             poolHandler.ReturnEnemy(gameObject);
             posController.ResetInstance();
+            explosionSpawner.MakeExplosion(new Vector3(transform.position.x, transform.position.y + 0.5f, transform.position.z));
         }
     }
 
