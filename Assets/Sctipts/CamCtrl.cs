@@ -1,43 +1,56 @@
+using PlayerAction;
 using UnityEngine;
 
 public class CamCtrl : MonoBehaviour
 {
-    [SerializeField] private GameObject player;
+    [SerializeField] private Transform playerTransform;
+    bool isFreezeCam = false;
+
+    private void Awake()
+    {
+        isFreezeCam = false;
+        ActionHandler.onPlayerDeath += OnPlayerDeath;
+    }
 
     private void Start()
     {
-        transform.position = new Vector3(4, player.transform.position.y, -10);
-        /*Vector3 pos = transform.position;
-        pos.x = player.transform.position.x;
-        transform.position = pos;*/
+        transform.position = new Vector3(4, playerTransform.position.y, -10);
+    }
+
+    void OnPlayerDeath()
+    {
+        Debug.Log("どうもカメラです！プレイヤーが死んだらしいぜ！");
+        isFreezeCam = true;
     }
 
     private void Update()
     {
-        if (player.transform.position.x > 4)
+        if(isFreezeCam) return;
+
+        if (playerTransform.position.x > 4)
         {
             Vector3 pos = transform.position;
-            pos.x = player.transform.position.x;
+            pos.x = playerTransform.position.x;
             transform.position = pos;
         }
 
-        if (player.transform.position.x > 27f)
+        if (playerTransform.position.x > 27f)
         {
-            if (player.transform.position.y > -2.5f)
+            if (playerTransform.position.y > -2.5f)
             {
                 SetYPos();
             }
         }
-        else if (player.transform.position.x > 10)
+        else if (playerTransform.position.x > 10)
         {
-            if (player.transform.position.y > 0f)
+            if (playerTransform.position.y > 0f)
             {
                 SetYPos();
             }
         }
         else
         {
-            if (player.transform.position.y > 1f)
+            if (playerTransform.position.y > 1f)
             {
                 SetYPos();
             }
@@ -47,7 +60,7 @@ public class CamCtrl : MonoBehaviour
     void SetYPos()
     {
         Vector3 pos = transform.position;
-        pos.y = player.transform.position.y;
+        pos.y = playerTransform.position.y;
         transform.position = pos;
     }
 }

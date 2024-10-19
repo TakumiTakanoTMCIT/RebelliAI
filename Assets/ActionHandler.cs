@@ -14,6 +14,15 @@ namespace PlayerAction
         PlayerStatus status;
         PlayerDashKeepManager dashKeepManager;
 
+        public delegate void OnPlayerDeath();
+        public static event OnPlayerDeath onPlayerDeath;
+
+        public delegate void OnPlayerDamage();
+        public static event OnPlayerDamage onPlayerDamage;
+
+        public delegate void OnPlayerDamageRecoverd();
+        public static event OnPlayerDamageRecoverd onPlayerDamageRecoverd;
+
         public void Init(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerStatus status, PlayerDashKeepManager dashKeepManager)
         {
             this.rb = rb;
@@ -73,6 +82,41 @@ namespace PlayerAction
                 rb.velocity = new Vector2(status.DashSpeed, rb.velocity.y);
             else
                 rb.velocity = new Vector2(-status.DashSpeed, rb.velocity.y);
+        }
+
+        public void Damage()
+        {
+            if (status.playerdirection)
+            {
+                rb.AddForce(new Vector2(-status.damageForce.x, status.damageForce.y), ForceMode2D.Impulse);
+            }
+            else
+            {
+                rb.AddForce(new Vector2(status.damageForce.x, status.damageForce.y), ForceMode2D.Impulse);
+            }
+        }
+
+        public void OnDestoryPlayer()
+        {
+            if (onPlayerDeath != null)
+                onPlayerDeath();
+        }
+
+        public void OnDamagePlayer()
+        {
+            if (onPlayerDamage != null)
+                onPlayerDamage();
+        }
+
+        public void OnDamageRecoverdPlayer()
+        {
+            if (onPlayerDamageRecoverd != null)
+                onPlayerDamageRecoverd();
+        }
+
+        public void OnDeathAnimEnd()
+        {
+            gameObject.SetActive(false);
         }
     }
 }

@@ -32,7 +32,7 @@ public class GarbageCanEnemyPoser : MonoBehaviour, IEnemyPosController
     {
         if (instance == null)
         {
-            instance = poolHandler.GetEnemy();
+            instance = poolHandler.GetObject();
             instance.MyGetComponent_NullChker<GarbageCanEnemyBody>().MyAwake(this.transform.position, transform, explosionSpawner);
             return;
         }

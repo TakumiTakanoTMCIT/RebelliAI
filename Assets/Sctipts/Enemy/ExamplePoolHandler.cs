@@ -5,8 +5,8 @@ public interface IPoolHandler
 {
     PoolHadnler spawnerHandler { get; set; }
     GameObject wannaInstanceEnemy { get; set; }
-    GameObject GetEnemy();
-    void ReturnEnemy(GameObject obj);
+    GameObject GetObject();
+    void ReturnObjct(GameObject obj);
 }
 
 public class ExamplePoolHandler : MonoBehaviour, IPoolHandler
@@ -23,13 +23,13 @@ public class ExamplePoolHandler : MonoBehaviour, IPoolHandler
     }
 
     //インターフェース実装
-    public GameObject GetEnemy()
+    public GameObject GetObject()
     {
         return spawnerHandler.Get();
     }
 
     //インターフェース実装
-    public void ReturnEnemy(GameObject obj)
+    public void ReturnObjct(GameObject obj)
     {
         spawnerHandler.Return(obj);
     }
@@ -64,7 +64,6 @@ public class PoolHadnler
     private GameObject OnCreateObj()
     {
         var instance = GameObject.Instantiate(wannaInstanceEnemy);
-        //instance.transform.SetParent(parentTransform);
         instance.SetActive(false);
         return instance;
     }

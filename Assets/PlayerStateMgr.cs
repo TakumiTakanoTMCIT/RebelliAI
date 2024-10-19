@@ -1,13 +1,7 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using ActionStatusChk;
-using DG.Tweening;
 using KeyHandler;
 using PlayerAction;
 using PlayerInfo;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 
 namespace PlayerState
@@ -24,19 +18,15 @@ namespace PlayerState
 
         private WallKickDelayManager wallKickManager;
 
-        public IState idleState;
-        public IState walkState;
-        public IState jumpState;
-        public IState fallState;
-        public IState wallFallState;
-        public IState wallKick;
-        public IState dashState;
+        public IState idleState, walkState, jumpState, fallState, wallFallState, wallKick,
+        dashState, damageState, deathState;
 
         internal IState currentState;
         internal bool isExecutable;
 
         [SerializeField] internal DashSparkFactory dashSparkFactory;
         [SerializeField] internal WallKickFactory wallKickFactory;
+        [SerializeField] DamageTimeHandler damageTimeHandler;
 
         [SerializeField] bool isDebugCurrentState = false;
 
@@ -56,16 +46,14 @@ namespace PlayerState
 
         private void Start()
         {
-            //Time.timeScale = 0.1f;
-
-            //Debug.Log("dash.dashsparkfactory: " + dash.dashSparkFactory);
-
             idleState = new Idle();
             walkState = new Walk();
             jumpState = new Jump();
             fallState = new Fall();
             wallFallState = new WallFall();
             wallKick = new WallKick();
+            damageState = new DamageState(animHandler, damageTimeHandler, actionHandler);
+            deathState = new DeathState(animHandler, playerStatus);
 
             currentState = idleState;
             currentState.Enter(this);
@@ -102,6 +90,20 @@ namespace PlayerState
 
             if (isDebugCurrentState)
                 Debug.Log("C: " + currentState);
+        }
+
+        public void OnDamage()
+        {
+            ChangeState(damageState);
+        }
+
+        public void OnDeath()
+        {
+            ChangeState(deathState);
+
+            actionHandler.Stop();
+            actionHandler.StopY();
+            rb.gravityScale = 0;
         }
 
         public bool IsCurrentState_DashState()
@@ -857,5 +859,70 @@ namespace PlayerState
         }
 
         public void Exit(PlayerStateMgr stateMgr) { }
+    }
+
+    public class DamageState : IState
+    {
+        PlayerAnimStateHandler animHandler;
+        DamageTimeHandler damageTimeHandler;
+        ActionHandler actionHandler;
+        public DamageState(PlayerAnimStateHandler animHandler, DamageTimeHandler damageTimeHandler, ActionHandler actionHandler)
+        {
+            this.damageTimeHandler = damageTimeHandler;
+            this.animHandler = animHandler;
+            this.actionHandler = actionHandler;
+        }
+
+        public void Enter(PlayerStateMgr stateMgr)
+        {
+            animHandler.ChangeAnimState(animHandler.damageState);
+            damageTimeHandler.StartDamageTime();
+            actionHandler.Stop();
+            actionHandler.StopY();
+            actionHandler.Damage();
+
+            actionHandler.OnDamagePlayer();
+        }
+
+        public void Execute(PlayerStateMgr stateMgr)
+        {
+            if (damageTimeHandler.IsDamaging) return;
+
+            stateMgr.ChangeState(stateMgr.idleState);
+        }
+
+        public void Exit(PlayerStateMgr stateMgr)
+        {
+            actionHandler.OnDamageRecoverdPlayer();
+        }
+    }
+
+    public class DeathState : IState
+    {
+        PlayerAnimStateHandler animstateHandler;
+        PlayerStatus playerStatus;
+        public DeathState(PlayerAnimStateHandler animStateHandler, PlayerStatus playerStatus)
+        {
+            this.playerStatus = playerStatus;
+            this.animstateHandler = animStateHandler;
+        }
+
+        public void Enter(PlayerStateMgr stateMgr)
+        {
+            stateMgr.actionHandler.OnDestoryPlayer();
+            Debug.Log("StateMgr: DeathState");
+            animstateHandler.ChangeAnimState(animstateHandler.deathState);
+            playerStatus.isDeath = true;
+        }
+
+        public void Execute(PlayerStateMgr stateMgr)
+        {
+            return;
+        }
+
+        public void Exit(PlayerStateMgr stateMgr)
+        {
+            return;
+        }
     }
 }

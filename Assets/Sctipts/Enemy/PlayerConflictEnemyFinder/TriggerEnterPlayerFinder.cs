@@ -11,10 +11,9 @@ public class TriggerEnterPlayerFinder : MonoBehaviour
         this.missileBody = missileBody;
     }
 
-    private void OnTriggerEnter2D(Collider2D other, MissileBody missileBody)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         if (!missileBody.IsAlivingNow) return;
-
         var conflictEnemy = other.gameObject.GetComponent<IConflictEnemy>();
         if (conflictEnemy == null) return;
         Destroy(gameObject);
