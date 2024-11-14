@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5212956201096586392
+--- !u!1 &7946258590275003176
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,23 +8,23 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4696042322416411419}
-  - component: {fileID: 298845984319634990}
-  - component: {fileID: 9031851262503762964}
+  - component: {fileID: 2124789516707573753}
+  - component: {fileID: 1552132380850805783}
+  - component: {fileID: 4566574099271835911}
   m_Layer: 5
-  m_Name: HPUnit
+  m_Name: UNIT
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &4696042322416411419
+--- !u!224 &2124789516707573753
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5212956201096586392}
+  m_GameObject: {fileID: 7946258590275003176}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -38,21 +38,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 62.5, y: 12.5}
   m_Pivot: {x: 0.5, y: 0}
---- !u!222 &298845984319634990
+--- !u!222 &1552132380850805783
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5212956201096586392}
+  m_GameObject: {fileID: 7946258590275003176}
   m_CullTransparentMesh: 1
---- !u!114 &9031851262503762964
+--- !u!114 &4566574099271835911
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5212956201096586392}
+  m_GameObject: {fileID: 7946258590275003176}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -455756200, guid: 6028d14c2246d42339e46b682ee90283, type: 3}
+  m_Sprite: {fileID: 730926150, guid: 798908fe1090d42c8ba8b0cd6a4b5d4f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
