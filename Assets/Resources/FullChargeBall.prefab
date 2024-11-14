@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 7965108950796039176}
   - component: {fileID: 6670866544590473577}
   - component: {fileID: 1791258713304518919}
+  - component: {fileID: 3049028290327607100}
   - component: {fileID: 4034020311666730795}
   - component: {fileID: 525289133199450347}
-  - component: {fileID: 3049028290327607100}
   m_Layer: 0
   m_Name: FullChargeBall
   m_TagString: Untagged
@@ -136,6 +136,27 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!95 &3049028290327607100
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4650480833402195142}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 5d7904f5db13440159907555740c1b56, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &4034020311666730795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -162,25 +183,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33b9054b7b5ae48a2a2f292ed07bd28b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myLevel: 2
   speed: 18
---- !u!95 &3049028290327607100
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4650480833402195142}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 5d7904f5db13440159907555740c1b56, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0

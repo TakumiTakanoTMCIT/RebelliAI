@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5942352777084661856}
   - component: {fileID: 7710027560092318730}
   - component: {fileID: -7447148387122229026}
+  - component: {fileID: 4437366774804821508}
   m_Layer: 0
   m_Name: GarbageCanEnemy
   m_TagString: Untagged
@@ -108,7 +109,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 5
 --- !u!61 &5942352777084661856
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -149,6 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hp: 5
   initialHp: 5
+  conflictDamage: 1
 --- !u!95 &-7447148387122229026
 Animator:
   serializedVersion: 5
@@ -170,3 +172,15 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4437366774804821508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2064518679919570246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7224d878cbe024624b00865874c5e48d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
