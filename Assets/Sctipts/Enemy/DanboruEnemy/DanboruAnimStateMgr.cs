@@ -52,7 +52,6 @@ public class DanboruAnimStateMgr : MonoBehaviour
     public void ReadyToJump()
     {
         actMgr.Jump(jumpForce);
-        Debug.Log("ジャンプ");
     }
 
     public void ChangeState(IEnemyAnimState nextState)
@@ -112,10 +111,7 @@ public class Idle : IEnemyAnimState
     public void OnEnter()
     {
         animHandler.SetBool("isIdle", true);
-
         hereIdlingTime = UnityEngine.Random.Range(1, idlingTime);
-        Debug.Log($"あと{hereIdlingTime}でチャージ開始します");
-
         countDownTime = 0;
     }
 
@@ -154,7 +150,6 @@ public class Charge : IEnemyAnimState
     public void OnEnter()
     {
         animHandler.SetBool("isCharge", true);
-        Debug.Log($"{chargeTime}秒後にジャンプします");
         coutDownTime = 0;
     }
 
@@ -193,7 +188,6 @@ public class Release : IEnemyAnimState
 
     public void OnEnter()
     {
-        Debug.Log("ジャンプします");
         animHandler.SetTrigger("OnRelease");
     }
 

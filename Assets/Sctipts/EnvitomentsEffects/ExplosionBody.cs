@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using UniRx;
 public class ExplosionBody : MonoBehaviour
 {
     ExplosionSpawner spawner;
@@ -7,6 +7,7 @@ public class ExplosionBody : MonoBehaviour
     {
         transform.position = pos;
         this.spawner = spwaner;
+        SoundEffectCtrl.OnPlayExplosionSE.OnNext(Unit.Default);
     }
     /// <summary>
     /// アニメーションイベントです。Unity側からAnimationで登録していて呼び出されます。

@@ -20,7 +20,6 @@ public class MissileBody : MonoBehaviour, IDamageableFromShot
         IsAlivingNow = false;
         rb = gameObject.MyGetComponent_NullChker<Rigidbody2D>();
         playerFinder = gameObject.MyGetComponent_NullChker<TriggerEnterPlayerFinder>();
-        Debug.Log($"ミサイルのダメージ : {missileStatus.damage}");
         playerFinder.Init(missileStatus.damage, this);
     }
 

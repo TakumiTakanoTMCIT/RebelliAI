@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using PlayerInfo;
 using UnityEngine;
+using HPBar;
 
 public class DamageTimeHandler : MonoBehaviour
 {
@@ -9,30 +12,23 @@ public class DamageTimeHandler : MonoBehaviour
     private bool isDamaging;
     public bool IsDamaging { get { return isDamaging; } }
 
-    Coroutine damageTimeCoroutine;
-    IEnumerator DamageTime()
+    //イベントの登録
+    private void OnEnable()
+    {
+        HPBarHandler.onPlayerDamage += StartDamageTime;
+    }
+
+    //イベントの登録解除
+    private void OnDisable()
+    {
+        HPBarHandler.onPlayerDamage -= StartDamageTime;
+    }
+
+    //イベントハンドラー
+    async void StartDamageTime()
     {
         isDamaging = true;
-        yield return new WaitForSeconds(playerStatus.damagingTime);
+        await UniTask.Delay(TimeSpan.FromSeconds(playerStatus.damagingTime));
         isDamaging = false;
-    }
-
-
-    //外部から呼び出す関数です
-    public void StartDamageTime()
-    {
-        if (damageTimeCoroutine != null)
-            StopCoroutine(damageTimeCoroutine);
-
-        damageTimeCoroutine = StartCoroutine(DamageTime());
-    }
-
-    public void StopDamageTime()
-    {
-        if (damageTimeCoroutine != null)
-            StopCoroutine(damageTimeCoroutine);
-
-        isDamaging = false;
-        damageTimeCoroutine = null;
     }
 }

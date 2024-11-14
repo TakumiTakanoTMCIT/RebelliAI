@@ -1,6 +1,7 @@
 using PlayerInfo;
 using UnityEngine;
 using UnityEngine.Pool;
+using HPBar;
 
 public class AfterGrowMain : MonoBehaviour
 {
@@ -11,12 +12,21 @@ public class AfterGrowMain : MonoBehaviour
     SpriteRenderer spriteRenderer;
     PlayerStatus playerStatus;
 
-    private void Awake()
+    private void OnEnable()
     {
-        spriteRenderer = this.gameObject.MyGetComponent_NullChker<SpriteRenderer>();
+        //イベントの登録
+        HPBarHandler.onPlayerDeath += OnPlayerDeathAndEndAnim;
+        HPBarHandler.onPlayerDamage += OnPlayerDeathAndEndAnim;
     }
 
-    public void Init(ObjectPool<GameObject> pool, Transform transform , PlayerStatus playerStatus)
+    private void OnDisable()
+    {
+        //イベントの解除
+        HPBarHandler.onPlayerDeath -= OnPlayerDeathAndEndAnim;
+        HPBarHandler.onPlayerDamage -= OnPlayerDeathAndEndAnim;
+    }
+
+    public void Init(ObjectPool<GameObject> pool, Transform transform, PlayerStatus playerStatus)
     {
         this.pool = pool;
         this.playerTransform = transform;
@@ -25,6 +35,7 @@ public class AfterGrowMain : MonoBehaviour
 
     public void StartAnim_Movement()
     {
+        spriteRenderer = this.gameObject.MyGetComponent_NullChker<SpriteRenderer>();
         spriteRenderer.flipX = !playerStatus.playerdirection;
         spriteRenderer.flipY = Random.Range(0, 2) == 0;
 
@@ -36,6 +47,14 @@ public class AfterGrowMain : MonoBehaviour
 
     public void EndAnim()
     {
+        //if (!gameObject.activeSelf) return;
         pool.Release(this.gameObject);
+    }
+
+    //イベントハンドラー
+    void OnPlayerDeathAndEndAnim()
+    {
+        Debug.Log("OnPlayerDeathAndEndAnim");
+        EndAnim();
     }
 }

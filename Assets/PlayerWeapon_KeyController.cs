@@ -1,19 +1,54 @@
+using System;
 using KeyHandler;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerWeapon_KeyController : MonoBehaviour
 {
     ChargeShot_Handler chargeShotHandler;
-    AllShellManager mameManager;
+    AllShellManager allShellManager;
     InputHandler inputHandler;
 
-    //GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
+    public static event Action onTooShortCharge;
 
     public void Init(InputHandler inputHandler, ChargeShot_Handler chargeShotHandler, AllShellManager shellManager)
     {
-        this.mameManager = shellManager;
+        this.allShellManager = shellManager;
         this.chargeShotHandler = chargeShotHandler;
         this.inputHandler = inputHandler;
+    }
+
+    private void OnEnable()
+    {
+        DoorAnimHandler.onDoorClosed += OnDoorClosed;
+        InputHandler.onAcceptInputCtrl += OnAcceptInputCtrl;
+        IntroBossHPBarHandler.onDead += CheckCharge;
+    }
+
+    private void OnDisable()
+    {
+        DoorAnimHandler.onDoorClosed -= OnDoorClosed;
+        InputHandler.onAcceptInputCtrl -= OnAcceptInputCtrl;
+        IntroBossHPBarHandler.onDead -= CheckCharge;
+    }
+
+    void OnAcceptInputCtrl()
+    {
+        if (!inputHandler.isShootKey) CheckCharge();
+    }
+
+    //イベントハンドラー
+    //TODO:名前変える。わかりにくい
+    void OnDoorClosed()
+    {
+        if (inputHandler.IsShootKey())
+        {
+            return;
+        }
+        else
+        {
+            CheckCharge();
+        }
     }
 
     private void Update()
@@ -24,30 +59,40 @@ public class PlayerWeapon_KeyController : MonoBehaviour
             {
                 chargeShotHandler.StartCharge();
             }
-            mameManager.ShootMame();
-            return;
+            allShellManager.ShootMame(false);
         }
 
         if (inputHandler.IsShootKeyUp())
         {
-            if (!chargeShotHandler.IsLowCharged)
-            {
-                if (chargeShotHandler.IsMinimumChargeTime)
-                {
-                    mameManager.ShootMame();
-                }
-
-                chargeShotHandler.InterruputChaging();
-                return;
-            }
-            else if (chargeShotHandler.IsLowCharged && !chargeShotHandler.IsFullCharged)
-            {
-                chargeShotHandler.Shoot_Charged_Shell(chargeShotHandler.levelLower_EnergyBall);
-            }
-            else if (chargeShotHandler.IsFullCharged)
-            {
-                chargeShotHandler.Shoot_Charged_Shell(chargeShotHandler.fullLevel_EnergyBall);
-            }
+            CheckCharge();
+            return;
         }
+    }
+
+    void CheckCharge()
+    {
+        if (!chargeShotHandler.IsCharging) return;
+
+        if (chargeShotHandler.IsFullCharged)
+        {
+            allShellManager.ShootChargedShell(chargeShotHandler.fullLevel_EnergyBall);
+            return;
+        }
+
+        if (chargeShotHandler.IsLowCharged)
+        {
+            allShellManager.ShootChargedShell(chargeShotHandler.levelLower_EnergyBall);
+            return;
+        }
+
+        if (chargeShotHandler.IsMinimumChargeTime)
+        {
+            allShellManager.ShootMame(true);
+            return;
+        }
+
+        //チャージをほぼしないでリリースした場合は撃つことは無いですが、チャージをリセットします
+        //この設定重要です
+        onTooShortCharge?.Invoke();
     }
 }

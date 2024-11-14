@@ -1,11 +1,14 @@
+using System;
 using UnityEngine;
 using UnityEngine.Pool;
-using UnityEngine.Video;
+using UniRx;
 
 public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
 {
     Rigidbody2D rb;
     SpriteRenderer spriteRenderer;
+
+    public event Action onDead;
 
     private ObjectPool<GameObject> pool;
 
@@ -15,6 +18,8 @@ public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
 
     bool isMoveable = true;
 
+    bool isReleased = false;
+
     /// <summary>
     /// InitはAllShellManagerでCreateShellしたときに呼び出されます
     /// </summary>
@@ -23,11 +28,7 @@ public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
         rb = this.gameObject.MyGetComponent_NullChker<Rigidbody2D>();
         spriteRenderer = this.gameObject.MyGetComponent_NullChker<SpriteRenderer>();
         this.pool = pool;
-    }
-
-    private void OnEnable()
-    {
-        isMoveable = true;
+        Debug.Log($"INITされた!!pool: {pool}");
     }
 
     /// <summary>
@@ -38,6 +39,9 @@ public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
         this.direction = direction;
         spriteRenderer.flipX = !direction;
         gameObject.MyGetComponent_NullChker<DamageAbleFinder>().SetDamageAmount(isDashExtraDamage);
+        isMoveable = true;
+        isReleased = false;
+        SoundEffectCtrl.OnPlayShotSE.OnNext(0);
     }
 
     private void FixedUpdate()
@@ -48,14 +52,19 @@ public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
         else rb.velocity = new Vector2(-speed, 0);
     }
 
-    private void Update()
+    private void OnBecameInvisible()
     {
-        if (!spriteRenderer.isVisible) DestroyShell();
+        DestroyShell();
     }
 
+    //アニメーションイベント
+    //ダメージを与えるアニメーションが終わったら呼び出される
     public void DestroyShell()
     {
-        pool.Release(this.gameObject);
+        if (isReleased) return;
+        isReleased = true;
+        onDead?.Invoke();
+        pool.Release(gameObject);
     }
 
     public void StopMove()
@@ -63,12 +72,26 @@ public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
         isMoveable = false;
         rb.velocity = Vector2.zero;
     }
+
+    public void Refrect()
+    {
+        direction = !direction;
+        spriteRenderer.flipX = !spriteRenderer.flipX;
+        StopMove();
+        if (direction)
+            rb.velocity = new Vector2(speed / 1.4f, speed / 1.4f);
+        else
+            rb.velocity = new Vector2(-speed / 1.4f, speed / 1.4f);
+    }
 }
 
 public class MameAnimator
 {
     ShellMainBodyCrtl mainbody;
     Animator animator;
+
+    internal bool isExcuted = false;
+
     public MameAnimator(Animator animator)
     {
         this.animator = animator;
@@ -77,12 +100,16 @@ public class MameAnimator
 
     public void TakeDamage()
     {
+        if (isExcuted) return;
+        isExcuted = true;
         animator.SetTrigger("isTakeDamage");
         mainbody.StopMove();
     }
 
     public void RefrectShell()
     {
-        //追記予定です。
+        if (isExcuted) return;
+        isExcuted = true;
+        mainbody.Refrect();
     }
 }

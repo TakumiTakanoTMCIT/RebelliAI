@@ -6,7 +6,6 @@ public class TriggerEnterPlayerFinder : MonoBehaviour
     int damage;
     public void Init(int damage, MissileBody missileBody)
     {
-        Debug.LogAssertion("Missile INIT");
         this.damage = damage;
         this.missileBody = missileBody;
     }
@@ -17,7 +16,6 @@ public class TriggerEnterPlayerFinder : MonoBehaviour
         var conflictEnemy = other.gameObject.GetComponent<IConflictEnemy>();
         if (conflictEnemy == null) return;
         Destroy(gameObject);
-        Debug.Log("Missile Hit");
         conflictEnemy.OnConflictEnemy(damage);
     }
 }

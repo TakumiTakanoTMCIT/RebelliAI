@@ -1,8 +1,12 @@
+using System;
 using ActionStatusChk;
 using KeyHandler;
 using PlayerAction;
 using PlayerInfo;
 using UnityEngine;
+using HPBar;
+using Cysharp.Threading.Tasks;
+using UniRx;
 
 namespace PlayerState
 {
@@ -27,6 +31,7 @@ namespace PlayerState
         [SerializeField] internal DashSparkFactory dashSparkFactory;
         [SerializeField] internal WallKickFactory wallKickFactory;
         [SerializeField] DamageTimeHandler damageTimeHandler;
+        [SerializeField] HPBarHandler hPBarHandler;
 
         [SerializeField] bool isDebugCurrentState = false;
 
@@ -44,9 +49,9 @@ namespace PlayerState
             this.animHandler = animStateHandler;
         }
 
-        private void Start()
+        private void Awake()
         {
-            idleState = new Idle();
+            idleState = new Idle(this, animHandler);
             walkState = new Walk();
             jumpState = new Jump();
             fallState = new Fall();
@@ -55,10 +60,31 @@ namespace PlayerState
             damageState = new DamageState(animHandler, damageTimeHandler, actionHandler);
             deathState = new DeathState(animHandler, playerStatus);
 
-            currentState = idleState;
-            currentState.Enter(this);
+            GameFlowManager.StartBattleAction.Subscribe(_ =>
+            {
+                ChangeState(idleState);
+            })
+            .AddTo(this);
+        }
 
-            isExecutable = true;
+        //プレイヤーが画面外に出たら
+        private void OnBecameInvisible()
+        {
+            hPBarHandler.onPlayerInVoid.OnNext(Unit.Default);
+        }
+
+        //イベントの登録
+        private void OnEnable()
+        {
+            HPBarHandler.onPlayerDeath += OnDeath;
+            HPBarHandler.onPlayerDamage += OnDamage;
+        }
+
+        //イベントの登録解除
+        private void OnDisable()
+        {
+            HPBarHandler.onPlayerDeath -= OnDeath;
+            HPBarHandler.onPlayerDamage -= OnDamage;
         }
 
         private void Update()
@@ -69,6 +95,14 @@ namespace PlayerState
 
         public void ChangeState(IState nextState)
         {
+            if (currentState == null)
+            {
+                currentState = nextState;
+                nextState.Enter(this);
+                isExecutable = true;
+                return;
+            }
+
             IState previousState;
             previousState = currentState;
 
@@ -92,12 +126,12 @@ namespace PlayerState
                 Debug.Log("C: " + currentState);
         }
 
-        public void OnDamage()
+        void OnDamage()
         {
             ChangeState(damageState);
         }
 
-        public void OnDeath()
+        void OnDeath()
         {
             ChangeState(deathState);
 
@@ -143,6 +177,15 @@ namespace PlayerState
 
     public class Idle : IState
     {
+        PlayerStateMgr playerStateMgr;
+        PlayerAnimStateHandler animStateHandler;
+
+        public Idle(PlayerStateMgr playerStateMgr, PlayerAnimStateHandler animStateHandler)
+        {
+            this.playerStateMgr = playerStateMgr;
+            this.animStateHandler = animStateHandler;
+        }
+
         public void Enter(PlayerStateMgr stateMgr)
         {
             /// <summary>
@@ -151,6 +194,18 @@ namespace PlayerState
             stateMgr.actionHandler.Stop();
 
             stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.idleState);
+
+            DoorAnimHandler.onDoorClosed += CheckCorrectAnim;
+        }
+
+        //イベントハンドラ
+        //TODO:なんでこれを書いた？
+        void CheckCorrectAnim()
+        {
+            if (playerStateMgr.actionStatusChk.IsGround())
+            {
+                animStateHandler.ChangeAnimState(animStateHandler.idleState);
+            }
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -215,7 +270,10 @@ namespace PlayerState
             }
         }
 
-        public void Exit(PlayerStateMgr stateMgr) { }
+        public void Exit(PlayerStateMgr stateMgr)
+        {
+            DoorAnimHandler.onDoorClosed -= CheckCorrectAnim;
+        }
     }
 
     public class Walk : IState, IWalker
@@ -361,6 +419,8 @@ namespace PlayerState
             dashTimeCtrl.StartDashTimeCtrl();
 
             stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.dashState);
+
+            PlayerAcitonSECtrl.OnPlaySE.OnNext(PlayerAcitonSECtrl.dashSound);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -456,6 +516,8 @@ namespace PlayerState
             stateMgr.actionHandler.Jump(stateMgr.playerStatus.JumpForce);
 
             stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.jumpState);
+
+            PlayerAcitonSECtrl.OnPlaySE.OnNext(PlayerAcitonSECtrl.jumpSound);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -578,6 +640,7 @@ namespace PlayerState
         {
             if (stateMgr.actionStatusChk.IsGround())
             {
+                PlayerAcitonSECtrl.OnPlaySE.OnNext(PlayerAcitonSECtrl.landSound);
                 if (!isWalkNow)
                 {
                     stateMgr.ChangeState(stateMgr.idleState);
@@ -749,10 +812,7 @@ namespace PlayerState
             stateMgr.rb.velocity = Vector2.zero;
             stateMgr.actionHandler.Jump(stateMgr.playerStatus.JumpForce);
 
-            /// <summary>
-            /// ダッシュキックの受付を開始する
-            /// </summary>
-            //dashKickKeyAcceptingHandler.Start_DashKickKey_AcceptingTime();
+            PlayerAcitonSECtrl.OnPlaySE.OnNext(PlayerAcitonSECtrl.jumpSound);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -863,6 +923,8 @@ namespace PlayerState
 
     public class DamageState : IState
     {
+        public static event Action onPlayerDamageRecover;
+
         PlayerAnimStateHandler animHandler;
         DamageTimeHandler damageTimeHandler;
         ActionHandler actionHandler;
@@ -875,13 +937,9 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            animHandler.ChangeAnimState(animHandler.damageState);
-            damageTimeHandler.StartDamageTime();
             actionHandler.Stop();
             actionHandler.StopY();
             actionHandler.Damage();
-
-            actionHandler.OnDamagePlayer();
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -893,7 +951,7 @@ namespace PlayerState
 
         public void Exit(PlayerStateMgr stateMgr)
         {
-            actionHandler.OnDamageRecoverdPlayer();
+            onPlayerDamageRecover?.Invoke();
         }
     }
 
@@ -909,10 +967,26 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            stateMgr.actionHandler.OnDestoryPlayer();
-            Debug.Log("StateMgr: DeathState");
-            animstateHandler.ChangeAnimState(animstateHandler.deathState);
-            playerStatus.isDeath = true;
+            return;
+        }
+
+        public void Execute(PlayerStateMgr stateMgr)
+        {
+            return;
+        }
+
+        public void Exit(PlayerStateMgr stateMgr)
+        {
+            return;
+        }
+    }
+
+    //会話やワープの時に使うステート
+    public class NeutralState : IState
+    {
+        public void Enter(PlayerStateMgr stateMgr)
+        {
+            return;
         }
 
         public void Execute(PlayerStateMgr stateMgr)

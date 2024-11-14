@@ -1,15 +1,32 @@
-using PlayerAction;
+using System.Collections.Generic;
 using UnityEngine;
+using HPBar;
 
 public class CamCtrl : MonoBehaviour
 {
+    [SerializeField] List<CamFollowZone> camFollowZones;
+
+    Vector3 pos, targetPos;
+
     [SerializeField] private Transform playerTransform;
     bool isFreezeCam = false;
+    [SerializeField] bool isDebugMode = false;
 
     private void Awake()
     {
         isFreezeCam = false;
-        ActionHandler.onPlayerDeath += OnPlayerDeath;
+    }
+
+    //イベントの登録
+    private void OnEnable()
+    {
+        HPBarHandler.onPlayerDeath += OnPlayerDeath;
+    }
+
+    //イベントの解除
+    private void OnDisable()
+    {
+        HPBarHandler.onPlayerDeath -= OnPlayerDeath;
     }
 
     private void Start()
@@ -19,48 +36,56 @@ public class CamCtrl : MonoBehaviour
 
     void OnPlayerDeath()
     {
-        Debug.Log("どうもカメラです！プレイヤーが死んだらしいぜ！");
         isFreezeCam = true;
     }
 
     private void Update()
     {
-        if(isFreezeCam) return;
+        if (isFreezeCam) return;
 
-        if (playerTransform.position.x > 4)
+        if (isDebugMode)
         {
-            Vector3 pos = transform.position;
-            pos.x = playerTransform.position.x;
-            transform.position = pos;
+            transform.position = playerTransform.position;
+            return;
         }
 
-        if (playerTransform.position.x > 27f)
+        int count = 0;
+        foreach (var zone in camFollowZones)
         {
-            if (playerTransform.position.y > -2.5f)
+            //ゾーンに対応したX座標にプレイヤーがいた場合にカメラを追従させる
+            if (playerTransform.position.x > zone.minX && playerTransform.position.x < zone.maxX)
             {
-                SetYPos();
-            }
-        }
-        else if (playerTransform.position.x > 10)
-        {
-            if (playerTransform.position.y > 0f)
-            {
-                SetYPos();
-            }
-        }
-        else
-        {
-            if (playerTransform.position.y > 1f)
-            {
-                SetYPos();
-            }
-        }
-    }
+                Debug.Log("In Zone " + count);
+                pos = transform.position;
+                pos.x = playerTransform.position.x;
+                pos.z = -10;
 
-    void SetYPos()
-    {
-        Vector3 pos = transform.position;
+                /*if (count == 3)
+                {
+                    pos.x = 57.5f;
+                }*/
+
+                if (transform.position.y > zone.camYMin && transform.position.y < zone.camYMax)
+                {
+                    pos.y = playerTransform.position.y;
+                    transform.position = pos;
+                    return;
+                }
+                transform.position = pos;
+            }
+            count++;
+        }
+
+        //上の範囲にいなかったら制限すべき範囲にいないから普通に追順させる！
+        pos = transform.position;
+        pos.x = playerTransform.position.x;
         pos.y = playerTransform.position.y;
         transform.position = pos;
     }
+}
+
+[System.Serializable]
+public class CamFollowZone
+{
+    public float minX, maxX, camYMin, camYMax;
 }

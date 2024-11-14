@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using ActionStatusChk;
+using Cysharp.Threading.Tasks;
 using PlayerInfo;
 using UnityEditor;
 using UnityEngine;
@@ -14,30 +16,43 @@ namespace PlayerAction
         PlayerStatus status;
         PlayerDashKeepManager dashKeepManager;
 
-        public delegate void OnPlayerDeath();
-        public static event OnPlayerDeath onPlayerDeath;
-
-        public delegate void OnPlayerDamage();
-        public static event OnPlayerDamage onPlayerDamage;
-
-        public delegate void OnPlayerDamageRecoverd();
-        public static event OnPlayerDamageRecoverd onPlayerDamageRecoverd;
-
         public void Init(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerStatus status, PlayerDashKeepManager dashKeepManager)
         {
+            LateInit(rb, actionStatusChecker, status, dashKeepManager);
+        }
+
+        //待ってから初期化
+        async void LateInit(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerStatus status, PlayerDashKeepManager dashKeepManager)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(0.02f));
+
             this.rb = rb;
             this.actionStatusChecker = actionStatusChecker;
             this.status = status;
             this.dashKeepManager = dashKeepManager;
         }
 
+        private void OnEnable()
+        {
+            BossDoorBody.onDoorTouched += () => { Stop(); StopY(); };
+        }
+
+        private void OnDisable()
+        {
+            BossDoorBody.onDoorTouched -= () => { Stop(); StopY(); };
+        }
+
         public void Stop()
         {
+            //いい対処法ではないので、後で確実に修正
+            if (rb == null) return;
             rb.velocity = new Vector2(0, rb.velocity.y);
         }
 
         public void StopY()
         {
+            //いい対処法ではないので、後で確実に修正
+            if (rb == null) return;
             rb.velocity = new Vector2(rb.velocity.x, 0);
         }
 
@@ -94,29 +109,6 @@ namespace PlayerAction
             {
                 rb.AddForce(new Vector2(status.damageForce.x, status.damageForce.y), ForceMode2D.Impulse);
             }
-        }
-
-        public void OnDestoryPlayer()
-        {
-            if (onPlayerDeath != null)
-                onPlayerDeath();
-        }
-
-        public void OnDamagePlayer()
-        {
-            if (onPlayerDamage != null)
-                onPlayerDamage();
-        }
-
-        public void OnDamageRecoverdPlayer()
-        {
-            if (onPlayerDamageRecoverd != null)
-                onPlayerDamageRecoverd();
-        }
-
-        public void OnDeathAnimEnd()
-        {
-            gameObject.SetActive(false);
         }
     }
 }

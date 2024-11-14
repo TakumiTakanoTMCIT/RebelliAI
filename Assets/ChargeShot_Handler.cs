@@ -1,13 +1,11 @@
-using System.Collections;
-using KeyHandler;
+using System;
 using PlayerInfo;
-using Unity.Mathematics;
 using UnityEngine;
+using HPBar;
 
 public class ChargeShot_Handler : MonoBehaviour
 {
     internal GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
-    PlayerStatus playerStatus;
 
     private bool isMinimumChargeTime = false;
     public bool IsMinimumChargeTime
@@ -39,11 +37,12 @@ public class ChargeShot_Handler : MonoBehaviour
         get { return isFullCharged; }
     }
 
+    public static event Action onLowCharge, onFullCharge;
+
     public void Init(PlayerStatus playerStatus, AllShellManager shellManager)
     {
         this.shellManager = shellManager;
-        this.playerStatus = playerStatus;
-        StopCharge_and_ResetSettings();
+        ResetSettings();
 
         levelLower_EnergyBall = Resources.Load<GameObject>("LevelLowerShell");
         fullLevel_EnergyBall = Resources.Load<GameObject>("FullChargeBall");
@@ -55,35 +54,57 @@ public class ChargeShot_Handler : MonoBehaviour
             Debug.Log("FullChargeBallがResourcesディレクトリにありません。確認してください!!");
     }
 
+    private void OnEnable()
+    {
+        HPBarHandler.onPlayerDamage += ResetSettings;
+        HPBarHandler.onPlayerDeath += ResetSettings;
+        AllShellManager.onShootChargedShell += ResetSettings;
+        PlayerWeapon_KeyController.onTooShortCharge += ResetSettings;
+    }
+
+    private void OnDisable()
+    {
+        HPBarHandler.onPlayerDamage -= ResetSettings;
+        HPBarHandler.onPlayerDeath -= ResetSettings;
+        AllShellManager.onShootChargedShell -= ResetSettings;
+        PlayerWeapon_KeyController.onTooShortCharge -= ResetSettings;
+    }
+
     private void FixedUpdate()
     {
         if (!isCharging) return;
 
-        /// <summary>
         /// タイマーをカウントする
-        /// </summary>
         timer += Time.deltaTime;
 
-        if (!isMinimumChargeTime && timer >= mameCharge_TimeThreshold)
+        if ((timer - lowCharge_TimeThreshold) >= fullCharge_TimeThreshold)
         {
-            isMinimumChargeTime = true;
-            //Debug.LogWarning("最低限のチャージ時間を超えた");
+            if (!isFullCharged)
+            {
+                isFullCharged = true;
+                onFullCharge?.Invoke();
+                return;
+            }
         }
 
-        if (!isLowCharged && timer >= lowCharge_TimeThreshold)
+        if (timer >= lowCharge_TimeThreshold)
         {
-            isLowCharged = true;
-            //Debug.LogWarning("低チャージ完了！！");
+            if (!isLowCharged)
+            {
+                isLowCharged = true;
+                onLowCharge?.Invoke();
+                return;
+            }
         }
 
-        if (!isFullCharged && (timer - lowCharge_TimeThreshold) >= fullCharge_TimeThreshold)
+        if (timer >= mameCharge_TimeThreshold)
         {
-            isFullCharged = true;
-            //Debug.LogWarning("フルチャージ完了！！");
+            if (!isMinimumChargeTime) isMinimumChargeTime = true;
+            return;
         }
     }
 
-    private void StopCharge_and_ResetSettings()
+    private void ResetSettings()
     {
         isCharging = false;
 
@@ -94,28 +115,17 @@ public class ChargeShot_Handler : MonoBehaviour
         timer = 0;
     }
 
-    //--public--
-
-    public void InterruputChaging()
-    {
-        StopCharge_and_ResetSettings();
-
-        if (timer <= mameCharge_TimeThreshold)
-            return;
-
-        shellManager.ShootMame();
-    }
-
+    //--public--//
     public void Shoot_Charged_Shell(GameObject shell)
     {
         shellManager.ShootChargedShell(shell);
 
-        StopCharge_and_ResetSettings();
+        ResetSettings();
     }
 
     public void StartCharge()
     {
-        StopCharge_and_ResetSettings();
+        ResetSettings();
 
         isCharging = true;
     }

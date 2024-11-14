@@ -13,6 +13,9 @@ public class DeathGlitchSparkFactory : MonoBehaviour
 
     [SerializeField] bool PushThisBool_WillMakeEffects = false;
 
+    public delegate void OnPlayerDeathEffectsInstanceDone();
+    public static event OnPlayerDeathEffectsInstanceDone onPlayerDeathEffectsInstanceDone;
+
     private void Awake()
     {
         isEndAnimDeath = false;
@@ -36,9 +39,11 @@ public class DeathGlitchSparkFactory : MonoBehaviour
         for (int count = 0; count < sparkPoolHandler.maxInstanceCount; count++)
         {
             var spark = sparkPoolHandler.GetObject();
-            await UniTask.Delay(TimeSpan.FromSeconds(intervalTime));
             spark.gameObject.MyGetComponent_NullChker<DeathGlitchSparkBody>().MyAwake(instancePos, this);
+            await UniTask.Delay(TimeSpan.FromSeconds(intervalTime));
         }
+
+        onPlayerDeathEffectsInstanceDone?.Invoke();
     }
 
     public void ReturnObject(GameObject obj)

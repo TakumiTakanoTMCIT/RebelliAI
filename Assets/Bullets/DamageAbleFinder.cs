@@ -4,18 +4,37 @@ public class DamageAbleFinder : MonoBehaviour
 {
     Animator animator;
     MameAnimator mamaeAnimator;
+    ShellMainBodyCrtl shellMainBodyCrtl;
 
     [SerializeField] private int damageAmount = 1, dashExtraDamageAmount = 2;
-    bool isDashExtraDamage;
+    bool isDashExtraDamage, isRefrected;
 
     private void Awake()
     {
+        shellMainBodyCrtl = gameObject.MyGetComponent_NullChker<ShellMainBodyCrtl>();
         animator = this.gameObject.MyGetComponent_NullChker<Animator>();
         mamaeAnimator = new MameAnimator(animator);
     }
 
+    private void OnEnable()
+    {
+        shellMainBodyCrtl.onDead += OnDead;
+    }
+
+    private void OnDisable()
+    {
+        shellMainBodyCrtl.onDead -= OnDead;
+    }
+
+    void OnDead()
+    {
+        mamaeAnimator.isExcuted = false;
+    }
+
     public void SetDamageAmount(bool isDashExtraDamage)
     {
+        isRefrected = false;
+
         if (isDashExtraDamage)
             this.isDashExtraDamage = true;
         else
@@ -24,12 +43,27 @@ public class DamageAbleFinder : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (isRefrected) return;
+
         IDamageableFromShot damageable = other.GetComponent<IDamageableFromShot>();
-        if (damageable == null) return;
+        if (damageable != null)
+        {
+            if (!isDashExtraDamage) damageable.TakeDamage(damageAmount);
+            else damageable.TakeDamage(dashExtraDamageAmount);
 
-        if (!isDashExtraDamage) damageable.TakeDamage(damageAmount);
-        else damageable.TakeDamage(dashExtraDamageAmount);
+            mamaeAnimator.TakeDamage();
+            SoundEffectCtrl.OnPlayHitSE.OnNext(0);
+            return;
+        }
 
-        mamaeAnimator.TakeDamage();
+        RefrectableBody refrectableBody = other.GetComponent<RefrectableBody>();
+        if (refrectableBody != null)
+        {
+            Debug.Log($"RefrectableBody Hit! {other.name}");
+            isRefrected = true;
+            mamaeAnimator.RefrectShell();
+            SoundEffectCtrl.OnPlayHitSE.OnNext(1);
+            return;
+        }
     }
 }

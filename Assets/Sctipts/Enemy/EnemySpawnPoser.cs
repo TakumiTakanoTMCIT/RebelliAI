@@ -14,10 +14,7 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
     GameObject instance;
     ExplosionSpawner explosionSpawner;
 
-    private void Awake()
-    {
-        GetSpawnHandler();
-    }
+    private void Awake() => GetSpawnHandler();
 
     //インターフェース実装
     public void GetSpawnHandler()
@@ -39,23 +36,12 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
             instance.gameObject.MyGetComponent_NullChker<EnemyBody>().MyAwake(transform.position, transform, explosionSpawner);
             return;
         }
-        else
-        {
-            Debug.Log($"instanceはすでに生成されていて、画面内にいるから生成しません!{gameObject.name}");
-            return;
-        }
+        else return;
     }
 
     //Unityから呼び出されます(インターフェース実装)
-    public void OnBecameVisible()
-    {
-        Debug.Log($"表示された！ : {gameObject.name}");
-        MakeInstance();
-    }
+    public void OnBecameVisible() => MakeInstance();
 
     //インターフェース実装
-    public void ResetInstance()
-    {
-        instance = null;
-    }
+    public void ResetInstance() => instance = null;
 }

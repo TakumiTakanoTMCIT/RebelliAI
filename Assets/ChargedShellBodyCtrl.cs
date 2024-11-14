@@ -1,4 +1,4 @@
-using ActionStatusChk;
+using UniRx;
 using PlayerInfo;
 using UnityEngine;
 
@@ -9,17 +9,21 @@ public interface IDestroyable
 
 public class ChargedShellBodyCtrl : MonoBehaviour, IDestroyable
 {
+    [SerializeField] private int myLevel = 1;
     [SerializeField] private float speed = 5.0f;
 
     PlayerStatus playerStatus;
     Rigidbody2D rb;
     SpriteRenderer spriteRenderer;
 
+    bool isStartedMove;
+
     private void Awake()
     {
         playerStatus = GameObject.Find("Player").MyGetComponent_NullChker<PlayerStatus>();
         rb = gameObject.MyGetComponent_NullChker<Rigidbody2D>();
         spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
+        isStartedMove = false;
     }
 
     /// <summary>
@@ -44,16 +48,14 @@ public class ChargedShellBodyCtrl : MonoBehaviour, IDestroyable
         }
 
         spriteRenderer.flipX = !playerStatus.playerdirection;
+        isStartedMove = true;
+        SoundEffectCtrl.OnPlayShotSE.OnNext(myLevel);
     }
 
-    private void Update()
+    private void OnBecameInvisible()
     {
-        if (spriteRenderer == null)
-        {
-            MoveShell();
-        }
-
-        if (!spriteRenderer.isVisible) DestroyShell();
+        if (!isStartedMove) return;
+        DestroyShell();
     }
 
     public void DestroyShell()
@@ -64,6 +66,12 @@ public class ChargedShellBodyCtrl : MonoBehaviour, IDestroyable
     public void StopMove()
     {
         rb.velocity = Vector2.zero;
+    }
+
+    //アニメーションイベント
+    void FinishRefrectAnim()
+    {
+        DestroyShell();
     }
 }
 
@@ -83,5 +91,12 @@ public class ChargedShellAnimatorCtrl
         //Debug.Log("TakeDamage。チャージシェルのアニメーションを再生します");
         bodyCtrl.StopMove();
         animator.SetTrigger("isHit");
+    }
+
+    public void RefrectShell()
+    {
+        //Debug.Log("RefrectShell。チャージシェルのアニメーションを再生します");
+        bodyCtrl.StopMove();
+        animator.SetTrigger("isRefrect");
     }
 }

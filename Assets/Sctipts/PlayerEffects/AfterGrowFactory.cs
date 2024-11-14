@@ -1,8 +1,11 @@
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEditor;
-using System.Collections;
 using PlayerInfo;
+using Cysharp.Threading.Tasks;
+using System;
+using PlayerState;
+using HPBar;
 
 public class AfterGrowFactory : MonoBehaviour
 {
@@ -12,18 +15,17 @@ public class AfterGrowFactory : MonoBehaviour
     [SerializeField] private Transform parentTransform;
 
     private GameObject effect;
-    bool isInstantiable = true;
+    bool isInstantiable = true, isPlayerDamage_Death = false;
     private ObjectPool<GameObject> pool;
 
     PlayerDashTimeCtrl playerDashTimeCtrl;
     PlayerDashKeepManager playerDashKeepManager;
     PlayerStatus playerStatus;
 
-    Coroutine coroutine;
-    private IEnumerator CountTime()
+    async private void CountInterval()
     {
         isInstantiable = false;
-        yield return new WaitForSeconds(Random.Range(minTime, maxTime));
+        await UniTask.Delay(TimeSpan.FromSeconds(UnityEngine.Random.Range(minTime, maxTime)));
         isInstantiable = true;
     }
 
@@ -33,12 +35,14 @@ public class AfterGrowFactory : MonoBehaviour
         if (effect == null)
         {
             Debug.LogWarning("Effect is null");
-            EditorApplication.isPaused = true;
+            //EditorApplication.isPaused = true;
         }
 
         playerDashTimeCtrl = player.MyGetComponent_NullChker<PlayerDashTimeCtrl>();
         playerDashKeepManager = player.MyGetComponent_NullChker<PlayerDashKeepManager>();
         playerStatus = player.MyGetComponent_NullChker<PlayerStatus>();
+
+        isPlayerDamage_Death = false;
 
         InitPool();
     }
@@ -47,10 +51,32 @@ public class AfterGrowFactory : MonoBehaviour
     {
         if (!isInstantiable) return;
 
+        if(isPlayerDamage_Death) return;
+
         if (playerDashTimeCtrl.IsDashNow || playerDashKeepManager.IsKeepDashSpeed)
         {
             pool.Get();
         }
+    }
+
+    void OnPlayerDeath_Damage() => isPlayerDamage_Death = true;
+
+    void OnPlayerRecoverDamage() => isPlayerDamage_Death = false;
+
+    private void OnEnable()
+    {
+        HPBarHandler.onPlayerDeath += OnPlayerDeath_Damage;
+        HPBarHandler.onPlayerDamage += OnPlayerDeath_Damage;
+
+        PlayerState.DamageState.onPlayerDamageRecover += OnPlayerRecoverDamage;
+    }
+
+    private void OnDisable()
+    {
+        HPBarHandler.onPlayerDeath -= OnPlayerDeath_Damage;
+        HPBarHandler.onPlayerDamage -= OnPlayerDeath_Damage;
+
+        PlayerState.DamageState.onPlayerDamageRecover -= OnPlayerRecoverDamage;
     }
 
     //--Pool Methods--↓↓
@@ -90,7 +116,7 @@ public class AfterGrowFactory : MonoBehaviour
     {
         effect.SetActive(true);
         effect.MyGetComponent_NullChker<AfterGrowMain>().StartAnim_Movement();
-        coroutine = StartCoroutine(CountTime());
+        CountInterval();
     }
 
     private void ReleaseEffect(GameObject effect)
