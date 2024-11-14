@@ -1,20 +1,85 @@
-using System.Collections;
-using System.Collections.Generic;
-using PlayerAction;
 using UnityEngine;
+using HPBar;
+using System;
+using UniRx;
 
 namespace KeyHandler
 {
     public class InputHandler : MonoBehaviour
     {
-        bool isAbleToInputKey = true;
+        [SerializeField] private bool isDebugMode = false;
+        [SerializeField] bool isAbleToInputKey = true, isTalkKeyMode = false, isEnteredBossRoom = false;
+
+        internal bool isShootKey = false;
+
+        public static event Action onAcceptInputCtrl;
+
+        public Subject<Unit> EnableInput = new Subject<Unit>();
+        public Subject<Unit> DisableInput = new Subject<Unit>();
 
         private void Awake()
         {
-            ActionHandler.onPlayerDeath += DontAcceptInputCtrl;
-            ActionHandler.onPlayerDamage += DontAcceptInputCtrl;
-            ActionHandler.onPlayerDamageRecoverd += AcceptInputCtrl;
+            DisableInput.Subscribe(_ => DontAcceptInputCtrl()).AddTo(this);
+            EnableInput.Subscribe(_ => AcceptInputCtrl()).AddTo(this);
+        }
+
+        /*private void Start()
+        {
             AcceptInputCtrl();
+        }*/
+
+        /*private void OnEnable()
+        {
+            GamePlayerManager.onPlayerOffStage += DontAcceptInputCtrl;
+            GamePlayerManager.onPlayerOnStage += AcceptInputCtrl;
+
+            HPBarHandler.onPlayerDeath += DontAcceptInputCtrl;
+
+            HPBarHandler.onPlayerDamage += DontAcceptInputCtrl;
+            PlayerState.DamageState.onPlayerDamageRecover += AcceptInputCtrl;
+
+            BossDoorBody.onDoorTouched += DontAcceptInputCtrl;
+            DoorAnimHandler.onDoorClosed += AcceptInputCtrl;
+
+            BossCutSceneHandler.onStartBossTalk += TalkKeyMode;
+
+            BossCutSceneHandler.onStartBattle += BattleStart;
+
+            IntroBossHPBarHandler.onDead += DontAcceptInputCtrl;
+        }
+
+        //イベントの登録解除
+        private void OnDisable()
+        {
+            GamePlayerManager.onPlayerOffStage -= DontAcceptInputCtrl;
+            GamePlayerManager.onPlayerOnStage -= AcceptInputCtrl;
+
+            HPBarHandler.onPlayerDeath -= DontAcceptInputCtrl;
+
+            HPBarHandler.onPlayerDamage -= DontAcceptInputCtrl;
+            PlayerState.DamageState.onPlayerDamageRecover -= AcceptInputCtrl;
+
+            BossDoorBody.onDoorTouched -= DontAcceptInputCtrl;
+            DoorAnimHandler.onDoorClosed -= AcceptInputCtrl;
+
+            BossCutSceneHandler.onStartBossTalk -= TalkKeyMode;
+
+            BossCutSceneHandler.onStartBattle -= BattleStart;
+
+            IntroBossHPBarHandler.onDead -= DontAcceptInputCtrl;
+        }*/
+
+        public void OnEnteredDoor()
+        {
+            isEnteredBossRoom = true;
+        }
+
+        //イベントハンドラ
+        void TalkKeyMode()
+        {
+            isTalkKeyMode = true;
+            if (isAbleToInputKey)
+                DontAcceptInputCtrl();
         }
 
         void DontAcceptInputCtrl()
@@ -24,7 +89,37 @@ namespace KeyHandler
 
         void AcceptInputCtrl()
         {
+            if (isEnteredBossRoom) return;
             isAbleToInputKey = true;
+            onAcceptInputCtrl?.Invoke();
+        }
+
+        void BattleStart()
+        {
+            isAbleToInputKey = true;
+            isEnteredBossRoom = false;
+            onAcceptInputCtrl?.Invoke();
+        }
+
+        public static event Action onPauseKeyDown, onTalkKeyDown;
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                onPauseKeyDown?.Invoke();
+            }
+
+            if (isDebugMode || isTalkKeyMode) IsTalkKey();
+        }
+
+        void IsTalkKey()
+        {
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                Debug.Log("TalkKey");
+                onTalkKeyDown?.Invoke();
+            }
         }
 
         public bool IsMoveLeftKey()
@@ -112,6 +207,14 @@ namespace KeyHandler
             if (!isAbleToInputKey) return false;
 
             if (Input.GetKeyDown(KeyCode.J)) return true;
+            else return false;
+        }
+
+        public bool IsShootKey()
+        {
+            //if (!isAbleToInputKey) return false;
+
+            if (Input.GetKey(KeyCode.J)) return true;
             else return false;
         }
 

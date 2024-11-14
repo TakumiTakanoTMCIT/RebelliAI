@@ -1,16 +1,19 @@
-using PlayerAction;
+using System;
 using PlayerInfo;
 using PlayerState;
 using UnityEngine;
+using HPBar;
+using UniRx;
 
 public class PlayerAnimStateHandler : MonoBehaviour
 {
+    [SerializeField] GameFlowManager gameFlowManager;
     [SerializeField] private DeathGlitchSparkFactory deathGlitchSparkFactory;
-    ActionHandler actionHandler;
-    Animator animator;
+    [SerializeField] internal bool isDebugMode = false;
+    internal Animator animator;
     PlayerStateMgr stateMgr;
 
-    internal IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState, damageState, deathState;
+    internal IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState, damageState, deathState, warpState, warpEscapeState, neutralIdleState;
     internal IPlayerAnimState currentState;
 
     AnimatorCtrl animatorCtrl;
@@ -18,15 +21,43 @@ public class PlayerAnimStateHandler : MonoBehaviour
 
     SpriteRenderer spriteRenderer;
 
+    bool isChangeableAnim = false;
+
+    public static event Action onPlayerDeathAnimEnd;
+
+    private Subject<Unit> onEnterDoor = new Subject<Unit>();
+    public IObserver<Unit> OnEnterDoor => onEnterDoor;
+
+    private Subject<Unit> onExitDoor = new Subject<Unit>();
+    public IObserver<Unit> OnExitDoor => onExitDoor;
+
     private void Awake()
     {
-        animator = GetComponent<Animator>();
-        stateMgr = GetComponent<PlayerStateMgr>();
-        playerStatus = GetComponent<PlayerStatus>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        actionHandler = GetComponent<ActionHandler>();
+        animator = gameObject.MyGetComponent_NullChker<Animator>();
+        stateMgr = gameObject.MyGetComponent_NullChker<PlayerStateMgr>();
+        playerStatus = gameObject.MyGetComponent_NullChker<PlayerStatus>();
+        spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
 
-        animatorCtrl = new AnimatorCtrl(animator);
+        GameFlowManager.StartBattleAction.Subscribe(_ =>
+        {
+            currentState = idleState;
+            idleState.Enter();
+        })
+        .AddTo(this);
+
+        onEnterDoor.Subscribe(_ =>
+        {
+            isChangeableAnim = false;
+        })
+        .AddTo(this);
+
+        onExitDoor.Subscribe(_ =>
+        {
+            isChangeableAnim = true;
+        })
+        .AddTo(this);
+
+        animatorCtrl = new AnimatorCtrl(this);
 
         idleState = new IdleState(animatorCtrl, this, stateMgr);
         walkState = new WalkState(animatorCtrl, this, stateMgr);
@@ -36,9 +67,34 @@ public class PlayerAnimStateHandler : MonoBehaviour
         wallFallState = new WallFallState(animatorCtrl);
         wallKickState = new WallKickState(animatorCtrl);
         damageState = new DamageState(animatorCtrl, playerStatus, spriteRenderer);
-        deathState = new DeathState(animatorCtrl);
+        deathState = new DeathState(animatorCtrl, this);
+        warpState = new WarpState(animatorCtrl);
+        neutralIdleState = new NeutralIdle(animatorCtrl);
+        warpEscapeState = new WarpEscapeState(animatorCtrl);
 
         currentState = idleState;
+
+        isChangeableAnim = true;
+
+        Debug.Log("アニメーションステートハンドラが初期化されました");
+    }
+
+    private void OnEnable()
+    {
+        HPBarHandler.onPlayerDamage += OnDamage;
+        HPBarHandler.onPlayerDeath += OnDeath;
+
+        BossDoorBody.onDoorTouched += () => isChangeableAnim = false;
+        DoorAnimHandler.onDoorClosed += () => isChangeableAnim = true;
+    }
+
+    private void OnDisable()
+    {
+        HPBarHandler.onPlayerDamage -= OnDamage;
+        HPBarHandler.onPlayerDeath -= OnDeath;
+
+        BossDoorBody.onDoorTouched -= () => isChangeableAnim = false;
+        DoorAnimHandler.onDoorClosed -= () => isChangeableAnim = true;
     }
 
     private void Update()
@@ -53,37 +109,73 @@ public class PlayerAnimStateHandler : MonoBehaviour
 
     public void ChangeAnimState(IPlayerAnimState newState)
     {
+        if (!isChangeableAnim) return;
         if (currentState == newState) return;
 
-        currentState.Exit();
+        if (currentState != null) currentState.Exit();
         currentState = newState;
         currentState.Enter();
+    }
+
+    //アニメーションイベント
+    public void OnFinishWarpIn()
+    {
+        Debug.Log("ワープあにめ終了");
+        GameFlowManager.onCompletedPlayerWarpIn.OnNext(Unit.Default);
+    }
+
+    public void OnFinishEscape()
+    {
+        Debug.Log("ワープエスケープアニメーション終了");
+        gameFlowManager.OnCompletedEscapeAnim.OnNext(Unit.Default);
     }
 
     // アニメーションイベント
     public async void EndAnimDeath()
     {
+        onPlayerDeathAnimEnd?.Invoke();
         await deathGlitchSparkFactory.MakeDeathEffects();
-        actionHandler.OnDeathAnimEnd();
+    }
+
+    public void GetAnimator()
+    {
+        gameObject.MyGetComponent_NullChker<Animator>();
+    }
+
+    //イベントハンドラ
+    void OnDamage()
+    {
+        ChangeAnimState(damageState);
+    }
+
+    //イベントハンドラ
+    void OnDeath()
+    {
+        ChangeAnimState(deathState);
     }
 }
 
 public class AnimatorCtrl
 {
     Animator animator;
-    public AnimatorCtrl(Animator animator)
+    PlayerAnimStateHandler _animStateHadnler;
+    public AnimatorCtrl(PlayerAnimStateHandler animStateHandler)
     {
-        this.animator = animator;
+        _animStateHadnler = animStateHandler;
+
+        this.animator = animStateHandler.gameObject.MyGetComponent_NullChker<Animator>();
     }
 
     public void StartAnim(string name)
     {
-        animator.SetBool(name, true);
+        if (_animStateHadnler.animator == null) _animStateHadnler.GetAnimator();
+        _animStateHadnler.animator.SetBool(name, true);
     }
 
     public void StopAnim(string name)
     {
-        animator.SetBool(name, false);
+        if (_animStateHadnler.animator == null) _animStateHadnler.GetAnimator();
+        _animStateHadnler.animator.SetBool(name, false);
     }
 }
 
@@ -264,19 +356,81 @@ public class DamageState : IPlayerAnimState
 public class DeathState : IPlayerAnimState
 {
     AnimatorCtrl animatorCtrl;
-    public DeathState(AnimatorCtrl animatorCtrl)
+    PlayerAnimStateHandler animStateHandler;
+    public DeathState(AnimatorCtrl animatorCtrl, PlayerAnimStateHandler animStateHandler)
     {
         this.animatorCtrl = animatorCtrl;
+        this.animStateHandler = animStateHandler;
     }
 
     public void Enter()
     {
-        Debug.Log("死亡アニメーションが再生されました");
+        if (animStateHandler.isDebugMode) Debug.Log("死亡アニメーションが再生されました");
         animatorCtrl.StartAnim("isDeath");
     }
 
     public void Exit()
     {
         animatorCtrl.StopAnim("isDeath");
+    }
+}
+
+public class WarpState : IPlayerAnimState
+{
+    AnimatorCtrl animatorCtrl;
+    public WarpState(AnimatorCtrl animatorCtrl)
+    {
+        this.animatorCtrl = animatorCtrl;
+    }
+
+    public void Enter()
+    {
+        Debug.Log("ワープアニメーションが再生されました");
+        animatorCtrl.StartAnim("isWarp");
+    }
+
+    public void Exit()
+    {
+        animatorCtrl.StopAnim("isWarp");
+    }
+}
+
+public class NeutralIdle : IPlayerAnimState
+{
+    AnimatorCtrl animatorCtrl;
+    public NeutralIdle(AnimatorCtrl animatorCtrl)
+    {
+        this.animatorCtrl = animatorCtrl;
+    }
+
+    public void Enter()
+    {
+        Debug.Log("ニュートラルアニメーションが再生されました");
+        animatorCtrl.StartAnim("isNeutralIdle");
+    }
+
+    public void Exit()
+    {
+        animatorCtrl.StopAnim("isNeutralIdle");
+    }
+}
+
+public class WarpEscapeState : IPlayerAnimState
+{
+    AnimatorCtrl animatorCtrl;
+    public WarpEscapeState(AnimatorCtrl animatorCtrl)
+    {
+        this.animatorCtrl = animatorCtrl;
+    }
+
+    public void Enter()
+    {
+        Debug.Log("ワープエスケープアニメーションが再生されました");
+        animatorCtrl.StartAnim("isEscape");
+    }
+
+    public void Exit()
+    {
+        animatorCtrl.StopAnim("isEscape");
     }
 }

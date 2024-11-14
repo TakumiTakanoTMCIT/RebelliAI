@@ -32,7 +32,7 @@ public class DashSparkFactory : MonoBehaviour
         if (player == null)
         {
             Debug.LogWarning("Player が見つかりませんでした。追加してください");
-            EditorApplication.isPaused = true;
+            //EditorApplication.isPaused = true;
         }
     }
 

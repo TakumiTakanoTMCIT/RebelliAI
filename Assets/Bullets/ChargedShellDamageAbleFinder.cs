@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using UniRx;
 public class ChargedShellDamageAbleFinder : MonoBehaviour
 {
     [SerializeField] private int damageAmount = 5, extraDamageAmount = 7;
@@ -25,12 +25,21 @@ public class ChargedShellDamageAbleFinder : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         IDamageableFromShot damageable = other.GetComponent<IDamageableFromShot>();
-
-        if (damageable == null)
+        if (damageable != null)
+        {
+            if (isExtraDamage) damageable.TakeDamage(extraDamageAmount);
+            else damageable.TakeDamage(damageAmount);
+            animatorCtrl.TakeDamage();
+            SoundEffectCtrl.OnPlayHitSE.OnNext(0);
             return;
+        }
 
-        if (isExtraDamage) damageable.TakeDamage(extraDamageAmount);
-        else damageable.TakeDamage(damageAmount);
-        animatorCtrl.TakeDamage();
+        RefrectableBody refrectableBody = other.GetComponent<RefrectableBody>();
+        if (refrectableBody != null)
+        {
+            animatorCtrl.RefrectShell();
+            SoundEffectCtrl.OnPlayDeathSE.OnNext(1);
+            return;
+        }
     }
 }

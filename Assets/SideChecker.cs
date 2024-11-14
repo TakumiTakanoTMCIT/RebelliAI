@@ -19,25 +19,16 @@ public class SideChecker : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("Ground"))
-        {
-            isEnteredWall = true;
-        }
+        if (other.gameObject.CompareTag("Ground")) isEnteredWall = true;
     }
 
     private void OnTriggerStay2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("Ground"))
-        {
-            isEnteredWall = true;
-        }
+        if (other.gameObject.CompareTag("Ground")) isEnteredWall = true;
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("Ground"))
-        {
-            isEnteredWall = false;
-        }
+        if (other.gameObject.CompareTag("Ground")) isEnteredWall = false;
     }
 }

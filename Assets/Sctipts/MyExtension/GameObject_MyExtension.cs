@@ -6,7 +6,7 @@ public static class GameObject_MyExtension
 {
     public static void PauseGame()
     {
-        EditorApplication.isPaused = true;
+        //EditorApplication.isPaused = true;
     }
 
     public static T MyGetComponent_NullChker<T>(this GameObject requester) where T : Component

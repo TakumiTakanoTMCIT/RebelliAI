@@ -27,8 +27,6 @@ namespace PlayerInfo
             Application.targetFrameRate = 60;
 
             PlayerDirection = true;
-
-            isDeath = false;
         }
 
         [SerializeField]
@@ -65,8 +63,6 @@ namespace PlayerInfo
         public float damagingTime = 3f;
 
         public Vector2 damageForce = new Vector2(5, 5);
-
-        public bool isDeath = false;
 
         //DashStateの開始時にプレイヤーの向きを設定する
         public void SetPlayerDiresctionFromDashStateBigin(bool direction)

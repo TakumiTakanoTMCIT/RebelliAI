@@ -37,7 +37,6 @@ public class DanboruAttackHandler : MonoBehaviour
     private void ShotMissile()
     {
         var missile = Instantiate(prefabMissile, transform.position, Quaternion.identity);
-        Debug.Log("ミサイル発射");
         isShotedMissile = true;
     }
 }

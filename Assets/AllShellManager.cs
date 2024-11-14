@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using PlayerInfo;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -6,7 +8,7 @@ using UnityEngine.Pool;
 public class AllShellManager : MonoBehaviour
 {
     [SerializeField] private Transform mameParentTransform;
-    [SerializeField] private int defaultCapacity = 10;
+    [SerializeField] private int defaultCapacity = 3;
     [SerializeField] private float shootMameInterval = 0.5f;
 
     private ObjectPool<GameObject> pool;
@@ -16,8 +18,11 @@ public class AllShellManager : MonoBehaviour
 
     bool isMameShootable;
 
+    public static event Action onShootChargedShell;
+
     private void Awake()
     {
+        Debug.Log($"this.gameObject.name: {this.gameObject.name}");
         isMameShootable = true;
         player = transform.parent.gameObject;
         status = player.MyGetComponent_NullChker<PlayerStatus>();
@@ -25,10 +30,7 @@ public class AllShellManager : MonoBehaviour
         shellPrefab = Resources.Load<GameObject>("Shell");
         if (shellPrefab == null)
             Debug.LogWarning("shellPrefabが設定されていません");
-    }
 
-    private void Start()
-    {
         /// <summary>
         /// オブジェクトプールをインスタンス化
         /// </summary>
@@ -39,18 +41,17 @@ public class AllShellManager : MonoBehaviour
             actionOnRelease: ReleaseShell,
             actionOnDestroy: DestroyShell,
             collectionCheck: true,
-            defaultCapacity: 3,
+            defaultCapacity: defaultCapacity,
             maxSize: defaultCapacity
         );
 
         /// <summary>
         /// デフォルトの容量分だけ先に生成して処理を軽くするぞ！
         /// </summary>
-        int count;
-        count = 0;
+        int count = 0;
         while (count < defaultCapacity)
         {
-            pool.Get();
+            pool.Release(CreateShell());
             count++;
         }
     }
@@ -59,7 +60,7 @@ public class AllShellManager : MonoBehaviour
     {
         GameObject shell = Instantiate(shellPrefab);
         shell.GetComponent<ShellMainBodyCrtl>().Init(pool);
-        shell.transform.parent = mameParentTransform;
+        shell.transform.SetParent(mameParentTransform);
 
         return shell;
     }
@@ -67,11 +68,7 @@ public class AllShellManager : MonoBehaviour
     private void GetShell(GameObject shell)
     {
         shell.SetActive(true);
-        var shellMainBodyCtrl = shell.MyGetComponent_NullChker<ShellMainBodyCrtl>();
-
-        bool direction = status.playerdirection;
-        shellMainBodyCtrl.GetShellAndSetDirection(direction, status.IsDashNow());
-
+        shell.MyGetComponent_NullChker<ShellMainBodyCrtl>().GetShellAndSetDirection(status.playerdirection, status.IsDashNow());
         shell.transform.position = player.transform.position;
     }
 
@@ -85,8 +82,11 @@ public class AllShellManager : MonoBehaviour
         Destroy(shell);
     }
 
-    public void ShootMame()
+    public void ShootMame(bool isCharged)
     {
+        //チャージされた豆ならチャージショットとして扱います
+        if (isCharged) onShootChargedShell?.Invoke();
+
         /// <summary>
         /// 最大値になっていたら銃を打てません
         /// </summary>
@@ -95,20 +95,24 @@ public class AllShellManager : MonoBehaviour
         /// <summary>
         /// インターバルを設ける
         /// </summary>
-        if(!isMameShootable) return;
+        if (!isMameShootable) return;
         pool.Get();
-        StartCoroutine(mameIntervalCoroutine());
+        mameInterval();
     }
 
     public void ShootChargedShell(GameObject shell)
     {
-        Instantiate(shell, player.transform.position, Quaternion.identity);
+        onShootChargedShell?.Invoke();
+        //Debug.Log("onShootChargedShell?.Invoke();");
+        var chargedShell = Instantiate(shell, player.transform.position, Quaternion.identity);
+        chargedShell.SetActive(true);
+        Debug.Log("Instantiate!");
     }
 
-    IEnumerator mameIntervalCoroutine()
+    private async void mameInterval()
     {
         isMameShootable = false;
-        yield return new WaitForSeconds(shootMameInterval);
+        await UniTask.Delay(TimeSpan.FromSeconds(shootMameInterval));
         isMameShootable = true;
     }
 }
