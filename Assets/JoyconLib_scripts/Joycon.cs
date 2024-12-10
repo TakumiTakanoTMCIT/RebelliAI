@@ -54,7 +54,7 @@ public class Joycon
 
     private float[] stick = { 0, 0 };
 
-    private 
+    private
 	IntPtr handle;
 
     byte[] default_buf = { 0x0, 0x1, 0x40, 0x40, 0x0, 0x1, 0x40, 0x40 };
@@ -367,8 +367,8 @@ public class Joycon
                     DebugPrint(string.Format("Duplicate timestamp dequeued. TS: {0:X2}", ts_de), DebugType.THREADING);
                 }
                 ts_de = report_buf[1];
-                DebugPrint(string.Format("Dequeue. Queue length: {0:d}. Packet ID: {1:X2}. Timestamp: {2:X2}. Lag to dequeue: {3:s}. Lag between packets (expect 15ms): {4:s}",
-                    reports.Count, report_buf[0], report_buf[1], System.DateTime.Now.Subtract(rep.GetTime()), rep.GetTime().Subtract(ts_prev)), DebugType.THREADING);
+                /*DebugPrint(string.Format("Dequeue. Queue length: {0:d}. Packet ID: {1:X2}. Timestamp: {2:X2}. Lag to dequeue: {3:s}. Lag between packets (expect 15ms): {4:s}",
+                    reports.Count, report_buf[0], report_buf[1], System.DateTime.Now.Subtract(rep.GetTime()), rep.GetTime().Subtract(ts_prev)), DebugType.THREADING);*/
                 ts_prev = rep.GetTime();
             }
             ProcessButtonsAndStick(report_buf);
@@ -450,7 +450,7 @@ public class Joycon
 	private Vector3 i_b_;
 	private Vector3 w_a, w_g;
     private Quaternion vec;
-	
+
     private int ProcessIMU(byte[] report_buf)
     {
 
@@ -469,7 +469,7 @@ public class Joycon
         for (int n = 0; n < 3; ++n)
         {
             ExtractIMUValues(report_buf, n);
-            
+
 			float dt_sec = 0.005f * dt;
             sum[0] += gyr_g.x * dt_sec;
             sum[1] += gyr_g.y * dt_sec;
