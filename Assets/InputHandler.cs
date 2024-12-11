@@ -1,14 +1,19 @@
-using UnityEngine;
-using HPBar;
 using System;
 using UniRx;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace KeyHandler
 {
     public class InputHandler : MonoBehaviour
     {
-        [SerializeField] private bool isDebugMode = false;
-        [SerializeField] bool isAbleToInputKey = true, isTalkKeyMode = false, isEnteredBossRoom = false;
+        [SerializeField]
+        private bool isDebugMode = false;
+
+        [SerializeField]
+        bool isAbleToInputKey = true,
+            isTalkKeyMode = false,
+            isEnteredBossRoom = false;
 
         internal bool isShootKey = false;
 
@@ -89,7 +94,8 @@ namespace KeyHandler
 
         void AcceptInputCtrl()
         {
-            if (isEnteredBossRoom) return;
+            if (isEnteredBossRoom)
+                return;
             isAbleToInputKey = true;
             onAcceptInputCtrl?.Invoke();
         }
@@ -101,7 +107,8 @@ namespace KeyHandler
             onAcceptInputCtrl?.Invoke();
         }
 
-        public static event Action onPauseKeyDown, onTalkKeyDown;
+        public static event Action onPauseKeyDown,
+            onTalkKeyDown;
 
         private void Update()
         {
@@ -110,7 +117,8 @@ namespace KeyHandler
                 onPauseKeyDown?.Invoke();
             }
 
-            if (isDebugMode || isTalkKeyMode) IsTalkKey();
+            if (isDebugMode || isTalkKeyMode)
+                IsTalkKey();
         }
 
         void IsTalkKey()
@@ -124,7 +132,8 @@ namespace KeyHandler
 
         public bool IsMoveLeftKey()
         {
-            if (!isAbleToInputKey) return false;
+            if (!isAbleToInputKey)
+                return false;
 
             if (Input.GetKey(KeyCode.A))
             {
@@ -137,7 +146,8 @@ namespace KeyHandler
 
         public bool IsMoveRightKey()
         {
-            if (!isAbleToInputKey) return false;
+            if (!isAbleToInputKey)
+                return false;
 
             if (Input.GetKey(KeyCode.D))
             {
@@ -150,7 +160,8 @@ namespace KeyHandler
 
         public bool IsMoveKey()
         {
-            if (!isAbleToInputKey) return false;
+            if (!isAbleToInputKey)
+                return false;
 
             /// <summary>
             /// 同時押しは無効
@@ -172,7 +183,8 @@ namespace KeyHandler
 
         public bool IsJumpKeyDown()
         {
-            if (!isAbleToInputKey) return false;
+            if (!isAbleToInputKey)
+                return false;
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -184,7 +196,8 @@ namespace KeyHandler
 
         public bool IsDashKeyDown()
         {
-            if (!isAbleToInputKey) return false;
+            if (!isAbleToInputKey)
+                return false;
 
             if (Input.GetKeyDown(KeyCode.LeftShift))
             {
@@ -196,34 +209,91 @@ namespace KeyHandler
 
         public bool IsDashKey()
         {
-            if (!isAbleToInputKey) return false;
+            if (!isAbleToInputKey)
+                return false;
 
-            if (Input.GetKey(KeyCode.LeftShift)) return true;
-            else return false;
+            if (Input.GetKey(KeyCode.LeftShift))
+                return true;
+            else
+                return false;
         }
 
         public bool IsShootKeyDown()
         {
-            if (!isAbleToInputKey) return false;
+            if (!isAbleToInputKey)
+                return false;
 
-            if (Input.GetKeyDown(KeyCode.J)) return true;
-            else return false;
+            if (Input.GetKeyDown(KeyCode.J))
+                return true;
+            else
+                return false;
         }
 
         public bool IsShootKey()
         {
             //if (!isAbleToInputKey) return false;
 
-            if (Input.GetKey(KeyCode.J)) return true;
-            else return false;
+            if (Input.GetKey(KeyCode.J))
+                return true;
+            else
+                return false;
         }
 
         public bool IsShootKeyUp()
         {
-            if (!isAbleToInputKey) return false;
+            if (!isAbleToInputKey)
+                return false;
 
-            if (Input.GetKeyUp(KeyCode.J)) return true;
-            else return false;
+            if (Input.GetKeyUp(KeyCode.J))
+                return true;
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// InputSystemでUnityEventを使っています
+        /// </summary>
+
+        public void OnJump(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                Debug.Log("Experiment");
+            }
+        }
+
+        public void OnWalk(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                Debug.Log("Walk");
+            }
+
+            if (context.performed)
+            {
+                Debug.Log("Walking : " + context.ReadValue<float>());
+            }
+
+            if (context.canceled)
+            {
+                Debug.Log("Stop Walk");
+            }
+        }
+
+        public void OnDash(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                Debug.Log("Dash");
+            }
+        }
+
+        public void OnAttack(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                Debug.Log("Attack");
+            }
         }
     }
 }
