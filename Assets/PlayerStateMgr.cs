@@ -766,6 +766,13 @@ namespace PlayerState
                 stateMgr.ChangeState(stateMgr.wallKick);
             }
 
+            //どちらの移動キーも押されていない場合はFallに遷移
+            if (!stateMgr.inputHandler.IsMoveKey())
+            {
+                stateMgr.ChangeState(stateMgr.fallState);
+                return;
+            }
+
             //↑をすべて回避したら壁ずりをする
             WallFalling(stateMgr);
         }

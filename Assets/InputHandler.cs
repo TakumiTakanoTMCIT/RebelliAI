@@ -15,7 +15,25 @@ namespace KeyHandler
             isTalkKeyMode = false,
             isEnteredBossRoom = false;
 
-        internal bool isShootKey = false;
+        [SerializeField]
+        private bool isWalkKey = false,
+            isJumpKey = false,
+            isDashKey = false,
+            isAttackKey = false;
+
+        //エディタに表示しない
+        [HideInInspector] public bool IsAttackKey { get { return isAttackKey; } }
+
+        [SerializeField]
+        private bool walkDirection = true;
+
+        private bool
+            isjumpkeyDown = false,
+            isjumingKeyNow = false,
+            isdashKeydown = false,
+            isAttackKeydown = false,
+            isattackinKeyNow = false,
+            isdashingKeyNow = false;
 
         public static event Action onAcceptInputCtrl;
 
@@ -27,52 +45,6 @@ namespace KeyHandler
             DisableInput.Subscribe(_ => DontAcceptInputCtrl()).AddTo(this);
             EnableInput.Subscribe(_ => AcceptInputCtrl()).AddTo(this);
         }
-
-        /*private void Start()
-        {
-            AcceptInputCtrl();
-        }*/
-
-        /*private void OnEnable()
-        {
-            GamePlayerManager.onPlayerOffStage += DontAcceptInputCtrl;
-            GamePlayerManager.onPlayerOnStage += AcceptInputCtrl;
-
-            HPBarHandler.onPlayerDeath += DontAcceptInputCtrl;
-
-            HPBarHandler.onPlayerDamage += DontAcceptInputCtrl;
-            PlayerState.DamageState.onPlayerDamageRecover += AcceptInputCtrl;
-
-            BossDoorBody.onDoorTouched += DontAcceptInputCtrl;
-            DoorAnimHandler.onDoorClosed += AcceptInputCtrl;
-
-            BossCutSceneHandler.onStartBossTalk += TalkKeyMode;
-
-            BossCutSceneHandler.onStartBattle += BattleStart;
-
-            IntroBossHPBarHandler.onDead += DontAcceptInputCtrl;
-        }
-
-        //イベントの登録解除
-        private void OnDisable()
-        {
-            GamePlayerManager.onPlayerOffStage -= DontAcceptInputCtrl;
-            GamePlayerManager.onPlayerOnStage -= AcceptInputCtrl;
-
-            HPBarHandler.onPlayerDeath -= DontAcceptInputCtrl;
-
-            HPBarHandler.onPlayerDamage -= DontAcceptInputCtrl;
-            PlayerState.DamageState.onPlayerDamageRecover -= AcceptInputCtrl;
-
-            BossDoorBody.onDoorTouched -= DontAcceptInputCtrl;
-            DoorAnimHandler.onDoorClosed -= AcceptInputCtrl;
-
-            BossCutSceneHandler.onStartBossTalk -= TalkKeyMode;
-
-            BossCutSceneHandler.onStartBattle -= BattleStart;
-
-            IntroBossHPBarHandler.onDead -= DontAcceptInputCtrl;
-        }*/
 
         public void OnEnteredDoor()
         {
@@ -100,13 +72,6 @@ namespace KeyHandler
             onAcceptInputCtrl?.Invoke();
         }
 
-        void BattleStart()
-        {
-            isAbleToInputKey = true;
-            isEnteredBossRoom = false;
-            onAcceptInputCtrl?.Invoke();
-        }
-
         public static event Action onPauseKeyDown,
             onTalkKeyDown;
 
@@ -119,6 +84,15 @@ namespace KeyHandler
 
             if (isDebugMode || isTalkKeyMode)
                 IsTalkKey();
+
+            isjumpkeyDown = isJumpKey;
+            isJumpKey = false;
+
+            isdashKeydown = isDashKey;
+            isDashKey = false;
+
+            isAttackKeydown = isAttackKey;
+            isAttackKey = false;
         }
 
         void IsTalkKey()
@@ -135,7 +109,7 @@ namespace KeyHandler
             if (!isAbleToInputKey)
                 return false;
 
-            if (Input.GetKey(KeyCode.A))
+            if (!walkDirection)
             {
                 //Debug.Log("Left key is pressed.");
                 return true;
@@ -149,7 +123,7 @@ namespace KeyHandler
             if (!isAbleToInputKey)
                 return false;
 
-            if (Input.GetKey(KeyCode.D))
+            if (walkDirection)
             {
                 //Debug.Log("Right key is pressed.");
                 return true;
@@ -166,19 +140,16 @@ namespace KeyHandler
             /// <summary>
             /// 同時押しは無効
             /// </summary>
-            if (Input.GetKey(KeyCode.A) && Input.GetKey(KeyCode.D))
-                return false;
+            /*if (Input.GetKey(KeyCode.A) && Input.GetKey(KeyCode.D))
+                return false;*/
 
             /// <summary>
             /// どのキーも押されていない場合はfalse
             /// </summary>
-            if (!Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.D))
+            if (!isWalkKey)
                 return false;
-
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
-                return true;
             else
-                return false;
+                return true;
         }
 
         public bool IsJumpKeyDown()
@@ -186,12 +157,7 @@ namespace KeyHandler
             if (!isAbleToInputKey)
                 return false;
 
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                return true;
-            }
-            else
-                return false;
+            return isjumpkeyDown;
         }
 
         public bool IsDashKeyDown()
@@ -199,12 +165,7 @@ namespace KeyHandler
             if (!isAbleToInputKey)
                 return false;
 
-            if (Input.GetKeyDown(KeyCode.LeftShift))
-            {
-                return true;
-            }
-            else
-                return false;
+            return isdashKeydown;
         }
 
         public bool IsDashKey()
@@ -212,10 +173,7 @@ namespace KeyHandler
             if (!isAbleToInputKey)
                 return false;
 
-            if (Input.GetKey(KeyCode.LeftShift))
-                return true;
-            else
-                return false;
+            return isdashingKeyNow;
         }
 
         public bool IsShootKeyDown()
@@ -223,20 +181,12 @@ namespace KeyHandler
             if (!isAbleToInputKey)
                 return false;
 
-            if (Input.GetKeyDown(KeyCode.J))
-                return true;
-            else
-                return false;
+            return isAttackKeydown;
         }
 
         public bool IsShootKey()
         {
-            //if (!isAbleToInputKey) return false;
-
-            if (Input.GetKey(KeyCode.J))
-                return true;
-            else
-                return false;
+            return isattackinKeyNow;
         }
 
         public bool IsShootKeyUp()
@@ -244,7 +194,7 @@ namespace KeyHandler
             if (!isAbleToInputKey)
                 return false;
 
-            if (Input.GetKeyUp(KeyCode.J))
+            if (!isattackinKeyNow)
                 return true;
             else
                 return false;
@@ -256,9 +206,9 @@ namespace KeyHandler
 
         public void OnJump(InputAction.CallbackContext context)
         {
-            if (context.started)
+            if(context.performed)
             {
-                Debug.Log("Experiment");
+                isJumpKey = true;
             }
         }
 
@@ -266,33 +216,49 @@ namespace KeyHandler
         {
             if (context.started)
             {
-                Debug.Log("Walk");
-            }
+                isWalkKey = true;
 
-            if (context.performed)
-            {
-                Debug.Log("Walking : " + context.ReadValue<float>());
+                if (context.ReadValue<float>() > 0)
+                {
+                    walkDirection = true;
+                }
+                else
+                {
+                    walkDirection = false;
+                }
             }
 
             if (context.canceled)
             {
-                Debug.Log("Stop Walk");
+                isWalkKey = false;
             }
         }
 
         public void OnDash(InputAction.CallbackContext context)
         {
-            if (context.started)
+            if (context.performed)
             {
-                Debug.Log("Dash");
+                isDashKey = true;
+                isdashingKeyNow = true;
+            }
+
+            if (context.canceled)
+            {
+                isdashingKeyNow = false;
             }
         }
 
         public void OnAttack(InputAction.CallbackContext context)
         {
-            if (context.started)
+            if (context.performed)
             {
-                Debug.Log("Attack");
+                isAttackKey = true;
+                isattackinKeyNow = true;
+            }
+
+            if(context.canceled)
+            {
+                isattackinKeyNow = false;
             }
         }
     }

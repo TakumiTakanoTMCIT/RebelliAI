@@ -1,10 +1,12 @@
 using System;
 using KeyHandler;
+using PlayerState;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerWeapon_KeyController : MonoBehaviour
 {
+    PlayerStateMgr playerStateMgr;
     ChargeShot_Handler chargeShotHandler;
     AllShellManager allShellManager;
     InputHandler inputHandler;
@@ -16,6 +18,7 @@ public class PlayerWeapon_KeyController : MonoBehaviour
         this.allShellManager = shellManager;
         this.chargeShotHandler = chargeShotHandler;
         this.inputHandler = inputHandler;
+        playerStateMgr = GetComponent<PlayerStateMgr>();
     }
 
     private void OnEnable()
@@ -23,6 +26,7 @@ public class PlayerWeapon_KeyController : MonoBehaviour
         DoorAnimHandler.onDoorClosed += OnDoorClosed;
         InputHandler.onAcceptInputCtrl += OnAcceptInputCtrl;
         IntroBossHPBarHandler.onDead += CheckCharge;
+        PlayerState.DamageState.onPlayerDamageRecover += HandleChargeOnDamageRecover;
     }
 
     private void OnDisable()
@@ -30,11 +34,23 @@ public class PlayerWeapon_KeyController : MonoBehaviour
         DoorAnimHandler.onDoorClosed -= OnDoorClosed;
         InputHandler.onAcceptInputCtrl -= OnAcceptInputCtrl;
         IntroBossHPBarHandler.onDead -= CheckCharge;
+        PlayerState.DamageState.onPlayerDamageRecover -= HandleChargeOnDamageRecover;
     }
 
     void OnAcceptInputCtrl()
     {
-        if (!inputHandler.isShootKey) CheckCharge();
+        if (!inputHandler.IsAttackKey) CheckCharge();
+    }
+
+    //　　イベントハンドラー
+    // プレイヤーがダメージ状態から回復した際に、
+    // チャージボタンが押されていればチャージを開始する。
+    void HandleChargeOnDamageRecover()
+    {
+        if (inputHandler.IsShootKey() || inputHandler.IsShootKeyDown())
+        {
+            chargeShotHandler.StartCharge();
+        }
     }
 
     //イベントハンドラー
@@ -53,7 +69,9 @@ public class PlayerWeapon_KeyController : MonoBehaviour
 
     private void Update()
     {
-        if (inputHandler.IsShootKeyDown())
+        //ショットボタンを押したら豆を撃って、チャージを開始します
+        //ダメージを受けている時は撃てません
+        if (inputHandler.IsShootKeyDown() && playerStateMgr.currentState != playerStateMgr.damageState)
         {
             if (!chargeShotHandler.IsCharging)
             {
@@ -64,6 +82,9 @@ public class PlayerWeapon_KeyController : MonoBehaviour
 
         if (inputHandler.IsShootKeyUp())
         {
+            if (!chargeShotHandler.IsCharging) return;
+
+            Debug.Log("ShootKeyUp");
             CheckCharge();
             return;
         }
