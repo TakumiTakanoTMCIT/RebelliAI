@@ -15,6 +15,7 @@ public class ChargedShellDamageAbleFinder : MonoBehaviour
         bodyCtrl = this.gameObject.MyGetComponent_NullChker<ChargedShellBodyCtrl>();
 
         animatorCtrl = new ChargedShellAnimatorCtrl(animator, bodyCtrl);
+        bodyCtrl.Init(animatorCtrl);
     }
 
     public void IsExtraDamage(bool isExtraDamage)

@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   myLevel: 1
-  speed: 18
+  speed: 15
 --- !u!114 &-4758050053811623003
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -14,16 +14,38 @@ public class ChargedShellBodyCtrl : MonoBehaviour, IDestroyable
 
     PlayerStatus playerStatus;
     Rigidbody2D rb;
+    BoxCollider2D boxCollider2D;
     SpriteRenderer spriteRenderer;
+    ChargedShellAnimatorCtrl animatorCtrl;
 
     bool isStartedMove;
 
     private void Awake()
     {
         playerStatus = GameObject.Find("Player").MyGetComponent_NullChker<PlayerStatus>();
+        boxCollider2D = gameObject.MyGetComponent_NullChker<BoxCollider2D>();
         rb = gameObject.MyGetComponent_NullChker<Rigidbody2D>();
         spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
         isStartedMove = false;
+    }
+
+    public void Init(ChargedShellAnimatorCtrl animatorCtrl)
+    {
+        this.animatorCtrl = animatorCtrl;
+    }
+
+    private void Start()
+    {
+        animatorCtrl.StartAnim();
+        boxCollider2D.enabled = false;
+        isStartedMove = false;
+    }
+
+    private void Update()
+    {
+        //スタートアニメーション中はプレイヤーの銃口に追従する
+        if(isStartedMove) return;
+        transform.position = playerStatus.transform.position;
     }
 
     /// <summary>
@@ -31,6 +53,8 @@ public class ChargedShellBodyCtrl : MonoBehaviour, IDestroyable
     /// </summary>
     public void End_BiginingAnim()
     {
+        animatorCtrl.MoveAnim();
+        boxCollider2D.enabled = true;
         MoveShell();
     }
 
@@ -84,6 +108,16 @@ public class ChargedShellAnimatorCtrl
     {
         this.animator = animator;
         this.bodyCtrl = bodyCtrl;
+    }
+
+    public void StartAnim()
+    {
+        animator.SetTrigger("onReset");
+    }
+
+    public void MoveAnim()
+    {
+        animator.SetTrigger("onFinishBigin");
     }
 
     public void TakeDamage()
