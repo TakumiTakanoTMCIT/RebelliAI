@@ -72,7 +72,7 @@ AnimationClip:
   - time: 0.083333336
     functionName: End_BiginingAnim
     data: 
-    objectReferenceParameter: {fileID: 11500000, guid: 33b9054b7b5ae48a2a2f292ed07bd28b, type: 3}
+    objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0

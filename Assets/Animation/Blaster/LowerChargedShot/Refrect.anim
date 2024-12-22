@@ -82,9 +82,9 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0.5
-    functionName: FinishRefrectAnim
+    functionName: DestroyShell
     data: 
-    objectReferenceParameter: {fileID: 11500000, guid: 33b9054b7b5ae48a2a2f292ed07bd28b, type: 3}
+    objectReferenceParameter: {fileID: 11500000, guid: 6a6bd3c756d20427891e10d0a282e1a7, type: 3}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0

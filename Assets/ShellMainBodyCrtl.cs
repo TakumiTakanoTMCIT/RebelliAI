@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Pool;
-using UniRx;
+using PlayerShot;
 
 public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
 {

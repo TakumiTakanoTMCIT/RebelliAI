@@ -12,9 +12,10 @@ GameObject:
   - component: {fileID: 2655693965390914641}
   - component: {fileID: 551088953087315812}
   - component: {fileID: 6565280330612624435}
-  - component: {fileID: -6325911513947392782}
-  - component: {fileID: -4758050053811623003}
   - component: {fileID: 1906010848208051926}
+  - component: {fileID: 8424890440868547180}
+  - component: {fileID: -4758050053811623003}
+  - component: {fileID: 6861632831398830307}
   m_Layer: 0
   m_Name: LevelLowerShell
   m_TagString: Untagged
@@ -123,7 +124,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.05}
+  m_Offset: {x: -0.16437392, y: -0.050000012}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -134,36 +135,8 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.4, y: 0.8}
+  m_Size: {x: 1.0712522, y: 0.8}
   m_EdgeRadius: 0
---- !u!114 &-6325911513947392782
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8222463472790942817}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 33b9054b7b5ae48a2a2f292ed07bd28b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  myLevel: 1
-  speed: 15
---- !u!114 &-4758050053811623003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8222463472790942817}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 038fa650b4c354dbcbe7bdefc4941e24, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  damageAmount: 3
-  extraDamageAmount: 5
 --- !u!95 &1906010848208051926
 Animator:
   serializedVersion: 5
@@ -185,3 +158,43 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &8424890440868547180
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8222463472790942817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a6bd3c756d20427891e10d0a282e1a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 15
+  myLevel: 1
+--- !u!114 &-4758050053811623003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8222463472790942817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 038fa650b4c354dbcbe7bdefc4941e24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damageAmount: 3
+  extraDamageAmount: 5
+--- !u!114 &6861632831398830307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8222463472790942817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64bc6e34055e040f4a4c60f9c4dfa780, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

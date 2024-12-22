@@ -22,12 +22,12 @@ namespace KeyHandler
             isAttackKey = false;
 
         //エディタに表示しない
-        [HideInInspector] public bool IsAttackKey { get { return isAttackKey; } }
+        [HideInInspector] public bool IsAttackingKey { get { return isattackinKeyNow; } }
 
         [SerializeField]
         private bool walkDirection = true;
 
-        private bool
+        [SerializeField]private bool
             isjumpkeyDown = false,
             isjumingKeyNow = false,
             isdashKeydown = false,
@@ -206,7 +206,7 @@ namespace KeyHandler
 
         public void OnJump(InputAction.CallbackContext context)
         {
-            if(context.performed)
+            if (context.performed)
             {
                 isJumpKey = true;
             }
@@ -217,8 +217,11 @@ namespace KeyHandler
             if (context.started)
             {
                 isWalkKey = true;
+            }
 
-                if (context.ReadValue<float>() > 0)
+            if (context.performed)
+            {
+                if (context.ReadValue<Vector2>().x > 0)
                 {
                     walkDirection = true;
                 }
@@ -236,14 +239,20 @@ namespace KeyHandler
 
         public void OnDash(InputAction.CallbackContext context)
         {
+            if (context.started)
+            {
+                Debug.Log("Dash Start");
+                isDashKey = true;
+            }
+
             if (context.performed)
             {
-                isDashKey = true;
                 isdashingKeyNow = true;
             }
 
             if (context.canceled)
             {
+                Debug.Log("Dash End");
                 isdashingKeyNow = false;
             }
         }
@@ -256,7 +265,7 @@ namespace KeyHandler
                 isattackinKeyNow = true;
             }
 
-            if(context.canceled)
+            if (context.canceled)
             {
                 isattackinKeyNow = false;
             }

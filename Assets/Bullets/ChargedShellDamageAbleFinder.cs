@@ -1,21 +1,16 @@
 using UnityEngine;
-using UniRx;
+using PlayerShot;
+
 public class ChargedShellDamageAbleFinder : MonoBehaviour
 {
     [SerializeField] private int damageAmount = 5, extraDamageAmount = 7;
-    Animator animator;
-    ChargedShellAnimatorCtrl animatorCtrl;
-    ChargedShellBodyCtrl bodyCtrl;
+    IAnimatable animatorCtrl;
 
     bool isExtraDamage = false;
 
     private void Awake()
     {
-        animator = this.gameObject.MyGetComponent_NullChker<Animator>();
-        bodyCtrl = this.gameObject.MyGetComponent_NullChker<ChargedShellBodyCtrl>();
-
-        animatorCtrl = new ChargedShellAnimatorCtrl(animator, bodyCtrl);
-        bodyCtrl.Init(animatorCtrl);
+        animatorCtrl = GetComponent<IAnimatable>();
     }
 
     public void IsExtraDamage(bool isExtraDamage)
@@ -26,20 +21,33 @@ public class ChargedShellDamageAbleFinder : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         IDamageableFromShot damageable = other.GetComponent<IDamageableFromShot>();
+        RefrectableBody refrectableBody = other.GetComponent<RefrectableBody>();
+
+        //同時にダメージを受けるオブジェクトと、反射可能なオブジェクトがある場合
+        if(damageable != null && refrectableBody != null)
+        {
+            damageable.TakeDamage(extraDamageAmount);
+            animatorCtrl.TakeDamage();
+            GetComponent<IChargeShot>().TakeDamage();
+            SoundEffectCtrl.OnPlayHitSE.OnNext(0);
+            return;
+        }
+
         if (damageable != null)
         {
             if (isExtraDamage) damageable.TakeDamage(extraDamageAmount);
             else damageable.TakeDamage(damageAmount);
             animatorCtrl.TakeDamage();
+            GetComponent<IChargeShot>().TakeDamage();
             SoundEffectCtrl.OnPlayHitSE.OnNext(0);
             return;
         }
 
-        RefrectableBody refrectableBody = other.GetComponent<RefrectableBody>();
         if (refrectableBody != null)
         {
             animatorCtrl.RefrectShell();
             SoundEffectCtrl.OnPlayDeathSE.OnNext(1);
+            GetComponent<IChargeShot>().Refrect();
             return;
         }
     }

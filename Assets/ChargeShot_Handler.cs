@@ -116,12 +116,6 @@ public class ChargeShot_Handler : MonoBehaviour
     }
 
     //--public--//
-    public void Shoot_Charged_Shell(GameObject shell)
-    {
-        shellManager.ShootChargedShell(shell);
-
-        ResetSettings();
-    }
 
     public void StartCharge()
     {

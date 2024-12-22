@@ -889,6 +889,11 @@ namespace PlayerState
             {
                 if (stateMgr.inputHandler.IsDashKeyDown() || stateMgr.inputHandler.IsDashKey())
                 {
+                    //すでにKeepDashSpeedがオンになっていたら、何もしない
+                    if (stateMgr.dashKeepManager.IsKeepDashSpeed)
+                        return;
+
+                    Debug.Log("KeepDash");
                     if (isOneTimeAbleTo_TurnOn_KeepDashSpeed)
                         return;
 

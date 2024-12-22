@@ -37,9 +37,10 @@ public class PlayerWeapon_KeyController : MonoBehaviour
         PlayerState.DamageState.onPlayerDamageRecover -= HandleChargeOnDamageRecover;
     }
 
+    //FIX : ここが、ドアから入ったときにチャージが保存できないバグ
     void OnAcceptInputCtrl()
     {
-        if (!inputHandler.IsAttackKey) CheckCharge();
+        if (!inputHandler.IsAttackingKey) CheckCharge();
     }
 
     //　　イベントハンドラー
@@ -47,6 +48,7 @@ public class PlayerWeapon_KeyController : MonoBehaviour
     // チャージボタンが押されていればチャージを開始する。
     void HandleChargeOnDamageRecover()
     {
+        return;
         if (inputHandler.IsShootKey() || inputHandler.IsShootKeyDown())
         {
             chargeShotHandler.StartCharge();
@@ -80,11 +82,19 @@ public class PlayerWeapon_KeyController : MonoBehaviour
             allShellManager.ShootMame(false);
         }
 
+        //もしショットキーを押されてるならチャージを開始します。とくに、ドアから出るときや、ダメージから回復したときなどです
+        if (!inputHandler.IsShootKeyDown() && inputHandler.IsShootKey() && playerStateMgr.currentState != playerStateMgr.damageState)
+        {
+            if (chargeShotHandler.IsCharging)
+                return;
+
+            chargeShotHandler.StartCharge();
+        }
+
         if (inputHandler.IsShootKeyUp())
         {
             if (!chargeShotHandler.IsCharging) return;
 
-            Debug.Log("ShootKeyUp");
             CheckCharge();
             return;
         }
@@ -93,6 +103,8 @@ public class PlayerWeapon_KeyController : MonoBehaviour
     void CheckCharge()
     {
         if (!chargeShotHandler.IsCharging) return;
+
+        Debug.Log("CheckCharge");
 
         if (chargeShotHandler.IsFullCharged)
         {

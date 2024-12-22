@@ -103,10 +103,8 @@ public class AllShellManager : MonoBehaviour
     public void ShootChargedShell(GameObject shell)
     {
         onShootChargedShell?.Invoke();
-        //Debug.Log("onShootChargedShell?.Invoke();");
         var chargedShell = Instantiate(shell, player.transform.position, Quaternion.identity);
         chargedShell.SetActive(true);
-        Debug.Log("Instantiate!");
     }
 
     private async void mameInterval()
