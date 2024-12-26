@@ -3,9 +3,7 @@ using UniRx;
 using System;
 using Cysharp.Threading.Tasks;
 using System.Threading;
-using System.Runtime.CompilerServices;
 using KeyHandler;
-using UnityEditor;
 using ObjectPoolFactory;
 using UnityEngine.SceneManagement;
 
@@ -29,11 +27,6 @@ public class GameFlowManager : MonoBehaviour
     public IObserver<Unit> OnCompletedEscapeAnim => onCompletedEscapeAnim;
 
     CancellationTokenSource cts;
-
-    private void Awake()
-    {
-
-    }
 
     private void Start()
     {

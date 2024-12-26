@@ -3,12 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public static class SavePoint
-{
-    [SerializeField] public static int currentSavePoint = 0, nextSavePoint = 1;
-}
-
-[Serializable]
 public class SavePointBase
 {
     public Vector2 savePosition;
@@ -19,7 +13,9 @@ public class SavePointHandler : MonoBehaviour
 {
     [SerializeField] List<SavePointBase> savePointBase;
     [SerializeField] Transform playerTransform;
+    [SerializeField] SavePointSaver pointSaver;
 
+    //セーブポイントの位置をGizmosで表示
     private void OnDrawGizmos()
     {
         foreach (var point in savePointBase)
@@ -31,55 +27,38 @@ public class SavePointHandler : MonoBehaviour
 
     private void Awake()
     {
-        //InitSavePoint();
         if (playerTransform == null)
         {
             Debug.Log($"プレイヤーのTransformが設定されていません。");
         }
 
-        if(MyGameManager.resetSaveData)
+        //セーブポイントをリセットすべきならリセットします
+        if (MyGameManager.resetSaveData)
         {
-            InitSavePoint();
+            pointSaver.InitSavePoint();
             MyGameManager.resetSaveData = false;
         }
     }
 
-    //新しくステージに入った時に呼び出す
-    public void InitSavePoint()
-    {
-        SavePoint.currentSavePoint = 0;
-        SavePoint.nextSavePoint = 1;
-    }
-
     private void Update()
     {
-        //Debug.Log($"savePointBase[SavePoint.{SavePoint.nextSavePoint}].savePosition.x : {savePointBase[SavePoint.nextSavePoint].savePosition.x}");
+        //今のセーブが最後のセーブポイントなら処理をしない
+        if (pointSaver.NextSavePoint > savePointBase.Count - 1) return;
+
         //プレイヤーのポジションが次のセーブポイントを超えたらセーブ
-        if (SavePoint.nextSavePoint > savePointBase.Count - 1) return;
-        //if (savePointBase[SavePoint.nextSavePoint].isBossSaveRoom) return;
-
-        if (playerTransform.position.x > savePointBase[SavePoint.nextSavePoint].savePosition.x)
+        if (playerTransform.position.x > savePointBase[pointSaver.NextSavePoint].savePosition.x)
         {
-            /*if (savePointBase[SavePoint.nextSavePoint].isBossSaveRoom)
-            {
-                Debug.Log("ボス部屋に到達しました。");
-                return;
-            }*/
-            Debug.Log($"セーブポイント{SavePoint.nextSavePoint}に到達しました。次のステートは{SavePoint.nextSavePoint + 1}です。");
-            SavePointUpdate();
-        }
-    }
+            Debug.Log($"セーブポイント{pointSaver.NextSavePoint}に到達しました。次のステートは{pointSaver.NextSavePoint + 1}です。");
 
-    void SavePointUpdate()
-    {
-        SavePoint.currentSavePoint++;
-        SavePoint.nextSavePoint++;
+            //セーブポイントを更新
+            pointSaver.SaveNextPoint();
+        }
     }
 
     //現在のセーブポイントがボス部屋ならtrueを返す
     public bool SetPlayerOnStagePositionSavePoint()
     {
-        playerTransform.position = savePointBase[SavePoint.currentSavePoint].savePosition;
-        return savePointBase[SavePoint.currentSavePoint].isBossSaveRoom;
+        playerTransform.position = savePointBase[pointSaver.CurrentSavePoint].savePosition;
+        return savePointBase[pointSaver.CurrentSavePoint].isBossSaveRoom;
     }
 }

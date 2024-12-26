@@ -4,8 +4,7 @@ using DG.Tweening;
 using Cysharp.Threading.Tasks;
 using System;
 using UniRx;
-using Cysharp.Threading.Tasks.Triggers;
-using JetBrains.Annotations;
+using Door;
 
 public class CameraGoBossStageController : MonoBehaviour
 {

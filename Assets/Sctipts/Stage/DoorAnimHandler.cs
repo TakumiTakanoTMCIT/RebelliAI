@@ -1,9 +1,11 @@
 using System;
 using UnityEngine;
 using UniRx;
+using Door;
+
 public class DoorAnimHandler : MonoBehaviour
 {
-    public static event Action onDoorOpened, onDoorClosed;
+    public static event Action onDoorClosed;
 
     public Subject<Unit> onDoorOpenedSubject = new Subject<Unit>();
     public Subject<Unit> onDoorClosedSubject = new Subject<Unit>();
@@ -50,9 +52,6 @@ public class DoorAnimHandler : MonoBehaviour
     void OnDoorOpeningAnimFinish()
     {
         onDoorOpenedSubject.OnNext(Unit.Default);
-        //TODO:このif文は必要か検討
-        if (doorBody.IsEnterDoor) return;
-        //onDoorOpened?.Invoke();
     }
 
     //アニメーションイベント

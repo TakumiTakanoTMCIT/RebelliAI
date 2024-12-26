@@ -241,7 +241,6 @@ namespace KeyHandler
         {
             if (context.started)
             {
-                Debug.Log("Dash Start");
                 isDashKey = true;
             }
 
@@ -252,7 +251,6 @@ namespace KeyHandler
 
             if (context.canceled)
             {
-                Debug.Log("Dash End");
                 isdashingKeyNow = false;
             }
         }

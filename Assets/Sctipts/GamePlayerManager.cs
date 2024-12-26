@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Cysharp.Threading.Tasks;
 using UniRx;
-using KeyHandler;
+using Door;
 
 public class GamePlayerManager : MonoBehaviour
 {
@@ -11,7 +11,7 @@ public class GamePlayerManager : MonoBehaviour
 
     [SerializeField] internal bool isInGameArea = false, isDebugMode = false;
 
-    public static event Action onPlayerOnStage, onPlayerOffStage;
+    public static event Action onPlayerOffStage;
 
     [SerializeField] float settingSceneMovingSpeed = 4.0f;
     private static float cameraChangingSceneSpeed;

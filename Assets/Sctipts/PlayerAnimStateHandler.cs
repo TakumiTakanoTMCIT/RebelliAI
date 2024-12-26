@@ -4,6 +4,7 @@ using PlayerState;
 using UnityEngine;
 using HPBar;
 using UniRx;
+using Door;
 
 public class PlayerAnimStateHandler : MonoBehaviour
 {

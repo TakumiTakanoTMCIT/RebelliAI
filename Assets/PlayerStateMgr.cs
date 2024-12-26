@@ -892,8 +892,6 @@ namespace PlayerState
                     //すでにKeepDashSpeedがオンになっていたら、何もしない
                     if (stateMgr.dashKeepManager.IsKeepDashSpeed)
                         return;
-
-                    Debug.Log("KeepDash");
                     if (isOneTimeAbleTo_TurnOn_KeepDashSpeed)
                         return;
 

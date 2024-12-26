@@ -104,8 +104,6 @@ public class PlayerWeapon_KeyController : MonoBehaviour
     {
         if (!chargeShotHandler.IsCharging) return;
 
-        Debug.Log("CheckCharge");
-
         if (chargeShotHandler.IsFullCharged)
         {
             allShellManager.ShootChargedShell(chargeShotHandler.fullLevel_EnergyBall);

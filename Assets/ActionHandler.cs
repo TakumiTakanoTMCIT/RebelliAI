@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using ActionStatusChk;
 using Cysharp.Threading.Tasks;
 using PlayerInfo;
-using UnityEditor;
+using Door;
 using UnityEngine;
 
 namespace PlayerAction

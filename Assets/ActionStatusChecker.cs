@@ -13,21 +13,6 @@ namespace ActionStatusChk
         PlayerStatus playerStatus;
         Rigidbody2D rb;
 
-        bool isPlayerOnStage = false;
-
-        private void OnEnable()
-        {
-            //銃のキーを離したのにチャージが続くバグを解消する！！！！！！！
-            GamePlayerManager.onPlayerOffStage += () => isPlayerOnStage = false;
-            GamePlayerManager.onPlayerOnStage += () => isPlayerOnStage = true;
-        }
-
-        private void OnDisable()
-        {
-            GamePlayerManager.onPlayerOnStage -= () => isPlayerOnStage = true;
-            GamePlayerManager.onPlayerOffStage -= () => isPlayerOnStage = false;
-        }
-
         public void Init(GroundChk groundChk, SideChecker left, SideChecker right, SideChecker wallleft, SideChecker wallright, PlayerStatus playerStatus, Rigidbody2D rb)
         {
             this.groundChecker = groundChk;
