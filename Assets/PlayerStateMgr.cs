@@ -67,6 +67,14 @@ namespace PlayerState
             .AddTo(this);
         }
 
+        private void Start()
+        {
+            if(hPBarHandler == null)
+            {
+                Debug.LogWarning("HPBarHandler is not assigned!");
+            }
+        }
+
         //プレイヤーが画面外に出たら
         private void OnBecameInvisible()
         {

@@ -195,6 +195,6 @@ public class GameFlowManager : MonoBehaviour
             .ToUniTask();
 
         //クリアシーンに遷移
-        SceneManager.LoadScene("ClearScene");
+        SceneManager.LoadScene("StageSelect");
     }
 }

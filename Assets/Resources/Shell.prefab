@@ -182,5 +182,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a82638254598d4a629419910fe9ba521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damageAmount: 1
+  damageAmount: 100
   dashExtraDamageAmount: 2

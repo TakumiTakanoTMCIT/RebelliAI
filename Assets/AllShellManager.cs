@@ -18,7 +18,7 @@ public class AllShellManager : MonoBehaviour
 
     bool isMameShootable;
 
-    public static event Action onShootChargedShell;
+    public static event Action onShootChargedShell, onShotNow;
 
     private void Awake()
     {
@@ -97,11 +97,13 @@ public class AllShellManager : MonoBehaviour
         /// </summary>
         if (!isMameShootable) return;
         pool.Get();
+        onShotNow?.Invoke();
         mameInterval();
     }
 
     public void ShootChargedShell(GameObject shell)
     {
+        onShotNow?.Invoke();
         onShootChargedShell?.Invoke();
         var chargedShell = Instantiate(shell, player.transform.position, Quaternion.identity);
         chargedShell.SetActive(true);
