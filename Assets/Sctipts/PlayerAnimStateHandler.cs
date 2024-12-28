@@ -8,22 +8,19 @@ using ActionStatusChk;
 public class PlayerAnimStateHandler : MonoBehaviour
 {
     //向きに合わせて、スプライトを反転させるためのフィールド
-    [SerializeField] ActionStatusChecker actionStatusChecker;
+    ActionStatusChecker actionStatusChecker;
     //ワープアニメーションの終了を通知するためのイベントを発行するためのフィールド
-    [SerializeField] GameFlowManager gameFlowManager;
+    [SerializeField] GameFlowManager gameFlowManager;//ガチで一瞬しか使ってない
     //死亡時のエフェクトを生成するためのファクトリ
-    [SerializeField] private DeathGlitchSparkFactory deathGlitchSparkFactory;
-    [SerializeField] internal bool isDebugMode = false;
-    internal Animator animator;
-    PlayerStateMgr stateMgr;
+    [SerializeField] private DeathGlitchSparkFactory deathGlitchSparkFactory;//ガチで一瞬だね
+    [SerializeField] public bool isDebugMode = false;
 
-    internal IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState, damageState, deathState, warpState, warpEscapeState, neutralIdleState;
-    internal IPlayerAnimState currentState;
+    public IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState, damageState, deathState, warpState, warpEscapeState, neutralIdleState;
 
+    IPlayerAnimState currentState;
+    Animator animator;
     AnimatorCtrl animatorCtrl;
-
     SpriteRenderer spriteRenderer;
-
     bool isChangeableAnim = false;
 
     public static event Action onPlayerDeathAnimEnd;
@@ -36,8 +33,8 @@ public class PlayerAnimStateHandler : MonoBehaviour
 
     private void Awake()
     {
+        actionStatusChecker = gameObject.MyGetComponent_NullChker<ActionStatusChecker>();
         animator = gameObject.MyGetComponent_NullChker<Animator>();
-        stateMgr = gameObject.MyGetComponent_NullChker<PlayerStateMgr>();
         spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
 
         GameFlowManager.StartBattleAction.Subscribe(_ =>
@@ -59,20 +56,20 @@ public class PlayerAnimStateHandler : MonoBehaviour
         })
         .AddTo(this);
 
-        animatorCtrl = new AnimatorCtrl(this);
+        animatorCtrl = new AnimatorCtrl(this, animator);
 
-        idleState = new IdleState(animatorCtrl, this, stateMgr);
-        walkState = new WalkState(animatorCtrl, this, stateMgr);
-        jumpState = new JumpState(animatorCtrl);
-        fallState = new FallState(animatorCtrl);
-        dashState = new DashState(animatorCtrl);
-        wallFallState = new WallFallState(animatorCtrl);
-        wallKickState = new WallKickState(animatorCtrl);
-        damageState = new DamageState(animatorCtrl, spriteRenderer, actionStatusChecker);
-        deathState = new DeathState(animatorCtrl, this);
-        warpState = new WarpState(animatorCtrl);
-        neutralIdleState = new NeutralIdle(animatorCtrl);
-        warpEscapeState = new WarpEscapeState(animatorCtrl);
+        idleState = new IdleState(animatorCtrl, "isIdle");
+        walkState = new WalkState(animatorCtrl, "isRun");
+        jumpState = new JumpState(animatorCtrl, "isJump");
+        fallState = new FallState(animatorCtrl, "isFall");
+        dashState = new DashState(animatorCtrl, "isDash");
+        wallFallState = new WallFallState(animatorCtrl, "isWallFall");
+        wallKickState = new WallKickState(animatorCtrl, "isWallKick");
+        damageState = new DamageState(animatorCtrl, spriteRenderer, actionStatusChecker, "isDamaging");
+        deathState = new DeathState(animatorCtrl, "isDeath");
+        warpState = new WarpState(animatorCtrl, "isWarp");
+        neutralIdleState = new NeutralIdle(animatorCtrl, "isNeutralIdle");
+        warpEscapeState = new WarpEscapeState(animatorCtrl, "isWarpEscape");
 
         currentState = idleState;
 
@@ -152,7 +149,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
 
     public bool WhatCurrentAnimState(IPlayerAnimState state)
     {
-        if(currentState == state)
+        if (currentState == state)
         {
             return true;
         }
@@ -167,8 +164,9 @@ public class AnimatorCtrl
 {
     Animator animator;
     PlayerAnimStateHandler _animStateHadnler;
-    public AnimatorCtrl(PlayerAnimStateHandler animStateHandler)
+    public AnimatorCtrl(PlayerAnimStateHandler animStateHandler, Animator animator)
     {
+        this.animator = animator;
         _animStateHadnler = animStateHandler;
 
         this.animator = animStateHandler.gameObject.MyGetComponent_NullChker<Animator>();
@@ -176,14 +174,14 @@ public class AnimatorCtrl
 
     public void StartAnim(string name)
     {
-        if (_animStateHadnler.animator == null) _animStateHadnler.GetAnimator();
-        _animStateHadnler.animator.SetBool(name, true);
+        if (animator == null) _animStateHadnler.GetAnimator();
+        animator.SetBool(name, true);
     }
 
     public void StopAnim(string name)
     {
-        if (_animStateHadnler.animator == null) _animStateHadnler.GetAnimator();
-        _animStateHadnler.animator.SetBool(name, false);
+        if (animator == null) _animStateHadnler.GetAnimator();
+        animator.SetBool(name, false);
     }
 }
 
@@ -193,253 +191,100 @@ public interface IPlayerAnimState
     void Exit();
 }
 
-public class IdleState : IPlayerAnimState
+public abstract class PlayerAnimStateBase : IPlayerAnimState
 {
-    PlayerAnimStateHandler animStateHandler;
-    AnimatorCtrl animatorCtrl;
-    PlayerStateMgr stateMgr;
+    protected string animBoolName;
+    protected AnimatorCtrl animatorCtrl;
 
-    public IdleState(AnimatorCtrl animatorCtrl, PlayerAnimStateHandler stateHandler, PlayerStateMgr stateMgr)
+    public PlayerAnimStateBase(AnimatorCtrl animatorCtrl, string animBoolName)
     {
         this.animatorCtrl = animatorCtrl;
-        this.animStateHandler = stateHandler;
-        this.stateMgr = stateMgr;
+        this.animBoolName = animBoolName;
     }
 
-    public void Enter()
+    public virtual void Enter()
     {
-        animatorCtrl.StartAnim("isIdle");
+        animatorCtrl.StartAnim(animBoolName);
     }
 
-    public void Exit()
+    public virtual void Exit()
     {
-        animatorCtrl.StopAnim("isIdle");
+        animatorCtrl.StopAnim(animBoolName);
     }
 }
 
-public class WalkState : IPlayerAnimState
+public class IdleState : PlayerAnimStateBase
 {
-    AnimatorCtrl AnimatorCtrl;
-    PlayerAnimStateHandler stateHandler;
-    PlayerStateMgr stateMgr;
-    public WalkState(AnimatorCtrl animatorCtrl, PlayerAnimStateHandler stateHandler, PlayerStateMgr stateMgr)
-    {
-        this.AnimatorCtrl = animatorCtrl;
-        this.stateHandler = stateHandler;
-        this.stateMgr = stateMgr;
-    }
-
-    public void Enter()
-    {
-        AnimatorCtrl.StartAnim("isRun");
-    }
-
-    public void Exit()
-    {
-        AnimatorCtrl.StopAnim("isRun");
-    }
+    public IdleState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
 }
 
-public class JumpState : IPlayerAnimState
+public class WalkState : PlayerAnimStateBase
 {
-    AnimatorCtrl AnimatorCtrl;
-
-    public JumpState(AnimatorCtrl animatorCtrl)
-    {
-        this.AnimatorCtrl = animatorCtrl;
-    }
-
-    public void Enter()
-    {
-        AnimatorCtrl.StartAnim("isJump");
-    }
-
-    public void Exit()
-    {
-        AnimatorCtrl.StopAnim("isJump");
-    }
+    public WalkState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
 }
 
-public class FallState : IPlayerAnimState
+public class JumpState : PlayerAnimStateBase
 {
-    AnimatorCtrl AnimatorCtrl;
-    public FallState(AnimatorCtrl animatorCtrl)
-    {
-        this.AnimatorCtrl = animatorCtrl;
-    }
-
-    public void Enter()
-    {
-        AnimatorCtrl.StartAnim("isFall");
-    }
-
-    public void Exit()
-    {
-        AnimatorCtrl.StopAnim("isFall");
-    }
+    public JumpState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
 }
 
-public class DashState : IPlayerAnimState
+public class FallState : PlayerAnimStateBase
 {
-    AnimatorCtrl AnimatorCtrl;
-    public DashState(AnimatorCtrl animatorCtrl)
-    {
-        this.AnimatorCtrl = animatorCtrl;
-    }
-
-    public void Enter()
-    {
-        AnimatorCtrl.StartAnim("isDash");
-    }
-
-    public void Exit()
-    {
-        AnimatorCtrl.StopAnim("isDash");
-    }
+    public FallState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
 }
 
-public class WallFallState : IPlayerAnimState
+public class DashState : PlayerAnimStateBase
 {
-    AnimatorCtrl AnimatorCtrl;
-    public WallFallState(AnimatorCtrl animatorCtrl)
-    {
-        this.AnimatorCtrl = animatorCtrl;
-    }
-
-    public void Enter()
-    {
-        AnimatorCtrl.StartAnim("isWallFall");
-    }
-
-    public void Exit()
-    {
-        AnimatorCtrl.StopAnim("isWallFall");
-    }
+    public DashState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
 }
 
-public class WallKickState : IPlayerAnimState
+public class WallFallState : PlayerAnimStateBase
 {
-    AnimatorCtrl AnimatorCtrl;
-    public WallKickState(AnimatorCtrl animatorCtrl)
-    {
-        this.AnimatorCtrl = animatorCtrl;
-    }
-
-    public void Enter()
-    {
-        AnimatorCtrl.StartAnim("isWallKick");
-    }
-
-    public void Exit()
-    {
-        AnimatorCtrl.StopAnim("isWallKick");
-    }
+    public WallFallState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
 }
 
-public class DamageState : IPlayerAnimState
+public class WallKickState : PlayerAnimStateBase
 {
-    AnimatorCtrl animatorCtrl;
-    private PlayerStats playerStatus;
+    public WallKickState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
+}
+
+public class DamageState : PlayerAnimStateBase
+{
     SpriteRenderer spriteRenderer;
     ActionStatusChecker actionStatusChecker;
-    public DamageState(AnimatorCtrl animatorCtrl, SpriteRenderer spriteRenderer, ActionStatusChecker actionStatusChecker)
+    public DamageState(AnimatorCtrl animatorCtrl, SpriteRenderer spriteRenderer, ActionStatusChecker actionStatusChecker, string animBoolName) : base(animatorCtrl, animBoolName)
     {
         this.animatorCtrl = animatorCtrl;
         this.spriteRenderer = spriteRenderer;
         this.actionStatusChecker = actionStatusChecker;
     }
 
-    public void Enter()
+    public override void Enter()
     {
-        animatorCtrl.StartAnim("isDamaging");
-
+        animatorCtrl.StartAnim(animBoolName);
         spriteRenderer.flipX = actionStatusChecker.Direction;
     }
-
-    public void Exit()
-    {
-        animatorCtrl.StopAnim("isDamaging");
-    }
 }
 
-public class DeathState : IPlayerAnimState
+public class DeathState : PlayerAnimStateBase
 {
-    AnimatorCtrl animatorCtrl;
-    PlayerAnimStateHandler animStateHandler;
-    public DeathState(AnimatorCtrl animatorCtrl, PlayerAnimStateHandler animStateHandler)
-    {
-        this.animatorCtrl = animatorCtrl;
-        this.animStateHandler = animStateHandler;
-    }
-
-    public void Enter()
-    {
-        if (animStateHandler.isDebugMode) Debug.Log("死亡アニメーションが再生されました");
-        animatorCtrl.StartAnim("isDeath");
-    }
-
-    public void Exit()
-    {
-        animatorCtrl.StopAnim("isDeath");
-    }
-}
-
-public class WarpState : IPlayerAnimState
-{
-    AnimatorCtrl animatorCtrl;
-    public WarpState(AnimatorCtrl animatorCtrl)
+    public DeathState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName)
     {
         this.animatorCtrl = animatorCtrl;
     }
-
-    public void Enter()
-    {
-        Debug.Log("ワープアニメーションが再生されました");
-        animatorCtrl.StartAnim("isWarp");
-    }
-
-    public void Exit()
-    {
-        animatorCtrl.StopAnim("isWarp");
-    }
 }
 
-public class NeutralIdle : IPlayerAnimState
+public class WarpState : PlayerAnimStateBase
 {
-    AnimatorCtrl animatorCtrl;
-    public NeutralIdle(AnimatorCtrl animatorCtrl)
-    {
-        this.animatorCtrl = animatorCtrl;
-    }
-
-    public void Enter()
-    {
-        Debug.Log("ニュートラルアニメーションが再生されました");
-        animatorCtrl.StartAnim("isNeutralIdle");
-    }
-
-    public void Exit()
-    {
-        animatorCtrl.StopAnim("isNeutralIdle");
-    }
+    public WarpState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
 }
 
-public class WarpEscapeState : IPlayerAnimState
+public class NeutralIdle : PlayerAnimStateBase
 {
-    AnimatorCtrl animatorCtrl;
-    public WarpEscapeState(AnimatorCtrl animatorCtrl)
-    {
-        this.animatorCtrl = animatorCtrl;
-    }
+    public NeutralIdle(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
+}
 
-    public void Enter()
-    {
-        Debug.Log("ワープエスケープアニメーションが再生されました");
-        animatorCtrl.StartAnim("isEscape");
-    }
-
-    public void Exit()
-    {
-        animatorCtrl.StopAnim("isEscape");
-    }
+public class WarpEscapeState : PlayerAnimStateBase
+{
+    public WarpEscapeState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
 }

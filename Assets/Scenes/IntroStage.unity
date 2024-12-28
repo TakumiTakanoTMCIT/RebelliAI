@@ -8563,6 +8563,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27b5b9b70fc524430acd08d19eb955fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &906999112 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7374502908954113835, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+  m_PrefabInstance: {fileID: 7374502908718793222}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 906999080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 730f55fc898e64462a11eeb3e805569c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &906999113 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7374502908954113832, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+  m_PrefabInstance: {fileID: 7374502908718793222}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 906999080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffccb798d001543c1a53db53a89b9ac8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &906999114 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7374502908954113846, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
@@ -8590,6 +8612,19 @@ Rigidbody2D:
   m_CorrespondingSourceObject: {fileID: 7374502908954113845, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
   m_PrefabInstance: {fileID: 7374502908718793222}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &906999119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 906999080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0c669a598f274d44949d8718bc1efa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hPBarHandler: {fileID: 585496183}
 --- !u!1 &924561357
 GameObject:
   m_ObjectHideFlags: 0
@@ -14966,6 +15001,8 @@ MonoBehaviour:
   wallKickFactory: {fileID: 1337993094}
   damageTimeHandler: {fileID: 585946350}
   playerDashKeepManager: {fileID: 906999104}
+  wallKickDelayManager: {fileID: 906999113}
+  playerDashTimeCtrl: {fileID: 906999112}
   playerRb: {fileID: 906999117}
   actionStatusChecker: {fileID: 906999114}
 --- !u!114 &1110060448
@@ -19886,6 +19923,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 7374502908954113832, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+      propertyPath: inputHandler
+      value: 
+      objectReference: {fileID: 906999083}
     - target: {fileID: 7374502908954113832, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
       propertyPath: playerStatus
       value: 

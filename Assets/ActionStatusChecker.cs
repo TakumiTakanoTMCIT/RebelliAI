@@ -7,9 +7,9 @@ namespace ActionStatusChk
 {
     public class ActionStatusChecker : MonoBehaviour
     {
-        [SerializeField] private PlayerStateMgr playerStateMgr;
-        [SerializeField] private InputHandler inputHandler;
-        [SerializeField] private PlayerAnimStateHandler animStateHandler;
+        PlayerStateMgr playerStateMgr;
+        InputHandler inputHandler;
+        PlayerAnimStateHandler animStateHandler;
 
         GroundChk groundChecker;
         SideChecker leftSideChecker, rightSideChecker, wallLeftChecker, wallRightChecker;
@@ -21,7 +21,7 @@ namespace ActionStatusChk
         private bool _direction;
         public bool Direction => _direction;
 
-        public void Init(GroundChk groundChk, SideChecker left, SideChecker right, SideChecker wallleft, SideChecker wallright, Rigidbody2D rb)
+        public void Init(GroundChk groundChk, SideChecker left, SideChecker right, SideChecker wallleft, SideChecker wallright, Rigidbody2D rb, PlayerStateMgr playerStateMgr, InputHandler inputHandler, PlayerAnimStateHandler animStateHandler)
         {
             this.groundChecker = groundChk;
             this.leftSideChecker = left;
@@ -29,6 +29,9 @@ namespace ActionStatusChk
             this.wallLeftChecker = wallleft;
             this.wallRightChecker = wallright;
             this.rb = rb;
+            this.playerStateMgr = playerStateMgr;
+            this.inputHandler = inputHandler;
+            this.animStateHandler = animStateHandler;
         }
 
         public bool IsMovingNow()

@@ -69,7 +69,7 @@ public class PlayerWeapon_KeyController : MonoBehaviour
         }
 
         //もしショットキーを押されてるならチャージを開始します。とくに、ドアから出るときや、ダメージから回復したときなどです
-        if (!inputHandler.IsShootKeyDown() && inputHandler.IsShootKey() && playerStateMgr.CurrentState != playerStateMgr.damageState)
+        if (!inputHandler.IsShootKeyDown() && inputHandler.IsShootKey() && !playerStateMgr.WhatCurrentState(playerStateMgr.damageState))
         {
             if (chargeShotHandler.IsCharging)
                 return;

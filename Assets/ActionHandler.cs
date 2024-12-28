@@ -64,9 +64,9 @@ namespace PlayerAction
             return true;
         }
 
-        public void Jump(float jumpForce)
+        public void Jump()
         {
-            rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+            rb.AddForce(new Vector2(0, playerStatus.JumpForce), ForceMode2D.Impulse);
         }
 
         public void WallFall()

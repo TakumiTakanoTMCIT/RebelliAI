@@ -19,7 +19,6 @@ public class PlayerInitializer : MonoBehaviour
 
     ActionStatusChecker actionStatusChecker;
     WallKickDelayManager wallKickDelayManager;
-    PlayerDashTimeCtrl playerDashTimeCtrl;
     PlayerDashKeepManager dashKeepManager;
     PlayerAnimStateHandler animHandler;
 
@@ -51,7 +50,6 @@ public class PlayerInitializer : MonoBehaviour
         playerStateMgr = this.gameObject.MyGetComponent_NullChker<PlayerStateMgr>();
         actionStatusChecker = this.gameObject.MyGetComponent_NullChker<ActionStatusChecker>();
         wallKickDelayManager = this.gameObject.MyGetComponent_NullChker<WallKickDelayManager>();
-        playerDashTimeCtrl = this.gameObject.MyGetComponent_NullChker<PlayerDashTimeCtrl>();
         dashKeepManager = this.gameObject.MyGetComponent_NullChker<PlayerDashKeepManager>();
         inputHandler = this.gameObject.MyGetComponent_NullChker<InputHandler>();
         playerWeapon_KeyController = this.gameObject.MyGetComponent_NullChker<PlayerWeapon_KeyController>();
@@ -65,10 +63,10 @@ public class PlayerInitializer : MonoBehaviour
         shellManager = this.gameObject.GetOtherObjComponent_NullCheck<AllShellManager>(shellManagerObj);
         chargeShotHandler = this.gameObject.GetOtherObjComponent_NullCheck<ChargeShot_Handler>(chargeShotHandlerObj);
 
-        playerStateMgr.Init(rb, actionHandler, actionStatusChecker, inputHandler, dashKeepManager, wallKickDelayManager, animHandler);
-        actionStatusChecker.Init(groundChk, leftside, rightside, wallleftside, wallrightside, rb);
-        wallKickDelayManager.Init(playerStateMgr);
+        playerStateMgr.Init(rb, animHandler, actionStatusChecker, inputHandler, actionHandler, wallKickDelayManager);
+        actionStatusChecker.Init(groundChk, leftside, rightside, wallleftside, wallrightside, rb, playerStateMgr, inputHandler, animHandler);
         dashKeepManager.Init(actionStatusChecker, inputHandler);
         playerWeapon_KeyController.Init(inputHandler, chargeShotHandler, shellManager);
+        wallKickDelayManager.Init(inputHandler);
     }
 }
