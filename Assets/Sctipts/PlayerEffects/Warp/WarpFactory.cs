@@ -46,11 +46,9 @@ namespace ObjectPoolFactory
                 catch (Exception e)
                 {
                     Debug.Log(e);
-                    //UnityEditor.EditorApplication.isPaused = true;
                     return;
                 }
 
-                /*pool.Get().gameObject.MyGetComponent_NullChker<WarpEffectBody>().Init(this, playerTransform.position.x, transform.position.y + initialYPossition - (initialYPossition / MakeAmount * count));*/
                 pool.Get().gameObject.MyGetComponent_NullChker<WarpEffectBody>().Init(
                     this,
                     playerTransform.position.x + UnityEngine.Random.Range(-randomXRange, randomXRange),

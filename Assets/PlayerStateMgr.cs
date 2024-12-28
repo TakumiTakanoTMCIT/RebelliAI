@@ -2,7 +2,6 @@ using System;
 using ActionStatusChk;
 using KeyHandler;
 using PlayerAction;
-using PlayerInfo;
 using UnityEngine;
 using HPBar;
 using Cysharp.Threading.Tasks;
@@ -21,19 +20,20 @@ namespace PlayerState
 
         //このクラスのみで使用している変数
         [SerializeField] private bool isDebugCurrentState = false;
-        [SerializeField] private HPBarHandler hPBarHandler;
+
+        [Inject]
+        private PlayerStats playerStatus;
+        [Inject]
+        private ActionHandler actionHandler;
         private WallKickDelayManager wallKickManager;
         private IState currentState;
         private bool isExecutable;
         private InputHandler inputHandler;
-        private ActionHandler actionHandler;
         private ActionStatusChecker actionStatusChecker;
         private Rigidbody2D rb;
-        private PlayerStatus playerStatus;
-
         //他のクラスからアクセスされる変数
         public IState CurrentState => currentState;
-        public PlayerStatus PlayerStatus => playerStatus;
+        public PlayerStats PlayerStatus => playerStatus;
         public InputHandler InputHandler => inputHandler;
         public ActionHandler ActionHandler => actionHandler;
         public ActionStatusChecker ActionStatusChecker => actionStatusChecker;
@@ -42,12 +42,11 @@ namespace PlayerState
         public IState idleState, walkState, jumpState, fallState, wallFallState, wallKick,
         dashState, damageState, deathState;
 
-        public void Init(Rigidbody2D rb, PlayerStatus playerStatus, ActionHandler ActionHandler, ActionStatusChecker ActionStatusChecker, InputHandler InputHandler, PlayerDashKeepManager dashKeepManager, WallKickDelayManager wallKickManager, PlayerAnimStateHandler animStateHandler)
+        public void Init(Rigidbody2D rb, ActionHandler ActionHandler, ActionStatusChecker ActionStatusChecker, InputHandler InputHandler, PlayerDashKeepManager dashKeepManager, WallKickDelayManager wallKickManager, PlayerAnimStateHandler animStateHandler)
         {
             isExecutable = false;
 
             this.rb = rb;
-            this.playerStatus = playerStatus;
             this.actionHandler = ActionHandler;
             this.actionStatusChecker = ActionStatusChecker;
             this.inputHandler = InputHandler;
@@ -72,28 +71,11 @@ namespace PlayerState
             container.Inject(wallKick);
             container.Inject(damageState);
 
-            Debug.LogError("All states are initialized!");
-
             GameFlowManager.StartBattleAction.Subscribe(_ =>
             {
                 ChangeState(idleState);
             })
             .AddTo(this);
-        }
-
-        private void Start()
-        {
-            if (hPBarHandler == null)
-            {
-                Debug.LogWarning("HPBarHandler is not assigned!");
-            }
-        }
-
-        //プレイヤーが画面外に出たら
-        private void OnBecameInvisible()
-        {
-            //TODO:画面外で死ぬ処理はここに書くべきなのか？責務に反するので、後で修正
-            hPBarHandler.onPlayerInVoid.OnNext(Unit.Default);
         }
 
         //イベントの登録
@@ -161,7 +143,7 @@ namespace PlayerState
         {
             ChangeState(deathState);
 
-            ActionHandler.Stop();
+            ActionHandler.StopX();
             ActionHandler.StopY();
             //TODO:ここで重力を操作するのは責務に反するので、後で修正
             rb.gravityScale = 0;
@@ -223,7 +205,7 @@ namespace PlayerState
             /// <summary>
             /// 移動を止める処理を最初に実行し初期化しておく
             /// </summary>
-            stateMgr.ActionHandler.Stop();
+            stateMgr.ActionHandler.StopX();
 
             animHandler.ChangeAnimState(animHandler.idleState);
         }
@@ -449,7 +431,7 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            stateMgr.ActionStatusChecker.SetPlayerDiresctionFromDashStateBigin(direction);
+            stateMgr.ActionStatusChecker.SetPlayerDirectionFromDashStart(direction);
 
             sparkFactory.MakeEffect();
 
@@ -497,7 +479,7 @@ namespace PlayerState
                 return;
             }
 
-            if (stateMgr.InputHandler.IsJumpKeyDown())
+            if (stateMgr.ActionStatusChecker.isJumpingNow())
             {
                 dashKeepManager.KeepDashSpeed();
 
@@ -507,6 +489,7 @@ namespace PlayerState
 
             if (stateMgr.ActionStatusChecker.IsWall(direction))
             {
+                dashKeepManager.StopDashSpeed();
                 stateMgr.ChangeState(stateMgr.idleState);
                 return;
             }
@@ -537,7 +520,7 @@ namespace PlayerState
 
         public void Exit(PlayerStateMgr stateMgr)
         {
-            stateMgr.ActionHandler.Stop();
+            stateMgr.ActionHandler.StopX();
             dashTimeCtrl.StopDashTimeCtrl();
         }
     }
@@ -616,7 +599,7 @@ namespace PlayerState
                 /// </summary>
                 if (isWalkNow)
                 {
-                    stateMgr.ActionHandler.Stop();
+                    stateMgr.ActionHandler.StopX();
                     isWalkNow = false;
                 }
                 return;
@@ -672,7 +655,7 @@ namespace PlayerState
             /// </summary>
             if (!stateMgr.InputHandler.IsMoveKey())
             {
-                stateMgr.ActionHandler.Stop();
+                stateMgr.ActionHandler.StopX();
                 isWalkNow = false;
                 return;
             }
@@ -875,7 +858,6 @@ namespace PlayerState
         {
             this.wallKickFactory = wallKickFactory;
             this.dashKeepManager = dashKeepManager;
-            Debug.LogWarning("WallKickFactory is injected!");
         }
 
         public void Enter(PlayerStateMgr stateMgr)
@@ -897,7 +879,7 @@ namespace PlayerState
             /// <summary>
             /// スピードを0にして、壁キックを行う
             /// </summary>
-            stateMgr.ActionHandler.Stop();
+            stateMgr.ActionHandler.StopX();
             stateMgr.ActionHandler.StopY();
 
             stateMgr.ActionHandler.Jump(stateMgr.PlayerStatus.JumpForce);
@@ -992,7 +974,7 @@ namespace PlayerState
                 /// 同時押しの判定を行っています。
                 /// </summary>
                 isWalkNow = false;
-                stateMgr.ActionHandler.Stop();
+                stateMgr.ActionHandler.StopX();
                 return;
             }
 
@@ -1032,7 +1014,7 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            ActionHandler.Stop();
+            ActionHandler.StopX();
             ActionHandler.StopY();
             ActionHandler.Damage();
         }

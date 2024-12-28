@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
-using PlayerInfo;
 using PlayerState;
+using Zenject;
 
 /// <summary>
 /// このクラスは、壁蹴りの受付時間を管理するクラスです。
@@ -9,13 +9,13 @@ using PlayerState;
 /// </summary>
 public class WallKickDelayManager : MonoBehaviour
 {
-    PlayerStatus playerStatus;
-    PlayerStateMgr stateMgr;
+    [Inject]
+    PlayerStats playerStatus;
+    PlayerStateMgr playerStateMgr;
 
-    public void Init(PlayerStatus playerStatus, PlayerStateMgr stateMgr)
+    public void Init( PlayerStateMgr stateMgr)
     {
-        this.playerStatus = playerStatus;
-        this.stateMgr = stateMgr;
+        this.playerStateMgr = stateMgr;
     }
 
     private bool isJumpKey_Accepting = false;
@@ -65,13 +65,13 @@ public class WallKickDelayManager : MonoBehaviour
         if (!isJumpKey_Accepting) return;
 
         //ジャンプキーが押されたら
-        if (stateMgr.InputHandler.IsJumpKeyDown())
+        if (playerStateMgr.InputHandler.IsJumpKeyDown())
         {
             //コルーチンの受け付け時間を終了する
             Stop_JumpKey_AcceptingTime();
 
             //wallkickに遷移する
-            stateMgr.ChangeState(stateMgr.wallKick);
+            playerStateMgr.ChangeState(playerStateMgr.wallKick);
         }
     }
 }

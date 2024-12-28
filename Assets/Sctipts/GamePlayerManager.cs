@@ -25,6 +25,11 @@ public class GamePlayerManager : MonoBehaviour
 
     private void Awake()
     {
+        /// <summary>
+        /// 重要！フレームレートの設定
+        /// </summary>
+        Application.targetFrameRate = 60;
+
         //static変数はインスペクタで表示できないのでゴリ押しで代入！
         cameraChangingSceneSpeed = settingSceneMovingSpeed;
 

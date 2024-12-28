@@ -1,5 +1,4 @@
 using ActionStatusChk;
-using PlayerInfo;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -12,14 +11,11 @@ public class WallKickFactory : MonoBehaviour
     [SerializeField] private Transform parentTransform;
     [SerializeField] private ActionStatusChecker actionStatusChk;
     GameObject preafab;
-    PlayerStatus playerStatus;
 
     private ObjectPool<GameObject> pool;
     private void Awake()
     {
         preafab = Resources.Load<GameObject>("WallKickSparkBody");
-
-        playerStatus = player.MyGetComponent_NullChker<PlayerStatus>();
 
         pool = new ObjectPool<GameObject>(
             createFunc: CreateEffect,

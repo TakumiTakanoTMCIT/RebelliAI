@@ -57,7 +57,7 @@ public class DamagingBlinking : MonoBehaviour
     //点滅処理
     async void InvinsibleBlinking()
     {
-        Color playerColor = spriteRenderer.color;
+        Color playerColor;
 
         while (true)
         {

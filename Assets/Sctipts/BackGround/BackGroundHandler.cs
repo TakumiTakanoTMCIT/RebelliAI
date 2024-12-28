@@ -1,14 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using ActionStatusChk;
-using PlayerInfo;
 using UnityEngine;
 
 public class BackGroundHandler : MonoBehaviour
 {
     [SerializeField] float speed = 0.01f;
     [SerializeField] private GameObject player;
-    PlayerStatus playerStatus;
     ActionStatusChecker actionStatusChecker;
     Vector3 pos;
     private float previousPlayerPosX;  // プレイヤーの前フレームのX位置
@@ -16,7 +12,6 @@ public class BackGroundHandler : MonoBehaviour
     void Start()
     {
         player.gameObject.MyGetComponent_NullChker<Transform>();
-        playerStatus = player.gameObject.MyGetComponent_NullChker<PlayerStatus>();
         actionStatusChecker = player.gameObject.MyGetComponent_NullChker<ActionStatusChecker>();
 
         previousPlayerPosX = 4;

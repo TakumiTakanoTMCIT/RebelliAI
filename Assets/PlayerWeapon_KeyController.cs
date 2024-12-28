@@ -55,9 +55,11 @@ public class PlayerWeapon_KeyController : MonoBehaviour
 
     private void Update()
     {
-        //ショットボタンを押したら豆を撃って、チャージを開始します
         //ダメージを受けている時は撃てません
-        if (inputHandler.IsShootKeyDown() && playerStateMgr.CurrentState != playerStateMgr.damageState)
+        if (playerStateMgr.WhatCurrentState(playerStateMgr.damageState)) return;
+
+        //ショットボタンを押したら豆を撃って、チャージを開始します
+        if (inputHandler.IsShootKeyDown())
         {
             if (!chargeShotHandler.IsCharging)
             {

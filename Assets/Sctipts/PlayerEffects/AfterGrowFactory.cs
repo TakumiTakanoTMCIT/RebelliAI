@@ -1,10 +1,7 @@
 using UnityEngine;
 using UnityEngine.Pool;
-using UnityEditor;
-using PlayerInfo;
 using Cysharp.Threading.Tasks;
 using System;
-using PlayerState;
 using HPBar;
 using ActionStatusChk;
 
@@ -22,7 +19,6 @@ public class AfterGrowFactory : MonoBehaviour
 
     PlayerDashTimeCtrl playerDashTimeCtrl;
     PlayerDashKeepManager playerDashKeepManager;
-    PlayerStatus playerStatus;
 
     async private void CountInterval()
     {
@@ -42,7 +38,6 @@ public class AfterGrowFactory : MonoBehaviour
 
         playerDashTimeCtrl = player.MyGetComponent_NullChker<PlayerDashTimeCtrl>();
         playerDashKeepManager = player.MyGetComponent_NullChker<PlayerDashKeepManager>();
-        playerStatus = player.MyGetComponent_NullChker<PlayerStatus>();
 
         isPlayerDamage_Death = false;
 

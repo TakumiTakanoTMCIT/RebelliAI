@@ -6,6 +6,7 @@ using System;
 using Door;
 using PlayerAction;
 using DG.Tweening;
+using Zenject;
 
 namespace Door
 {
@@ -14,8 +15,9 @@ namespace Door
         [SerializeField] InputHandler inputHandler;
         [SerializeField] GamePlayerManager gamePlayerManager;
         [SerializeField] BossCutSceneHandler bossCutSceneHandler;
-        [SerializeField] ActionHandler actionHandler;
         [SerializeField] PlayerAnimStateHandler playerAnimStateHandler;
+        [Inject]
+        ActionHandler actionHandler;
 
         public IObserver<DoorAnimHandler> OnStartBossDoorCutScene => onStartBossDoorCutScene;
         private Subject<DoorAnimHandler> onStartBossDoorCutScene = new Subject<DoorAnimHandler>();
@@ -105,7 +107,7 @@ namespace Door
             //時間を再開する
             gamePlayerManager.EnableTime.OnNext(Unit.Default);
             //プレイヤーの速度を停止させる
-            actionHandler.Stop();
+            actionHandler.StopX();
             actionHandler.StopY();
             //アニメーションを変更可能にする
             playerAnimStateHandler.OnExitDoor.OnNext(Unit.Default);

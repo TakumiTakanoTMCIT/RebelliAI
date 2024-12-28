@@ -1,11 +1,11 @@
 using System;
-using System.Collections;
 using ActionStatusChk;
 using Cysharp.Threading.Tasks;
-using PlayerInfo;
 using PlayerState;
 using UnityEngine;
+using UnityEngine.InputSystem.Utilities;
 using UnityEngine.Pool;
+using Zenject;
 
 public class AllShellManager : MonoBehaviour
 {
@@ -13,12 +13,14 @@ public class AllShellManager : MonoBehaviour
     [SerializeField] private int defaultCapacity = 3;
     [SerializeField] private float shootMameInterval = 0.5f;
     [SerializeField] private ActionStatusChecker actionStatusChecker;
+    [SerializeField]GameObject shellPrefab;
+
+    [Inject]
+    DiContainer container;
 
     private ObjectPool<GameObject> pool;
-    PlayerStatus status;
     PlayerStateMgr playerStateMgr;
     GameObject player;
-    GameObject shellPrefab;
 
     bool isMameShootable;
 
@@ -26,13 +28,10 @@ public class AllShellManager : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log($"this.gameObject.name: {this.gameObject.name}");
         isMameShootable = true;
         player = transform.parent.gameObject;
-        status = player.MyGetComponent_NullChker<PlayerStatus>();
         playerStateMgr = player.MyGetComponent_NullChker<PlayerStateMgr>();
 
-        shellPrefab = Resources.Load<GameObject>("Shell");
         if (shellPrefab == null)
             Debug.LogWarning("shellPrefabが設定されていません");
 
@@ -63,7 +62,7 @@ public class AllShellManager : MonoBehaviour
 
     private GameObject CreateShell()
     {
-        GameObject shell = Instantiate(shellPrefab);
+        GameObject shell = container.InstantiatePrefab(shellPrefab);
         shell.GetComponent<ShellMainBodyCrtl>().Init(pool);
         shell.transform.SetParent(mameParentTransform);
 
@@ -110,7 +109,7 @@ public class AllShellManager : MonoBehaviour
     {
         onShotNow?.Invoke();
         onShootChargedShell?.Invoke();
-        var chargedShell = Instantiate(shell, player.transform.position, Quaternion.identity);
+        var chargedShell = container.InstantiatePrefab(shell);
         chargedShell.SetActive(true);
     }
 

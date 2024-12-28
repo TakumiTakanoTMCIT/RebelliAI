@@ -1,14 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using UnityEngine.Pool;
-using PlayerInfo;
 using ActionStatusChk;
 public class DashSparkFactory : MonoBehaviour
 {
     GameObject dashSparkPrefab;
-    PlayerStatus status;
     [SerializeField] private GameObject player;
     [SerializeField] private int DefaultCapacity = 5;
     [SerializeField] private ActionStatusChecker actionStatusChecker;
@@ -29,7 +24,6 @@ public class DashSparkFactory : MonoBehaviour
         );
 
         dashSparkPrefab = Resources.Load<GameObject>("DashSpark");
-        status = player.MyGetComponent_NullChker<PlayerStatus>();
 
         if (player == null)
         {

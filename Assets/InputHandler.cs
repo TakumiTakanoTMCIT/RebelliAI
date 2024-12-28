@@ -22,12 +22,13 @@ namespace KeyHandler
             isAttackKey = false;
 
         //エディタに表示しない
-        [HideInInspector] public bool IsAttackingKey { get { return isattackinKeyNow; } }
+        [HideInInspector] public bool IsAttackingKey => isattackinKeyNow;
 
         [SerializeField]
         private bool walkDirection = true;
 
-        [SerializeField]private bool
+        [SerializeField]
+        private bool
             isjumpkeyDown = false,
             isdashKeydown = false,
             isAttackKeydown = false,

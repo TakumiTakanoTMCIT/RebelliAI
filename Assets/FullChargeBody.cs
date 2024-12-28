@@ -1,8 +1,7 @@
-using UniRx;
-using PlayerInfo;
 using UnityEngine;
 using ActionStatusChk;
 using PlayerState;
+using Zenject;
 
 namespace PlayerShot
 {
@@ -22,14 +21,20 @@ namespace PlayerShot
         [SerializeField]
         protected float speed;
 
+        [Inject]
+        protected PlayerStats playerStatus;
+
+        [SerializeField]
+        protected GameObject playerOriginalPrefab;
+        protected GameObject playerObject;
+
         protected bool isStartedMove;
 
         protected Rigidbody2D rb;
         protected SpriteRenderer spriteRenderer;
-        protected PlayerStatus playerStatus;
         protected PlayerStateMgr playerStateMgr;
         protected IAnimatable animatorCtrl;
-        protected Transform playerPos;
+        protected Transform playerTransform;
         protected ActionStatusChecker actionStatusChecker;
 
         public abstract void DestroyShell();
@@ -42,17 +47,27 @@ namespace PlayerShot
         protected void Awake()
         {
             actionStatusChecker = GameObject.Find("Player").MyGetComponent_NullChker<ActionStatusChecker>();
-            playerStatus = GameObject.Find("Player").MyGetComponent_NullChker<PlayerStatus>();
             playerStateMgr = GameObject.Find("Player").MyGetComponent_NullChker<PlayerStateMgr>();
             rb = gameObject.MyGetComponent_NullChker<Rigidbody2D>();
             spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
             animatorCtrl = GetComponent<IAnimatable>();
-            playerPos = playerStatus.transform;
+
+            playerObject = GameObject.Find(playerOriginalPrefab.name);
+
+            playerTransform = playerObject.transform;
+            gameObject.transform.position = playerTransform.position;
 
             isStartedMove = false;
 
             CustomAwake();
         }
+
+        protected void Start()
+        {
+            CustomStart();
+        }
+
+        abstract protected void CustomStart();
 
         protected void MoveShell()
         {
@@ -93,7 +108,7 @@ namespace PlayerShot
         void RefrectShell();
     }
 
-    public abstract class ShellAnimCtrlBase : MonoBehaviour , IAnimatable
+    public abstract class ShellAnimCtrlBase : MonoBehaviour, IAnimatable
     {
         private void Awake()
         {
@@ -121,7 +136,7 @@ namespace PlayerShot
             boxCollider2D = gameObject.MyGetComponent_NullChker<BoxCollider2D>();
         }
 
-        private void Start()
+        protected override void CustomStart()
         {
             animatorCtrl.StartAnim();
             boxCollider2D.enabled = false;
@@ -132,7 +147,7 @@ namespace PlayerShot
         {
             //スタートアニメーション中はプレイヤーの銃口に追従する
             if (isStartedMove) return;
-            transform.position = playerStatus.transform.position;
+            transform.position = playerTransform.position;
         }
 
         /// <summary>

@@ -2574,7 +2574,6 @@ MonoBehaviour:
   inputHandler: {fileID: 906999083}
   gamePlayerManager: {fileID: 1264633628}
   bossCutSceneHandler: {fileID: 1264633636}
-  actionHandler: {fileID: 906999087}
   playerAnimStateHandler: {fileID: 906999096}
 --- !u!1001 &581550954
 PrefabInstance:
@@ -8532,17 +8531,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b51ff31e90294427599e5feef4b5e6ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &906999087 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7374502908954113833, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
-  m_PrefabInstance: {fileID: 7374502908718793222}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 906999080}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e5ae7c2b494f4147a8cb19b783871af, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!212 &906999093 stripped
 SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 7374502908954113843, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
@@ -8597,6 +8585,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19c876e88935e4abfb91bef9625b6f97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!50 &906999117 stripped
+Rigidbody2D:
+  m_CorrespondingSourceObject: {fileID: 7374502908954113845, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+  m_PrefabInstance: {fileID: 7374502908718793222}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &924561357
 GameObject:
   m_ObjectHideFlags: 0
@@ -14949,6 +14942,7 @@ GameObject:
   - component: {fileID: 1110060449}
   - component: {fileID: 1110060448}
   - component: {fileID: 1110060447}
+  - component: {fileID: 1110060450}
   m_Layer: 0
   m_Name: SceneContext
   m_TagString: Untagged
@@ -14972,6 +14966,8 @@ MonoBehaviour:
   wallKickFactory: {fileID: 1337993094}
   damageTimeHandler: {fileID: 585946350}
   playerDashKeepManager: {fileID: 906999104}
+  playerRb: {fileID: 906999117}
+  actionStatusChecker: {fileID: 906999114}
 --- !u!114 &1110060448
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14987,6 +14983,7 @@ MonoBehaviour:
   _scriptableObjectInstallers: []
   _monoInstallers:
   - {fileID: 1110060447}
+  - {fileID: 1110060450}
   _installerPrefabs: []
   _autoRun: 1
   OnPreInstall:
@@ -15019,6 +15016,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 63
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1110060450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110060446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d26764e3c71514716834f016189d78f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerStats: {fileID: 11400000, guid: 359e95883259e43e4b01593cb9e9a3ef, type: 2}
 --- !u!1001 &1134130826
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19876,6 +19886,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 7374502908954113832, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+      propertyPath: playerStatus
+      value: 
+      objectReference: {fileID: 11400000, guid: 359e95883259e43e4b01593cb9e9a3ef, type: 2}
+    - target: {fileID: 7374502908954113833, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+      propertyPath: playerStatus
+      value: 
+      objectReference: {fileID: 11400000, guid: 359e95883259e43e4b01593cb9e9a3ef, type: 2}
+    - target: {fileID: 7374502908954113835, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+      propertyPath: playerStatus
+      value: 
+      objectReference: {fileID: 11400000, guid: 359e95883259e43e4b01593cb9e9a3ef, type: 2}
     - target: {fileID: 7374502908954113838, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
       propertyPath: m_Name
       value: Player
@@ -19929,6 +19951,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 906999083}
     - target: {fileID: 7374502908954113846, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+      propertyPath: playerStatus
+      value: 
+      objectReference: {fileID: 11400000, guid: 359e95883259e43e4b01593cb9e9a3ef, type: 2}
+    - target: {fileID: 7374502908954113846, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
       propertyPath: playerStateMgr
       value: 
       objectReference: {fileID: 906999115}
@@ -19945,6 +19971,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 585496183}
     - target: {fileID: 7374502908954113847, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+      propertyPath: playerStatus
+      value: 
+      objectReference: {fileID: 11400000, guid: 359e95883259e43e4b01593cb9e9a3ef, type: 2}
+    - target: {fileID: 7374502908954113847, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
       propertyPath: wallKickFactory
       value: 
       objectReference: {fileID: 1337993094}
@@ -19952,6 +19982,10 @@ PrefabInstance:
       propertyPath: dashSparkFactory
       value: 
       objectReference: {fileID: 1599515777}
+    - target: {fileID: 7374502908954113854, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+      propertyPath: playerStatus
+      value: 
+      objectReference: {fileID: 11400000, guid: 359e95883259e43e4b01593cb9e9a3ef, type: 2}
     - target: {fileID: 7374502908954113854, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
       propertyPath: gameFlowManager
       value: 
@@ -19969,6 +20003,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 585496183}
     - target: {fileID: 7374502909154274617, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+      propertyPath: shellPrefab
+      value: 
+      objectReference: {fileID: 4312330236545398448, guid: f756b09db5e5f4a89bfb4522e01fd0be, type: 3}
+    - target: {fileID: 7374502909154274617, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
       propertyPath: actionStatusChecker
       value: 
       objectReference: {fileID: 906999114}
@@ -19976,5 +20014,15 @@ PrefabInstance:
       propertyPath: mameParentTransform
       value: 
       objectReference: {fileID: 1143615741}
-    m_RemovedComponents: []
+    - target: {fileID: 7374502909154274618, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+      propertyPath: fullLevel_EnergyBall
+      value: 
+      objectReference: {fileID: 4650480833402195142, guid: c237a923bbb1c44a9a4c47a26a0e0814, type: 3}
+    - target: {fileID: 7374502909154274618, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+      propertyPath: levelLower_EnergyBall
+      value: 
+      objectReference: {fileID: 8222463472790942817, guid: 4e3e35491bd954bd7b12a497250ef1f7, type: 3}
+    m_RemovedComponents:
+    - {fileID: 7374502908954113844, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
+    - {fileID: 7374502908954113833, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}

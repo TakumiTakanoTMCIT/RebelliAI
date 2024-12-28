@@ -171,6 +171,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 14
+  playerOriginalPrefab: {fileID: 7374502908954113838, guid: 516f0188f4ab64f04a87fb86994f9d46, type: 3}
   myLevel: 2
 --- !u!114 &4034020311666730795
 MonoBehaviour:

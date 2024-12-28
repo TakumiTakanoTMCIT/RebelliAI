@@ -1,7 +1,7 @@
-using PlayerInfo;
 using PlayerState;
 using UnityEngine;
 using KeyHandler;
+using Zenject;
 
 namespace ActionStatusChk
 {
@@ -10,24 +10,24 @@ namespace ActionStatusChk
         [SerializeField] private PlayerStateMgr playerStateMgr;
         [SerializeField] private InputHandler inputHandler;
         [SerializeField] private PlayerAnimStateHandler animStateHandler;
-        [SerializeField] private ActionStatusChecker actionStatusChecker;
 
         GroundChk groundChecker;
         SideChecker leftSideChecker, rightSideChecker, wallLeftChecker, wallRightChecker;
-        PlayerStatus playerStatus;
+
+        [Inject]
+        PlayerStats playerStatus;
         Rigidbody2D rb;
 
         private bool _direction;
         public bool Direction => _direction;
 
-        public void Init(GroundChk groundChk, SideChecker left, SideChecker right, SideChecker wallleft, SideChecker wallright, PlayerStatus playerStatus, Rigidbody2D rb)
+        public void Init(GroundChk groundChk, SideChecker left, SideChecker right, SideChecker wallleft, SideChecker wallright, Rigidbody2D rb)
         {
             this.groundChecker = groundChk;
             this.leftSideChecker = left;
             this.rightSideChecker = right;
             this.wallLeftChecker = wallleft;
             this.wallRightChecker = wallright;
-            this.playerStatus = playerStatus;
             this.rb = rb;
         }
 
@@ -103,7 +103,7 @@ namespace ActionStatusChk
         }
 
         //DashStateの開始時にプレイヤーの向きを設定する
-        public void SetPlayerDiresctionFromDashStateBigin(bool direction)
+        public void SetPlayerDirectionFromDashStart(bool direction)
         {
             _direction = direction;
         }
@@ -118,7 +118,7 @@ namespace ActionStatusChk
 
             if (inputHandler.IsMoveRightKey()) _direction = true;
 
-            if (animStateHandler.currentState == animStateHandler.wallKickState) return;
+            if (animStateHandler.WhatCurrentAnimState(animStateHandler.wallKickState)) return;
 
             //WallFall中の場合
             if(playerStateMgr.WhatCurrentState(playerStateMgr.wallFallState))

@@ -1,4 +1,3 @@
-using PlayerInfo;
 using UnityEngine;
 using UnityEngine.Pool;
 using HPBar;

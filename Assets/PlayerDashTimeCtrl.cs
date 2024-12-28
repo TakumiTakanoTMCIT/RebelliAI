@@ -1,21 +1,18 @@
 using UnityEngine;
 using System.Collections;
-using PlayerInfo;
+using Zenject;
 
+/// <summary>
+/// プレイヤーがダッシュを始めたら何秒間ダッシュを続けるかを制御するクラスです
+/// </summary>
 public class PlayerDashTimeCtrl : MonoBehaviour
 {
-    PlayerStatus playerStatus;
-    public void Init(PlayerStatus playerStatus)
-    {
-        this.playerStatus = playerStatus;
-    }
+    [Inject]
+    PlayerStats playerStatus;
 
     [SerializeField]
     private bool isDashNow = false;
-    public bool IsDashNow
-    {
-        get { return isDashNow; }
-    }
+    public bool IsDashNow => isDashNow;
 
     /// <summary>
     /// プレイヤーがダッシュを始めたら何秒間ダッシュを続けるかを制御するコルーチンです

@@ -1,38 +1,26 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using ActionStatusChk;
-using Cysharp.Threading.Tasks;
-using PlayerInfo;
-using Door;
 using UnityEngine;
+using Zenject;
 
 namespace PlayerAction
 {
-    public class ActionHandler : MonoBehaviour
+    public class ActionHandler
     {
         Rigidbody2D rb;
         ActionStatusChecker actionStatusChecker;
-        PlayerStatus status;
+
+        [Inject]
+        PlayerStats playerStatus;
         PlayerDashKeepManager dashKeepManager;
 
-        public void Init(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerStatus status, PlayerDashKeepManager dashKeepManager)
+        public ActionHandler(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerDashKeepManager dashKeepManager)
         {
-            LateInit(rb, actionStatusChecker, status, dashKeepManager);
-        }
-
-        //待ってから初期化
-        async void LateInit(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerStatus status, PlayerDashKeepManager dashKeepManager)
-        {
-            await UniTask.Delay(TimeSpan.FromSeconds(0.02f));
-
             this.rb = rb;
             this.actionStatusChecker = actionStatusChecker;
-            this.status = status;
             this.dashKeepManager = dashKeepManager;
         }
 
-        public void Stop()
+        public void StopX()
         {
             //いい対処法ではないので、後で確実に修正
             if (rb == null) return;
@@ -55,23 +43,23 @@ namespace PlayerAction
 
             if (actionStatusChecker.IsWall(direction))
             {
-                Stop();
+                StopX();
                 return false;
             }
 
             if (direction)
             {
                 if (dashKeepManager.IsKeepDashSpeed)
-                    rb.velocity = new Vector2(status.DashSpeed, rb.velocity.y);
+                    rb.velocity = new Vector2(playerStatus.DashSpeed, rb.velocity.y);
                 else
-                    rb.velocity = new Vector2(status.MoveSpeed, rb.velocity.y);
+                    rb.velocity = new Vector2(playerStatus.MoveSpeed, rb.velocity.y);
             }
             else
             {
                 if (dashKeepManager.IsKeepDashSpeed)
-                    rb.velocity = new Vector2(-status.DashSpeed, rb.velocity.y);
+                    rb.velocity = new Vector2(-playerStatus.DashSpeed, rb.velocity.y);
                 else
-                    rb.velocity = new Vector2(-status.MoveSpeed, rb.velocity.y);
+                    rb.velocity = new Vector2(-playerStatus.MoveSpeed, rb.velocity.y);
             }
             return true;
         }
@@ -83,26 +71,26 @@ namespace PlayerAction
 
         public void WallFall()
         {
-            rb.velocity = new Vector2(0, -status.WallFallSpeed);
+            rb.velocity = new Vector2(0, -playerStatus.WallFallSpeed);
         }
 
         public void Dash(bool direction)
         {
             if (direction)
-                rb.velocity = new Vector2(status.DashSpeed, rb.velocity.y);
+                rb.velocity = new Vector2(playerStatus.DashSpeed, rb.velocity.y);
             else
-                rb.velocity = new Vector2(-status.DashSpeed, rb.velocity.y);
+                rb.velocity = new Vector2(-playerStatus.DashSpeed, rb.velocity.y);
         }
 
         public void Damage()
         {
             if (actionStatusChecker.Direction)
             {
-                rb.AddForce(new Vector2(-status.damageForce.x, status.damageForce.y), ForceMode2D.Impulse);
+                rb.AddForce(new Vector2(-playerStatus.damageForce.x, playerStatus.damageForce.y), ForceMode2D.Impulse);
             }
             else
             {
-                rb.AddForce(new Vector2(status.damageForce.x, status.damageForce.y), ForceMode2D.Impulse);
+                rb.AddForce(new Vector2(playerStatus.damageForce.x, playerStatus.damageForce.y), ForceMode2D.Impulse);
             }
         }
     }

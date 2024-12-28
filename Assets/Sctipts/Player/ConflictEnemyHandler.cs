@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using PlayerInfo;
-using PlayerState;
 using UnityEngine;
 
 public interface IConflictEnemy

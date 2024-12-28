@@ -1,13 +1,13 @@
 using System;
-using System.Collections;
 using Cysharp.Threading.Tasks;
-using PlayerInfo;
 using UnityEngine;
 using HPBar;
+using Zenject;
 
 public class DamageTimeHandler : MonoBehaviour
 {
-    [SerializeField] PlayerStatus playerStatus;
+    [Inject]
+    PlayerStats playerStatus;
 
     private bool isDamaging;
     public bool IsDamaging { get { return isDamaging; } }

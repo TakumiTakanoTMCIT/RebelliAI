@@ -1,16 +1,17 @@
 using System;
-using PlayerInfo;
 using PlayerState;
 using UnityEngine;
 using HPBar;
 using UniRx;
-using Door;
 using ActionStatusChk;
 
 public class PlayerAnimStateHandler : MonoBehaviour
 {
+    //向きに合わせて、スプライトを反転させるためのフィールド
     [SerializeField] ActionStatusChecker actionStatusChecker;
+    //ワープアニメーションの終了を通知するためのイベントを発行するためのフィールド
     [SerializeField] GameFlowManager gameFlowManager;
+    //死亡時のエフェクトを生成するためのファクトリ
     [SerializeField] private DeathGlitchSparkFactory deathGlitchSparkFactory;
     [SerializeField] internal bool isDebugMode = false;
     internal Animator animator;
@@ -20,7 +21,6 @@ public class PlayerAnimStateHandler : MonoBehaviour
     internal IPlayerAnimState currentState;
 
     AnimatorCtrl animatorCtrl;
-    PlayerStatus playerStatus;
 
     SpriteRenderer spriteRenderer;
 
@@ -38,7 +38,6 @@ public class PlayerAnimStateHandler : MonoBehaviour
     {
         animator = gameObject.MyGetComponent_NullChker<Animator>();
         stateMgr = gameObject.MyGetComponent_NullChker<PlayerStateMgr>();
-        playerStatus = gameObject.MyGetComponent_NullChker<PlayerStatus>();
         spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
 
         GameFlowManager.StartBattleAction.Subscribe(_ =>
@@ -69,7 +68,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
         dashState = new DashState(animatorCtrl);
         wallFallState = new WallFallState(animatorCtrl);
         wallKickState = new WallKickState(animatorCtrl);
-        damageState = new DamageState(animatorCtrl, playerStatus, spriteRenderer, actionStatusChecker);
+        damageState = new DamageState(animatorCtrl, spriteRenderer, actionStatusChecker);
         deathState = new DeathState(animatorCtrl, this);
         warpState = new WarpState(animatorCtrl);
         neutralIdleState = new NeutralIdle(animatorCtrl);
@@ -149,6 +148,18 @@ public class PlayerAnimStateHandler : MonoBehaviour
     void OnDeath()
     {
         ChangeAnimState(deathState);
+    }
+
+    public bool WhatCurrentAnimState(IPlayerAnimState state)
+    {
+        if(currentState == state)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }
 
@@ -328,13 +339,12 @@ public class WallKickState : IPlayerAnimState
 public class DamageState : IPlayerAnimState
 {
     AnimatorCtrl animatorCtrl;
-    PlayerStatus playerStatus;
+    private PlayerStats playerStatus;
     SpriteRenderer spriteRenderer;
     ActionStatusChecker actionStatusChecker;
-    public DamageState(AnimatorCtrl animatorCtrl, PlayerStatus playerStatus, SpriteRenderer spriteRenderer, ActionStatusChecker actionStatusChecker)
+    public DamageState(AnimatorCtrl animatorCtrl, SpriteRenderer spriteRenderer, ActionStatusChecker actionStatusChecker)
     {
         this.animatorCtrl = animatorCtrl;
-        this.playerStatus = playerStatus;
         this.spriteRenderer = spriteRenderer;
         this.actionStatusChecker = actionStatusChecker;
     }

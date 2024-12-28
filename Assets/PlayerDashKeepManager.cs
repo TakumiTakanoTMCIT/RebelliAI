@@ -19,17 +19,14 @@ public class PlayerDashKeepManager : MonoBehaviour
     }
 
     [SerializeField] private bool isKeepDashSpeed = false;
-    public bool IsKeepDashSpeed
-    {
-        get { return isKeepDashSpeed; }
-    }
+    public bool IsKeepDashSpeed => isKeepDashSpeed;
 
     public void KeepDashSpeed()
     {
         isKeepDashSpeed = true;
     }
 
-    private void StopDashSpeed()
+    public void StopDashSpeed()
     {
         isKeepDashSpeed = false;
     }

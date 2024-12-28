@@ -12,7 +12,7 @@ class LowChargeBody : ShellBase
         boxCollider2D = gameObject.MyGetComponent_NullChker<BoxCollider2D>();
     }
 
-    private void Start()
+    protected override void CustomStart()
     {
         boxCollider2D.enabled = false;
         isStartedMove = false;
@@ -23,7 +23,7 @@ class LowChargeBody : ShellBase
         //移動を始めていなかったらプレイヤーの位置に合わせる
         if(!isStartedMove)
         {
-            transform.position = playerPos.position;
+            transform.position = playerTransform.position;
         }
     }
 
@@ -37,6 +37,7 @@ class LowChargeBody : ShellBase
 
     public override void DestroyShell()
     {
+        Debug.LogError("LowChargeBody DestroyShell");
         Destroy(gameObject);
     }
 

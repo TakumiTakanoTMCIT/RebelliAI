@@ -1,51 +1,32 @@
 using System;
-using PlayerInfo;
 using UnityEngine;
 using HPBar;
 
 public class ChargeShot_Handler : MonoBehaviour
 {
-    internal GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
+    [SerializeField] public GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
 
     private bool isMinimumChargeTime = false;
-    public bool IsMinimumChargeTime
-    {
-        get { return isMinimumChargeTime; }
-    }
+    public bool IsMinimumChargeTime => isMinimumChargeTime;
 
     float timer;
-
-    AllShellManager shellManager;
 
     [SerializeField] private float mameCharge_TimeThreshold = 0.5f, lowCharge_TimeThreshold = 1.0f, fullCharge_TimeThreshold = 1.7f;
 
     private bool isCharging;
-    public bool IsCharging
-    {
-        get { return isCharging; }
-    }
+    public bool IsCharging => isCharging;
 
     private bool isLowCharged;
-    public bool IsLowCharged
-    {
-        get { return isLowCharged; }
-    }
+    public bool IsLowCharged => isLowCharged;
 
     private bool isFullCharged;
-    public bool IsFullCharged
-    {
-        get { return isFullCharged; }
-    }
+    public bool IsFullCharged => isFullCharged;
 
     public static event Action onLowCharge, onFullCharge;
 
-    public void Init(PlayerStatus playerStatus, AllShellManager shellManager)
+    private void Awake()
     {
-        this.shellManager = shellManager;
         ResetSettings();
-
-        levelLower_EnergyBall = Resources.Load<GameObject>("LevelLowerShell");
-        fullLevel_EnergyBall = Resources.Load<GameObject>("FullChargeBall");
 
         if (levelLower_EnergyBall == null)
             Debug.Log("LevelLowerShellがResourcesディレクトリにありません。確認してください!!");

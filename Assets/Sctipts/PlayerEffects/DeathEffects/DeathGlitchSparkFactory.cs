@@ -1,8 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
-using PlayerInfo;
 using UnityEngine;
-using UnityEngine.Pool;
 
 public class DeathGlitchSparkFactory : MonoBehaviour
 {
