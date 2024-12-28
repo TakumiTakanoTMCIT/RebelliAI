@@ -2,15 +2,16 @@ using PlayerInfo;
 using UnityEngine;
 using UnityEngine.Pool;
 using HPBar;
+using ActionStatusChk;
 
 public class AfterGrowMain : MonoBehaviour
 {
     [SerializeField] private float AddPosY = 0.5f;
 
+    ActionStatusChecker actionStatusChecker;
     ObjectPool<GameObject> pool;
     Transform playerTransform;
     SpriteRenderer spriteRenderer;
-    PlayerStatus playerStatus;
 
     private void OnEnable()
     {
@@ -26,17 +27,17 @@ public class AfterGrowMain : MonoBehaviour
         HPBarHandler.onPlayerDamage -= OnPlayerDeathAndEndAnim;
     }
 
-    public void Init(ObjectPool<GameObject> pool, Transform transform, PlayerStatus playerStatus)
+    public void Init(ObjectPool<GameObject> pool, Transform transform, ActionStatusChecker actionStatusChecker)
     {
         this.pool = pool;
         this.playerTransform = transform;
-        this.playerStatus = playerStatus;
+        this.actionStatusChecker = actionStatusChecker;
     }
 
     public void StartAnim_Movement()
     {
         spriteRenderer = this.gameObject.MyGetComponent_NullChker<SpriteRenderer>();
-        spriteRenderer.flipX = !playerStatus.playerdirection;
+        spriteRenderer.flipX = !actionStatusChecker.Direction;
         spriteRenderer.flipY = Random.Range(0, 2) == 0;
 
         Vector2 pos;

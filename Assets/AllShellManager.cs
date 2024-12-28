@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using ActionStatusChk;
 using Cysharp.Threading.Tasks;
 using PlayerInfo;
+using PlayerState;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -10,9 +12,11 @@ public class AllShellManager : MonoBehaviour
     [SerializeField] private Transform mameParentTransform;
     [SerializeField] private int defaultCapacity = 3;
     [SerializeField] private float shootMameInterval = 0.5f;
+    [SerializeField] private ActionStatusChecker actionStatusChecker;
 
     private ObjectPool<GameObject> pool;
     PlayerStatus status;
+    PlayerStateMgr playerStateMgr;
     GameObject player;
     GameObject shellPrefab;
 
@@ -26,6 +30,7 @@ public class AllShellManager : MonoBehaviour
         isMameShootable = true;
         player = transform.parent.gameObject;
         status = player.MyGetComponent_NullChker<PlayerStatus>();
+        playerStateMgr = player.MyGetComponent_NullChker<PlayerStateMgr>();
 
         shellPrefab = Resources.Load<GameObject>("Shell");
         if (shellPrefab == null)
@@ -68,7 +73,7 @@ public class AllShellManager : MonoBehaviour
     private void GetShell(GameObject shell)
     {
         shell.SetActive(true);
-        shell.MyGetComponent_NullChker<ShellMainBodyCrtl>().GetShellAndSetDirection(status.playerdirection, status.IsDashNow());
+        shell.MyGetComponent_NullChker<ShellMainBodyCrtl>().GetShellAndSetDirection(actionStatusChecker.Direction, playerStateMgr.WhatCurrentState(playerStateMgr.dashState));
         shell.transform.position = player.transform.position;
     }
 

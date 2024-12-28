@@ -5,8 +5,6 @@ using Door;
 
 public class DoorAnimHandler : MonoBehaviour
 {
-    public static event Action onDoorClosed;
-
     public Subject<Unit> onDoorOpenedSubject = new Subject<Unit>();
     public Subject<Unit> onDoorClosedSubject = new Subject<Unit>();
 

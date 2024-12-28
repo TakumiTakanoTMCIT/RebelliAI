@@ -5,9 +5,11 @@ using UnityEngine;
 using HPBar;
 using UniRx;
 using Door;
+using ActionStatusChk;
 
 public class PlayerAnimStateHandler : MonoBehaviour
 {
+    [SerializeField] ActionStatusChecker actionStatusChecker;
     [SerializeField] GameFlowManager gameFlowManager;
     [SerializeField] private DeathGlitchSparkFactory deathGlitchSparkFactory;
     [SerializeField] internal bool isDebugMode = false;
@@ -67,7 +69,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
         dashState = new DashState(animatorCtrl);
         wallFallState = new WallFallState(animatorCtrl);
         wallKickState = new WallKickState(animatorCtrl);
-        damageState = new DamageState(animatorCtrl, playerStatus, spriteRenderer);
+        damageState = new DamageState(animatorCtrl, playerStatus, spriteRenderer, actionStatusChecker);
         deathState = new DeathState(animatorCtrl, this);
         warpState = new WarpState(animatorCtrl);
         neutralIdleState = new NeutralIdle(animatorCtrl);
@@ -84,25 +86,19 @@ public class PlayerAnimStateHandler : MonoBehaviour
     {
         HPBarHandler.onPlayerDamage += OnDamage;
         HPBarHandler.onPlayerDeath += OnDeath;
-
-        BossDoorBody.onDoorTouched += () => isChangeableAnim = false;
-        DoorAnimHandler.onDoorClosed += () => isChangeableAnim = true;
     }
 
     private void OnDisable()
     {
         HPBarHandler.onPlayerDamage -= OnDamage;
         HPBarHandler.onPlayerDeath -= OnDeath;
-
-        BossDoorBody.onDoorTouched -= () => isChangeableAnim = false;
-        DoorAnimHandler.onDoorClosed -= () => isChangeableAnim = true;
     }
 
     private void Update()
     {
         if (currentState == damageState) return;
 
-        if (playerStatus.playerdirection)
+        if (actionStatusChecker.Direction)
             spriteRenderer.flipX = false;
         else
             spriteRenderer.flipX = true;
@@ -334,18 +330,20 @@ public class DamageState : IPlayerAnimState
     AnimatorCtrl animatorCtrl;
     PlayerStatus playerStatus;
     SpriteRenderer spriteRenderer;
-    public DamageState(AnimatorCtrl animatorCtrl, PlayerStatus playerStatus, SpriteRenderer spriteRenderer)
+    ActionStatusChecker actionStatusChecker;
+    public DamageState(AnimatorCtrl animatorCtrl, PlayerStatus playerStatus, SpriteRenderer spriteRenderer, ActionStatusChecker actionStatusChecker)
     {
         this.animatorCtrl = animatorCtrl;
         this.playerStatus = playerStatus;
         this.spriteRenderer = spriteRenderer;
+        this.actionStatusChecker = actionStatusChecker;
     }
 
     public void Enter()
     {
         animatorCtrl.StartAnim("isDamaging");
 
-        spriteRenderer.flipX = !playerStatus.playerdirection;
+        spriteRenderer.flipX = actionStatusChecker.Direction;
     }
 
     public void Exit()

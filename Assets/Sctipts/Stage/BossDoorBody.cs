@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Door
@@ -14,12 +13,11 @@ namespace Door
         [SerializeField] internal bool isBossDoor = false;
         [SerializeField] static bool isDebugMode = false;
         const float canEnterDistance = 0.65f;
-        public static event Action onDoorTouched;
 
         BossDoorCutSceneCtrl bossDoorCutSceneCtrl;
         internal CameraGoBossStageController cameraGoBossStageController;
 
-        Door.PlayerCtrl playerCtrl;
+        PlayerCtrl playerCtrl;
 
         BoxCollider2D boxCollider2D;
 

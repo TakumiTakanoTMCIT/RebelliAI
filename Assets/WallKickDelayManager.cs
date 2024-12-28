@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 using PlayerInfo;
 using PlayerState;
 
@@ -66,12 +65,10 @@ public class WallKickDelayManager : MonoBehaviour
         if (!isJumpKey_Accepting) return;
 
         //ジャンプキーが押されたら
-        if (stateMgr.inputHandler.IsJumpKeyDown())
+        if (stateMgr.InputHandler.IsJumpKeyDown())
         {
             //コルーチンの受け付け時間を終了する
             Stop_JumpKey_AcceptingTime();
-
-            //Debug.Log("WallKickをfallから割り込んでします");
 
             //wallkickに遷移する
             stateMgr.ChangeState(stateMgr.wallKick);

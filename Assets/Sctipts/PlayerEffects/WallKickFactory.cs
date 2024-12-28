@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using ActionStatusChk;
 using PlayerInfo;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -11,6 +10,7 @@ public class WallKickFactory : MonoBehaviour
     [SerializeField] private GameObject player;
     [SerializeField] float YPosAdd = 0.5f;
     [SerializeField] private Transform parentTransform;
+    [SerializeField] private ActionStatusChecker actionStatusChk;
     GameObject preafab;
     PlayerStatus playerStatus;
 
@@ -71,6 +71,6 @@ public class WallKickFactory : MonoBehaviour
 
     public void MakeEffect(Transform playertransform)
     {
-        pool.Get().GetComponent<WallKickSparkBody>().StartMove(playerStatus.playerdirection);
+        pool.Get().GetComponent<WallKickSparkBody>().StartMove(actionStatusChk.Direction);
     }
 }

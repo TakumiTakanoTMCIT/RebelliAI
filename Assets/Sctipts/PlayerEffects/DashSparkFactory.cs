@@ -4,12 +4,14 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.Pool;
 using PlayerInfo;
+using ActionStatusChk;
 public class DashSparkFactory : MonoBehaviour
 {
     GameObject dashSparkPrefab;
     PlayerStatus status;
     [SerializeField] private GameObject player;
     [SerializeField] private int DefaultCapacity = 5;
+    [SerializeField] private ActionStatusChecker actionStatusChecker;
 
     private ObjectPool<GameObject> pool;
 
@@ -57,7 +59,7 @@ public class DashSparkFactory : MonoBehaviour
     private void GetEffect(GameObject effect)
     {
         effect.SetActive(true);
-        effect.gameObject.GetComponent<DashSparkBody>().Init(pool, player.transform, status.playerdirection);
+        effect.gameObject.GetComponent<DashSparkBody>().Init(pool, player.transform, actionStatusChecker.Direction);
     }
 
     private void ReleaseEffect(GameObject effect)

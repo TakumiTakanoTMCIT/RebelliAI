@@ -43,9 +43,6 @@ public class PlayerInitializer : MonoBehaviour
     //Unity側のコンポーネント-------------------------------------
     Rigidbody2D rb;
 
-    //アタッチされてほしいコンポーネント-------------------------------
-    BoxCollider2D boxCollider;
-
     private void Awake()
     {
         this.gameObject.MyGetComponent_NullChker<BoxCollider2D>();

@@ -7,44 +7,50 @@ using UnityEngine;
 using HPBar;
 using Cysharp.Threading.Tasks;
 using UniRx;
+using Zenject;
 
 namespace PlayerState
 {
     public class PlayerStateMgr : MonoBehaviour
     {
-        internal ActionStatusChecker actionStatusChk;
-        internal PlayerStatus playerStatus;
-        internal ActionHandler actionHandler;
-        internal InputHandler inputHandler;
-        internal Rigidbody2D rb;
-        internal PlayerDashKeepManager dashKeepManager;
-        internal PlayerAnimStateHandler animHandler;
+        [Inject]
+        private DiContainer container;
 
+        //このクラスのみだけどコンストラクタで使用している変数
+        private PlayerAnimStateHandler animHandler;
+
+        //このクラスのみで使用している変数
+        [SerializeField] private bool isDebugCurrentState = false;
+        [SerializeField] private HPBarHandler hPBarHandler;
         private WallKickDelayManager wallKickManager;
+        private IState currentState;
+        private bool isExecutable;
+        private InputHandler inputHandler;
+        private ActionHandler actionHandler;
+        private ActionStatusChecker actionStatusChecker;
+        private Rigidbody2D rb;
+        private PlayerStatus playerStatus;
 
+        //他のクラスからアクセスされる変数
+        public IState CurrentState => currentState;
+        public PlayerStatus PlayerStatus => playerStatus;
+        public InputHandler InputHandler => inputHandler;
+        public ActionHandler ActionHandler => actionHandler;
+        public ActionStatusChecker ActionStatusChecker => actionStatusChecker;
+
+        //ステートクラスから頻繁にアクセスされるので、publicにしています
         public IState idleState, walkState, jumpState, fallState, wallFallState, wallKick,
         dashState, damageState, deathState;
 
-        internal IState currentState;
-        internal bool isExecutable;
-
-        [SerializeField] internal DashSparkFactory dashSparkFactory;
-        [SerializeField] internal WallKickFactory wallKickFactory;
-        [SerializeField] DamageTimeHandler damageTimeHandler;
-        [SerializeField] HPBarHandler hPBarHandler;
-
-        [SerializeField] bool isDebugCurrentState = false;
-
-        public void Init(Rigidbody2D rb, PlayerStatus playerStatus, ActionHandler actionHandler, ActionStatusChecker actionStatusChk, InputHandler inputHandler, PlayerDashKeepManager dashKeepManager, WallKickDelayManager wallKickManager, PlayerAnimStateHandler animStateHandler)
+        public void Init(Rigidbody2D rb, PlayerStatus playerStatus, ActionHandler ActionHandler, ActionStatusChecker ActionStatusChecker, InputHandler InputHandler, PlayerDashKeepManager dashKeepManager, WallKickDelayManager wallKickManager, PlayerAnimStateHandler animStateHandler)
         {
             isExecutable = false;
 
             this.rb = rb;
             this.playerStatus = playerStatus;
-            this.actionHandler = actionHandler;
-            this.actionStatusChk = actionStatusChk;
-            this.inputHandler = inputHandler;
-            this.dashKeepManager = dashKeepManager;
+            this.actionHandler = ActionHandler;
+            this.actionStatusChecker = ActionStatusChecker;
+            this.inputHandler = InputHandler;
             this.wallKickManager = wallKickManager;
             this.animHandler = animStateHandler;
         }
@@ -52,13 +58,21 @@ namespace PlayerState
         private void Awake()
         {
             idleState = new Idle(this, animHandler);
-            walkState = new Walk();
-            jumpState = new Jump();
-            fallState = new Fall();
-            wallFallState = new WallFall();
-            wallKick = new WallKick();
-            damageState = new DamageState(animHandler, damageTimeHandler, actionHandler);
-            deathState = new DeathState(animHandler, playerStatus);
+            walkState = new Walk(animHandler);
+            dashState = new Dash(animHandler);
+            jumpState = new Jump(animHandler);
+            fallState = new Fall(animHandler);
+            wallFallState = new WallFall(animHandler);
+            wallKick = new WallKick(animHandler);
+            damageState = new DamageState(animHandler, ActionHandler);
+            deathState = new DeathState();
+
+            //Injectしています
+            container.Inject(dashState);
+            container.Inject(wallKick);
+            container.Inject(damageState);
+
+            Debug.LogError("All states are initialized!");
 
             GameFlowManager.StartBattleAction.Subscribe(_ =>
             {
@@ -69,7 +83,7 @@ namespace PlayerState
 
         private void Start()
         {
-            if(hPBarHandler == null)
+            if (hPBarHandler == null)
             {
                 Debug.LogWarning("HPBarHandler is not assigned!");
             }
@@ -78,6 +92,7 @@ namespace PlayerState
         //プレイヤーが画面外に出たら
         private void OnBecameInvisible()
         {
+            //TODO:画面外で死ぬ処理はここに書くべきなのか？責務に反するので、後で修正
             hPBarHandler.onPlayerInVoid.OnNext(Unit.Default);
         }
 
@@ -114,6 +129,9 @@ namespace PlayerState
             IState previousState;
             previousState = currentState;
 
+            Debug.Log("PreviousState: " + previousState);
+            Debug.Log("NextState: " + nextState);
+
             isExecutable = false;
             currentState.Exit(this);
             currentState = nextState;
@@ -143,8 +161,9 @@ namespace PlayerState
         {
             ChangeState(deathState);
 
-            actionHandler.Stop();
-            actionHandler.StopY();
+            ActionHandler.Stop();
+            ActionHandler.StopY();
+            //TODO:ここで重力を操作するのは責務に反するので、後で修正
             rb.gravityScale = 0;
         }
 
@@ -163,6 +182,11 @@ namespace PlayerState
         public IState GetCurrentState()
         {
             return currentState;
+        }
+
+        public bool WhatCurrentState(IState checkeState)
+        {
+            return currentState == checkeState;
         }
     }
 
@@ -186,12 +210,12 @@ namespace PlayerState
     public class Idle : IState
     {
         PlayerStateMgr playerStateMgr;
-        PlayerAnimStateHandler animStateHandler;
+        PlayerAnimStateHandler animHandler;
 
         public Idle(PlayerStateMgr playerStateMgr, PlayerAnimStateHandler animStateHandler)
         {
             this.playerStateMgr = playerStateMgr;
-            this.animStateHandler = animStateHandler;
+            this.animHandler = animStateHandler;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
@@ -199,20 +223,18 @@ namespace PlayerState
             /// <summary>
             /// 移動を止める処理を最初に実行し初期化しておく
             /// </summary>
-            stateMgr.actionHandler.Stop();
+            stateMgr.ActionHandler.Stop();
 
-            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.idleState);
-
-            DoorAnimHandler.onDoorClosed += CheckCorrectAnim;
+            animHandler.ChangeAnimState(animHandler.idleState);
         }
 
         //イベントハンドラ
         //TODO:なんでこれを書いた？
         void CheckCorrectAnim()
         {
-            if (playerStateMgr.actionStatusChk.IsGround())
+            if (playerStateMgr.ActionStatusChecker.IsGround())
             {
-                animStateHandler.ChangeAnimState(animStateHandler.idleState);
+                animHandler.ChangeAnimState(animHandler.idleState);
             }
         }
 
@@ -222,7 +244,7 @@ namespace PlayerState
             /// 地面についておらず、落下中ならfallstateに遷移
             /// なぜ地面の判定を取るのかというと、落ちる床に乗っている時にプレイヤーも落下中と判定されてしまうので、それでは不自然なので判定しました
             /// </summary>
-            if (!stateMgr.actionStatusChk.IsGround() && stateMgr.actionStatusChk.IsFallingNow())
+            if (!stateMgr.ActionStatusChecker.IsGround() && stateMgr.ActionStatusChecker.IsFallingNow())
             {
                 stateMgr.ChangeState(stateMgr.fallState);
                 return;
@@ -232,7 +254,7 @@ namespace PlayerState
             /// ジャンプキーが押されたらJumpStateに遷移
             /// ここで地面の判定を取るべきかと悩みますが、上で落ちているかどうかの判定が取れているので、上のif文を通過している場合は地面にいないです
             /// </sumary>
-            if (stateMgr.inputHandler.IsJumpKeyDown())
+            if (stateMgr.InputHandler.IsJumpKeyDown())
             {
                 stateMgr.ChangeState(stateMgr.jumpState);
                 return;
@@ -242,46 +264,43 @@ namespace PlayerState
             /// 歩行に遷移するかどうかの判定です
             /// 壁の検知を行い、移動キーを押していたとしても、進行方向の壁にぶつかっていたら遷移せずに待機します
             /// </summary>
-            if (stateMgr.inputHandler.IsMoveKey())
+            if (stateMgr.InputHandler.IsMoveKey())
             {
-                if (stateMgr.inputHandler.IsMoveLeftKey())
+                if (stateMgr.InputHandler.IsMoveLeftKey())
                 {
-                    if (stateMgr.actionStatusChk.IsWall(false))
+                    if (stateMgr.ActionStatusChecker.IsWall(false))
                         return;
 
                     stateMgr.ChangeState(stateMgr.walkState);
                 }
 
-                if (stateMgr.inputHandler.IsMoveRightKey())
+                if (stateMgr.InputHandler.IsMoveRightKey())
                 {
-                    if (stateMgr.actionStatusChk.IsWall(true))
+                    if (stateMgr.ActionStatusChecker.IsWall(true))
                         return;
 
                     stateMgr.ChangeState(stateMgr.walkState);
                 }
             }
 
-            if (stateMgr.inputHandler.IsDashKeyDown())
+            if (stateMgr.InputHandler.IsDashKeyDown())
             {
-                if (stateMgr.playerStatus.playerdirection)
+                if (stateMgr.ActionStatusChecker.Direction)
                 {
-                    stateMgr.dashState = new Dash(true);
+                    (stateMgr.dashState as Dash)?.DirectionSetter(true);
                     stateMgr.ChangeState(stateMgr.dashState);
                     return;
                 }
                 else
                 {
-                    stateMgr.dashState = new Dash(false);
+                    (stateMgr.dashState as Dash)?.DirectionSetter(false);
                     stateMgr.ChangeState(stateMgr.dashState);
                     return;
                 }
             }
         }
 
-        public void Exit(PlayerStateMgr stateMgr)
-        {
-            DoorAnimHandler.onDoorClosed -= CheckCorrectAnim;
-        }
+        public void Exit(PlayerStateMgr stateMgr) { }
     }
 
     public class Walk : IState, IWalker
@@ -292,6 +311,13 @@ namespace PlayerState
         /// </summary>
         public bool isWalkNow { get; set; }
 
+        PlayerAnimStateHandler animHandler;
+
+        public Walk(PlayerAnimStateHandler animStateHandler)
+        {
+            this.animHandler = animStateHandler;
+        }
+
         public void Enter(PlayerStateMgr stateMgr)
         {
             /// <summary>
@@ -299,7 +325,7 @@ namespace PlayerState
             /// </summary>
             isWalkNow = false;
 
-            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.walkState);
+            animHandler.ChangeAnimState(animHandler.walkState);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -308,7 +334,7 @@ namespace PlayerState
             /// 落下中ならFallStateに遷移するが、↓
             /// 地面についているなら実行しない。これもまた、落ちる床に乗っている時にfallstateにいかないようにするためです。(idlestateにも同じことを書きました)
             /// </summary>
-            if (!stateMgr.actionStatusChk.IsGround() && stateMgr.actionStatusChk.IsFallingNow())
+            if (!stateMgr.ActionStatusChecker.IsGround() && stateMgr.ActionStatusChecker.IsFallingNow())
             {
                 stateMgr.ChangeState(stateMgr.fallState);
                 return;
@@ -317,7 +343,7 @@ namespace PlayerState
             /// <summary>
             /// ジャンプキーが押されたらJumpStateに遷移
             /// </summary>
-            if (stateMgr.inputHandler.IsJumpKeyDown())
+            if (stateMgr.InputHandler.IsJumpKeyDown())
             {
                 stateMgr.ChangeState(stateMgr.jumpState);
                 return;
@@ -326,18 +352,18 @@ namespace PlayerState
             /// <summary>
             /// ダッシュに遷移する処理
             /// </summary>
-            if (stateMgr.inputHandler.IsDashKeyDown())
+            if (stateMgr.InputHandler.IsDashKeyDown())
             {
-                if (stateMgr.inputHandler.IsMoveLeftKey())
+                if (stateMgr.InputHandler.IsMoveLeftKey())
                 {
-                    stateMgr.dashState = new Dash(false);
+                    (stateMgr.dashState as Dash)?.DirectionSetter(false);
                     stateMgr.ChangeState(stateMgr.dashState);
                     return;
                 }
 
-                if (stateMgr.inputHandler.IsMoveRightKey())
+                if (stateMgr.InputHandler.IsMoveRightKey())
                 {
-                    stateMgr.dashState = new Dash(true);
+                    (stateMgr.dashState as Dash)?.DirectionSetter(true);
                     stateMgr.ChangeState(stateMgr.dashState);
                     return;
                 }
@@ -358,7 +384,7 @@ namespace PlayerState
             /// どちらのキーも押されていない場合、同時押しはIdleStateに遷移
             /// IsMoveKeyは左右のキーどちらかが押されているかどうか、左右の同時押しをしていないか、何も押されていないかを判定しています
             /// </summary>
-            if (!stateMgr.inputHandler.IsMoveKey())
+            if (!stateMgr.InputHandler.IsMoveKey())
             {
                 stateMgr.ChangeState(stateMgr.idleState);
                 isWalkNow = false;
@@ -372,61 +398,67 @@ namespace PlayerState
             /// WalkStateに入っている時点で歩行をしています。そのため、壁にぶつかっていたらIdleに遷移します
             /// 一瞬違和感を覚えますが、WalkStateに入ってる時点で歩行をしていると思うと納得できるかと思います
             /// </summary>
-            if (stateMgr.inputHandler.IsMoveLeftKey())
+            if (stateMgr.InputHandler.IsMoveLeftKey())
             {
-                if (stateMgr.actionStatusChk.IsWall(false))
+                if (stateMgr.ActionStatusChecker.IsWall(false))
                 {
                     stateMgr.ChangeState(stateMgr.idleState);
                     return;
                 }
 
-                stateMgr.actionHandler.Walk(false);
+                stateMgr.ActionHandler.Walk(false);
             }
-            else if (stateMgr.inputHandler.IsMoveRightKey())
+            else if (stateMgr.InputHandler.IsMoveRightKey())
             {
-                if (stateMgr.actionStatusChk.IsWall(true))
+                if (stateMgr.ActionStatusChecker.IsWall(true))
                 {
                     stateMgr.ChangeState(stateMgr.idleState);
                     return;
                 }
 
-                stateMgr.actionHandler.Walk(true);
+                stateMgr.ActionHandler.Walk(true);
             }
         }
 
         public void Exit(PlayerStateMgr stateMgr) { }
     }
 
+    //Injectしています
     public class Dash : IState
     {
-        DashSparkFactory dashSparkFactory;
         PlayerDashTimeCtrl dashTimeCtrl;
 
         bool direction;
+        PlayerAnimStateHandler animHandler;
+
+        [Inject]
+        private DashSparkFactory sparkFactory;
+        [Inject]
+        private PlayerDashKeepManager dashKeepManager;
 
         //インスタンスした時にdirectionを渡すようにしたい
-        public Dash(bool direction)
+        public Dash(PlayerAnimStateHandler animStateHandler)
+        {
+            this.animHandler = animStateHandler;
+        }
+
+        public void DirectionSetter(bool direction)
         {
             this.direction = direction;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            stateMgr.playerStatus.SetPlayerDiresctionFromDashStateBigin(direction);
+            stateMgr.ActionStatusChecker.SetPlayerDiresctionFromDashStateBigin(direction);
 
-            if (dashSparkFactory == null)
-            {
-                dashSparkFactory = stateMgr.dashSparkFactory.gameObject.MyGetComponent_NullChker<DashSparkFactory>();
-            }
-
-            dashSparkFactory.MakeEffect();
+            sparkFactory.MakeEffect();
 
             dashTimeCtrl = stateMgr.gameObject.MyGetComponent_NullChker<PlayerDashTimeCtrl>();
 
-            stateMgr.actionHandler.Dash(direction);
+            stateMgr.ActionHandler.Dash(direction);
             dashTimeCtrl.StartDashTimeCtrl();
 
-            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.dashState);
+            animHandler.ChangeAnimState(animHandler.dashState);
 
             PlayerAcitonSECtrl.OnPlaySE.OnNext(PlayerAcitonSECtrl.dashSound);
         }
@@ -439,11 +471,11 @@ namespace PlayerState
             /// </summary>
             if (dashTimeCtrl.IsDashNow == false)
             {
-                if (!stateMgr.inputHandler.IsMoveKey())
+                if (!stateMgr.InputHandler.IsMoveKey())
                     stateMgr.ChangeState(stateMgr.idleState);
-                else if (stateMgr.inputHandler.IsMoveLeftKey())
+                else if (stateMgr.InputHandler.IsMoveLeftKey())
                     stateMgr.ChangeState(stateMgr.walkState);
-                else if (stateMgr.inputHandler.IsMoveRightKey())
+                else if (stateMgr.InputHandler.IsMoveRightKey())
                     stateMgr.ChangeState(stateMgr.walkState);
                 else
                 {
@@ -454,49 +486,49 @@ namespace PlayerState
                 return;
             }
 
-            if (stateMgr.actionStatusChk.IsFallingNow())
+            if (stateMgr.ActionStatusChecker.IsFallingNow())
             {
                 /// <summary>
                 /// ダッシュしている最中に落下したら、ダッシュを維持したままFallに遷移
                 /// </summary>
-                stateMgr.dashKeepManager.KeepDashSpeed();
+                dashKeepManager.KeepDashSpeed();
 
                 stateMgr.ChangeState(stateMgr.fallState);
                 return;
             }
 
-            if (stateMgr.inputHandler.IsJumpKeyDown())
+            if (stateMgr.InputHandler.IsJumpKeyDown())
             {
-                stateMgr.dashKeepManager.KeepDashSpeed();
+                dashKeepManager.KeepDashSpeed();
 
                 stateMgr.ChangeState(stateMgr.jumpState);
                 return;
             }
 
-            if (stateMgr.actionStatusChk.IsWall(direction))
+            if (stateMgr.ActionStatusChecker.IsWall(direction))
             {
                 stateMgr.ChangeState(stateMgr.idleState);
                 return;
             }
 
             //ダッシュ中にダッシュキーを押されたら、ダッシュをし直す
-            if (stateMgr.inputHandler.IsDashKeyDown())
+            if (stateMgr.InputHandler.IsDashKeyDown())
             {
                 dashTimeCtrl.StopDashTimeCtrl();
 
                 /// <summary>
                 /// 向きをコンストラクタで渡し、ダッシュのステートに遷移する
                 /// </summary>
-                if (stateMgr.inputHandler.IsMoveLeftKey())
+                if (stateMgr.InputHandler.IsMoveLeftKey())
                 {
-                    stateMgr.dashState = new Dash(false);
+                    (stateMgr.dashState as Dash)?.DirectionSetter(false);
                     stateMgr.ChangeState(stateMgr.dashState);
                     return;
                 }
 
-                if (stateMgr.inputHandler.IsMoveRightKey())
+                if (stateMgr.InputHandler.IsMoveRightKey())
                 {
-                    stateMgr.dashState = new Dash(true);
+                    (stateMgr.dashState as Dash)?.DirectionSetter(true);
                     stateMgr.ChangeState(stateMgr.dashState);
                     return;
                 }
@@ -505,7 +537,7 @@ namespace PlayerState
 
         public void Exit(PlayerStateMgr stateMgr)
         {
-            stateMgr.actionHandler.Stop();
+            stateMgr.ActionHandler.Stop();
             dashTimeCtrl.StopDashTimeCtrl();
         }
     }
@@ -517,25 +549,32 @@ namespace PlayerState
         //IWalkerインターフェースを実装しているため、このプロパティを持っています
         public bool isWalkNow { get; set; }
 
+        PlayerAnimStateHandler animHandler;
+
+        public Jump(PlayerAnimStateHandler animStateHandler)
+        {
+            this.animHandler = animStateHandler;
+        }
+
         public void Enter(PlayerStateMgr stateMgr)
         {
             isWalkNow = false;
 
-            stateMgr.actionHandler.Jump(stateMgr.playerStatus.JumpForce);
+            stateMgr.ActionHandler.Jump(stateMgr.PlayerStatus.JumpForce);
 
-            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.jumpState);
+            animHandler.ChangeAnimState(animHandler.jumpState);
 
             PlayerAcitonSECtrl.OnPlaySE.OnNext(PlayerAcitonSECtrl.jumpSound);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
         {
-            if (stateMgr.actionStatusChk.IsGround())
+            if (stateMgr.ActionStatusChecker.IsGround())
             {
                 /// <summary>
                 /// 地面についていても上昇中ならジャンプ状態を維持
                 /// </summary>
-                if (stateMgr.actionStatusChk.isJumpingNow())
+                if (stateMgr.ActionStatusChecker.isJumpingNow())
                     return;
 
                 if (isWalkNow == false)
@@ -547,17 +586,17 @@ namespace PlayerState
             /// <summary>
             /// 落下を始めたらFallに遷移
             /// </summary>
-            if (stateMgr.actionStatusChk.IsFallingNow())
+            if (stateMgr.ActionStatusChecker.IsFallingNow())
             {
                 stateMgr.ChangeState(stateMgr.fallState);
                 return;
             }
 
-            if (stateMgr.inputHandler.IsJumpKeyDown())
+            if (stateMgr.InputHandler.IsJumpKeyDown())
             {
                 if (
-                    stateMgr.actionStatusChk.IsFarWall(false)
-                    || stateMgr.actionStatusChk.IsFarWall(true)
+                    stateMgr.ActionStatusChecker.IsFarWall(false)
+                    || stateMgr.ActionStatusChecker.IsFarWall(true)
                 )
                     stateMgr.ChangeState(stateMgr.wallKick);
             }
@@ -570,14 +609,14 @@ namespace PlayerState
 
         public void ExecuteWalk(PlayerStateMgr stateMgr)
         {
-            if (!stateMgr.inputHandler.IsMoveKey())
+            if (!stateMgr.InputHandler.IsMoveKey())
             {
                 /// <summary>
                 /// 一度しか停止は実行できないようにする
                 /// </summary>
                 if (isWalkNow)
                 {
-                    stateMgr.actionHandler.Stop();
+                    stateMgr.ActionHandler.Stop();
                     isWalkNow = false;
                 }
                 return;
@@ -588,15 +627,15 @@ namespace PlayerState
             /// </summary>
             isWalkNow = true;
 
-            if (stateMgr.inputHandler.IsMoveLeftKey())
+            if (stateMgr.InputHandler.IsMoveLeftKey())
             {
-                stateMgr.actionHandler.Walk(false);
+                stateMgr.ActionHandler.Walk(false);
                 return;
             }
 
-            if (stateMgr.inputHandler.IsMoveRightKey())
+            if (stateMgr.InputHandler.IsMoveRightKey())
             {
-                stateMgr.actionHandler.Walk(true);
+                stateMgr.ActionHandler.Walk(true);
                 return;
             }
         }
@@ -609,9 +648,16 @@ namespace PlayerState
         //IWalkerインターフェースを実装しているため、このプロパティを持っています
         public bool isWalkNow { get; set; }
 
+        PlayerAnimStateHandler animHandler;
+
+        public Fall(PlayerAnimStateHandler animStateHandler)
+        {
+            this.animHandler = animStateHandler;
+        }
+
         public void Enter(PlayerStateMgr stateMgr)
         {
-            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.fallState);
+            animHandler.ChangeAnimState(animHandler.fallState);
 
             /// <summary>
             /// 初期化
@@ -624,29 +670,29 @@ namespace PlayerState
             /// <summary>
             /// どちらのキーも押されていない場合か、同時押しの場合は、移動を止める
             /// </summary>
-            if (!stateMgr.inputHandler.IsMoveKey())
+            if (!stateMgr.InputHandler.IsMoveKey())
             {
-                stateMgr.actionHandler.Stop();
+                stateMgr.ActionHandler.Stop();
                 isWalkNow = false;
                 return;
             }
 
-            if (stateMgr.inputHandler.IsMoveLeftKey())
+            if (stateMgr.InputHandler.IsMoveLeftKey())
             {
-                isWalkNow = stateMgr.actionHandler.Walk(false);
+                isWalkNow = stateMgr.ActionHandler.Walk(false);
                 return;
             }
 
-            if (stateMgr.inputHandler.IsMoveRightKey())
+            if (stateMgr.InputHandler.IsMoveRightKey())
             {
-                isWalkNow = stateMgr.actionHandler.Walk(true);
+                isWalkNow = stateMgr.ActionHandler.Walk(true);
                 return;
             }
         }
 
         public void Execute(PlayerStateMgr stateMgr)
         {
-            if (stateMgr.actionStatusChk.IsGround())
+            if (stateMgr.ActionStatusChecker.IsGround())
             {
                 PlayerAcitonSECtrl.OnPlaySE.OnNext(PlayerAcitonSECtrl.landSound);
                 if (!isWalkNow)
@@ -663,19 +709,19 @@ namespace PlayerState
 
             ExecuteWalk(stateMgr);
 
-            if (stateMgr.inputHandler.IsMoveKey())
+            if (stateMgr.InputHandler.IsMoveKey())
             {
-                if (stateMgr.inputHandler.IsMoveLeftKey())
+                if (stateMgr.InputHandler.IsMoveLeftKey())
                 {
-                    if (stateMgr.actionStatusChk.IsFarWall(false) || stateMgr.actionStatusChk.IsWall(false))
+                    if (stateMgr.ActionStatusChecker.IsFarWall(false) || stateMgr.ActionStatusChecker.IsWall(false))
                     {
                         stateMgr.ChangeState(stateMgr.wallFallState);
                         return;
                     }
                 }
-                else if (stateMgr.inputHandler.IsMoveRightKey())
+                else if (stateMgr.InputHandler.IsMoveRightKey())
                 {
-                    if (stateMgr.actionStatusChk.IsFarWall(true) || stateMgr.actionStatusChk.IsWall(true))
+                    if (stateMgr.ActionStatusChecker.IsFarWall(true) || stateMgr.ActionStatusChecker.IsWall(true))
                     {
                         stateMgr.ChangeState(stateMgr.wallFallState);
                         return;
@@ -699,6 +745,13 @@ namespace PlayerState
         /// </summary>
         bool IsWallFallExecutable;
 
+        PlayerAnimStateHandler animHandler;
+
+        public WallFall(PlayerAnimStateHandler animStateHandler)
+        {
+            this.animHandler = animStateHandler;
+        }
+
         public void Enter(PlayerStateMgr stateMgr)
         {
             /// <summary>
@@ -706,16 +759,16 @@ namespace PlayerState
             /// </summary>
             IsWallFallExecutable = true;
 
-            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.wallFallState);
+            animHandler.ChangeAnimState(animHandler.wallFallState);
 
             /// <summary>
             /// 壁にぶつかっている方向を判定
             /// </summary>
-            if (stateMgr.actionStatusChk.IsWall(true))
+            if (stateMgr.ActionStatusChecker.IsWall(true))
             {
                 wall_facing_which = true;
             }
-            else if (stateMgr.actionStatusChk.IsWall(false))
+            else if (stateMgr.ActionStatusChecker.IsWall(false))
             {
                 wall_facing_which = false;
             }
@@ -724,7 +777,7 @@ namespace PlayerState
         public void Execute(PlayerStateMgr stateMgr)
         {
             //地面についたらIdleに遷移
-            if (stateMgr.actionStatusChk.IsGround())
+            if (stateMgr.ActionStatusChecker.IsGround())
             {
                 stateMgr.ChangeState(stateMgr.idleState);
                 return;
@@ -734,48 +787,48 @@ namespace PlayerState
             if (wall_facing_which)
             {
                 //もし壁にぶつからなくなったらFallに遷移
-                if (!stateMgr.actionStatusChk.IsWall(true))
+                if (!stateMgr.ActionStatusChecker.IsWall(true))
                 {
                     stateMgr.ChangeState(stateMgr.fallState);
-                    stateMgr.actionHandler.StopY();
+                    stateMgr.ActionHandler.StopY();
                     return;
                 }
 
                 //壁に向かって歩くのをやめたらFallに遷移
-                if (!stateMgr.inputHandler.IsMoveRightKey())
+                if (!stateMgr.InputHandler.IsMoveRightKey())
                 {
                     stateMgr.ChangeState(stateMgr.fallState);
-                    stateMgr.actionHandler.StopY();
+                    stateMgr.ActionHandler.StopY();
                     return;
                 }
             }
             else
             {
                 //もし壁にぶつからなくなったらFallに遷移
-                if (!stateMgr.actionStatusChk.IsWall(false))
+                if (!stateMgr.ActionStatusChecker.IsWall(false))
                 {
                     stateMgr.ChangeState(stateMgr.fallState);
-                    stateMgr.actionHandler.StopY();
+                    stateMgr.ActionHandler.StopY();
                     return;
                 }
 
                 //壁に向かって歩くのをやめたらFallに遷移
-                if (!stateMgr.inputHandler.IsMoveLeftKey())
+                if (!stateMgr.InputHandler.IsMoveLeftKey())
                 {
                     stateMgr.ChangeState(stateMgr.fallState);
-                    stateMgr.actionHandler.StopY();
+                    stateMgr.ActionHandler.StopY();
                     return;
                 }
             }
 
             //壁キック判定
-            if (stateMgr.inputHandler.IsJumpKeyDown())
+            if (stateMgr.InputHandler.IsJumpKeyDown())
             {
                 stateMgr.ChangeState(stateMgr.wallKick);
             }
 
             //どちらの移動キーも押されていない場合はFallに遷移
-            if (!stateMgr.inputHandler.IsMoveKey())
+            if (!stateMgr.InputHandler.IsMoveKey())
             {
                 stateMgr.ChangeState(stateMgr.fallState);
                 return;
@@ -790,7 +843,7 @@ namespace PlayerState
             if (!IsWallFallExecutable)
                 return;
 
-            stateMgr.rb.velocity = new Vector2(0, -stateMgr.playerStatus.WallFallSpeed);
+            stateMgr.ActionHandler.WallFall();
         }
 
         public void Exit(PlayerStateMgr stateMgr)
@@ -800,50 +853,72 @@ namespace PlayerState
         }
     }
 
+    //Injectしています
     public class WallKick : IState, IWalker
     {
-        WallKickFactory wallKickFactory;
+        private WallKickFactory wallKickFactory;
+        private PlayerDashKeepManager dashKeepManager;
 
         public bool isWalkNow { get; set; }
 
         private bool isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
+
+        PlayerAnimStateHandler animHandler;
+
+        public WallKick(PlayerAnimStateHandler animStateHandler)
+        {
+            this.animHandler = animStateHandler;
+        }
+
+        [Inject]
+        public void MyInject(WallKickFactory wallKickFactory, PlayerDashKeepManager dashKeepManager)
+        {
+            this.wallKickFactory = wallKickFactory;
+            this.dashKeepManager = dashKeepManager;
+            Debug.LogWarning("WallKickFactory is injected!");
+        }
 
         public void Enter(PlayerStateMgr stateMgr)
         {
             isWalkNow = false;
             isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
 
-            stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.wallKickState);
+            animHandler.ChangeAnimState(animHandler.wallKickState);
 
-            if (wallKickFactory == null)
+            if (wallKickFactory != null)
             {
-                wallKickFactory = stateMgr.wallKickFactory.gameObject.MyGetComponent_NullChker<WallKickFactory>();
+                wallKickFactory.MakeEffect(stateMgr.transform);
             }
-            wallKickFactory.MakeEffect(stateMgr.transform);
+            else
+            {
+                Debug.LogError("WallKickFactory is not assigned!");
+            }
 
             /// <summary>
             /// スピードを0にして、壁キックを行う
             /// </summary>
-            stateMgr.rb.velocity = Vector2.zero;
-            stateMgr.actionHandler.Jump(stateMgr.playerStatus.JumpForce);
+            stateMgr.ActionHandler.Stop();
+            stateMgr.ActionHandler.StopY();
+
+            stateMgr.ActionHandler.Jump(stateMgr.PlayerStatus.JumpForce);
 
             PlayerAcitonSECtrl.OnPlaySE.OnNext(PlayerAcitonSECtrl.jumpSound);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
         {
-            if (stateMgr.actionStatusChk.IsFallingNow())
+            if (stateMgr.ActionStatusChecker.IsFallingNow())
             {
-                if (stateMgr.inputHandler.IsMoveLeftKey() && stateMgr.actionStatusChk.IsWall(false))
+                if (stateMgr.InputHandler.IsMoveLeftKey() && stateMgr.ActionStatusChecker.IsWall(false))
                 {
-                    stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.wallFallState);
+                    animHandler.ChangeAnimState(animHandler.wallFallState);
                     stateMgr.ChangeState(stateMgr.wallFallState);
                     return;
                 }
 
-                if (stateMgr.inputHandler.IsMoveRightKey() && stateMgr.actionStatusChk.IsWall(true))
+                if (stateMgr.InputHandler.IsMoveRightKey() && stateMgr.ActionStatusChecker.IsWall(true))
                 {
-                    stateMgr.animHandler.ChangeAnimState(stateMgr.animHandler.wallFallState);
+                    animHandler.ChangeAnimState(animHandler.wallFallState);
                     stateMgr.ChangeState(stateMgr.wallFallState);
                     return;
                 }
@@ -853,10 +928,10 @@ namespace PlayerState
                 return;
             }
 
-            if (stateMgr.actionStatusChk.IsGround())
+            if (stateMgr.ActionStatusChecker.IsGround())
             {
                 //上昇中ならジャンプ状態を維持
-                if (stateMgr.actionStatusChk.isJumpingNow())
+                if (stateMgr.ActionStatusChecker.isJumpingNow())
                 {
                     return;
                 }
@@ -872,15 +947,15 @@ namespace PlayerState
             }
 
             //ボタンの押した方向に壁があった状態で、壁キックを行った場合は壁キックを再度行う
-            if (stateMgr.inputHandler.IsJumpKeyDown())
+            if (stateMgr.InputHandler.IsJumpKeyDown())
             {
-                if (stateMgr.inputHandler.IsMoveLeftKey() && stateMgr.actionStatusChk.IsWall(false))
+                if (stateMgr.InputHandler.IsMoveLeftKey() && stateMgr.ActionStatusChecker.IsWall(false))
                 {
                     stateMgr.ChangeState(stateMgr.wallKick);
                     return;
                 }
 
-                if (stateMgr.inputHandler.IsMoveRightKey() && stateMgr.actionStatusChk.IsWall(true))
+                if (stateMgr.InputHandler.IsMoveRightKey() && stateMgr.ActionStatusChecker.IsWall(true))
                 {
                     stateMgr.ChangeState(stateMgr.wallKick);
                     return;
@@ -893,17 +968,17 @@ namespace PlayerState
             /// どの壁にも触れなくなったとき、ダッシュキーを押されていたらkeepdashにする
             /// 一度のみ実行可能(重複防止の為)
             /// </summary>
-            if (!stateMgr.actionStatusChk.IsWall(true) && !stateMgr.actionStatusChk.IsWall(false))
+            if (!stateMgr.ActionStatusChecker.IsWall(true) && !stateMgr.ActionStatusChecker.IsWall(false))
             {
-                if (stateMgr.inputHandler.IsDashKeyDown() || stateMgr.inputHandler.IsDashKey())
+                if (stateMgr.InputHandler.IsDashKeyDown() || stateMgr.InputHandler.IsDashKey())
                 {
                     //すでにKeepDashSpeedがオンになっていたら、何もしない
-                    if (stateMgr.dashKeepManager.IsKeepDashSpeed)
+                    if (dashKeepManager.IsKeepDashSpeed)
                         return;
                     if (isOneTimeAbleTo_TurnOn_KeepDashSpeed)
                         return;
 
-                    stateMgr.dashKeepManager.KeepDashSpeed();
+                    dashKeepManager.KeepDashSpeed();
                     isOneTimeAbleTo_TurnOn_KeepDashSpeed = true;
                 }
             }
@@ -911,26 +986,26 @@ namespace PlayerState
 
         public void ExecuteWalk(PlayerStateMgr stateMgr)
         {
-            if (!stateMgr.inputHandler.IsMoveKey())
+            if (!stateMgr.InputHandler.IsMoveKey())
             {
                 /// <summary>
                 /// 同時押しの判定を行っています。
                 /// </summary>
                 isWalkNow = false;
-                stateMgr.actionHandler.Stop();
+                stateMgr.ActionHandler.Stop();
                 return;
             }
 
-            if (stateMgr.inputHandler.IsMoveLeftKey())
+            if (stateMgr.InputHandler.IsMoveLeftKey())
             {
-                stateMgr.actionHandler.Walk(false);
+                stateMgr.ActionHandler.Walk(false);
                 isWalkNow = true;
                 return;
             }
 
-            if (stateMgr.inputHandler.IsMoveRightKey())
+            if (stateMgr.InputHandler.IsMoveRightKey())
             {
-                stateMgr.actionHandler.Walk(true);
+                stateMgr.ActionHandler.Walk(true);
                 isWalkNow = true;
                 return;
             }
@@ -939,25 +1014,27 @@ namespace PlayerState
         public void Exit(PlayerStateMgr stateMgr) { }
     }
 
+    // Injectしています
     public class DamageState : IState
     {
         public static event Action onPlayerDamageRecover;
 
+        [Inject]
+        private DamageTimeHandler damageTimeHandler;
+
         PlayerAnimStateHandler animHandler;
-        DamageTimeHandler damageTimeHandler;
-        ActionHandler actionHandler;
-        public DamageState(PlayerAnimStateHandler animHandler, DamageTimeHandler damageTimeHandler, ActionHandler actionHandler)
+        ActionHandler ActionHandler;
+        public DamageState(PlayerAnimStateHandler animHandler, ActionHandler ActionHandler)
         {
-            this.damageTimeHandler = damageTimeHandler;
             this.animHandler = animHandler;
-            this.actionHandler = actionHandler;
+            this.ActionHandler = ActionHandler;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            actionHandler.Stop();
-            actionHandler.StopY();
-            actionHandler.Damage();
+            ActionHandler.Stop();
+            ActionHandler.StopY();
+            ActionHandler.Damage();
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -975,13 +1052,7 @@ namespace PlayerState
 
     public class DeathState : IState
     {
-        PlayerAnimStateHandler animstateHandler;
-        PlayerStatus playerStatus;
-        public DeathState(PlayerAnimStateHandler animStateHandler, PlayerStatus playerStatus)
-        {
-            this.playerStatus = playerStatus;
-            this.animstateHandler = animStateHandler;
-        }
+        public DeathState() { }
 
         public void Enter(PlayerStateMgr stateMgr)
         {

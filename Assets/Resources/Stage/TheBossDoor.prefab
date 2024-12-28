@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 2315021898221821586}
   m_Layer: 0
   m_Name: TheBossDoor
-  m_TagString: Untagged
+  m_TagString: Door
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -155,7 +155,6 @@ MonoBehaviour:
   playerTeleportationPos: {x: 118.38, y: -11.5}
   cameraPos: {x: 123.19, y: -11}
   isBossDoor: 0
-  canEnterDistance: 0.8
 --- !u!114 &2315021898221821586
 MonoBehaviour:
   m_ObjectHideFlags: 0

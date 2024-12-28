@@ -23,36 +23,20 @@ public class PlayerWeapon_KeyController : MonoBehaviour
 
     private void OnEnable()
     {
-        DoorAnimHandler.onDoorClosed += OnDoorClosed;
         InputHandler.onAcceptInputCtrl += OnAcceptInputCtrl;
         IntroBossHPBarHandler.onDead += CheckCharge;
-        PlayerState.DamageState.onPlayerDamageRecover += HandleChargeOnDamageRecover;
     }
 
     private void OnDisable()
     {
-        DoorAnimHandler.onDoorClosed -= OnDoorClosed;
         InputHandler.onAcceptInputCtrl -= OnAcceptInputCtrl;
         IntroBossHPBarHandler.onDead -= CheckCharge;
-        PlayerState.DamageState.onPlayerDamageRecover -= HandleChargeOnDamageRecover;
     }
 
     //FIX : ここが、ドアから入ったときにチャージが保存できないバグ
     void OnAcceptInputCtrl()
     {
         if (!inputHandler.IsAttackingKey) CheckCharge();
-    }
-
-    //　　イベントハンドラー
-    // プレイヤーがダメージ状態から回復した際に、
-    // チャージボタンが押されていればチャージを開始する。
-    void HandleChargeOnDamageRecover()
-    {
-        return;
-        if (inputHandler.IsShootKey() || inputHandler.IsShootKeyDown())
-        {
-            chargeShotHandler.StartCharge();
-        }
     }
 
     //イベントハンドラー
@@ -73,7 +57,7 @@ public class PlayerWeapon_KeyController : MonoBehaviour
     {
         //ショットボタンを押したら豆を撃って、チャージを開始します
         //ダメージを受けている時は撃てません
-        if (inputHandler.IsShootKeyDown() && playerStateMgr.currentState != playerStateMgr.damageState)
+        if (inputHandler.IsShootKeyDown() && playerStateMgr.CurrentState != playerStateMgr.damageState)
         {
             if (!chargeShotHandler.IsCharging)
             {
@@ -83,7 +67,7 @@ public class PlayerWeapon_KeyController : MonoBehaviour
         }
 
         //もしショットキーを押されてるならチャージを開始します。とくに、ドアから出るときや、ダメージから回復したときなどです
-        if (!inputHandler.IsShootKeyDown() && inputHandler.IsShootKey() && playerStateMgr.currentState != playerStateMgr.damageState)
+        if (!inputHandler.IsShootKeyDown() && inputHandler.IsShootKey() && playerStateMgr.CurrentState != playerStateMgr.damageState)
         {
             if (chargeShotHandler.IsCharging)
                 return;

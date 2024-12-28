@@ -44,7 +44,6 @@ public class BossCutSceneHandler : MonoBehaviour, IBossCutSceneHandler
 
     private void OnEnable()
     {
-        CameraGoBossStageController.onEnterBossRoom += OnEnterBossRoom;
         BackGroundTalkPanelAnimCtrl.onHideBackGround += OnEndTalk;
         IntroBossHPBarHandler.onFinishInitializeHPBar += OnFinishInitializeHPBar;
         IntroBossHPBarHandler.onDead += OnDead;
@@ -53,7 +52,6 @@ public class BossCutSceneHandler : MonoBehaviour, IBossCutSceneHandler
 
     private void OnDisable()
     {
-        CameraGoBossStageController.onEnterBossRoom -= OnEnterBossRoom;
         BackGroundTalkPanelAnimCtrl.onHideBackGround -= OnEndTalk;
         IntroBossHPBarHandler.onFinishInitializeHPBar -= OnFinishInitializeHPBar;
         IntroBossHPBarHandler.onDead -= OnDead;

@@ -58,9 +58,6 @@ public class GamePlayerManager : MonoBehaviour
         DeathPanelCtrl.onFinishDeathPanel += RestartStage;
         PlayerAnimStateHandler.onPlayerDeathAnimEnd += InvisiblePlayer;
 
-        BossDoorBody.onDoorTouched += StopTime;
-        DoorAnimHandler.onDoorClosed += StartTime;
-
         BossCutSceneHandler.onStartExplodeCutScene += StopTime;
         BossCutSceneHandler.onExplode += StartTime;
 
@@ -71,9 +68,6 @@ public class GamePlayerManager : MonoBehaviour
     {
         DeathPanelCtrl.onFinishDeathPanel -= RestartStage;
         PlayerAnimStateHandler.onPlayerDeathAnimEnd -= InvisiblePlayer;
-
-        BossDoorBody.onDoorTouched -= StopTime;
-        DoorAnimHandler.onDoorClosed -= StartTime;
 
         BossCutSceneHandler.onStartExplodeCutScene -= StopTime;
         BossCutSceneHandler.onExplode -= StartTime;

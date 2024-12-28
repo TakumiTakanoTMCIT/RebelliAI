@@ -13,8 +13,6 @@ public class CameraGoBossStageController : MonoBehaviour
     [SerializeField] bool isDebugMode = false;
     CameraSwitcher cameraSwitcher;
 
-    public static event Action onEnterBossRoom;
-
     private void Awake()
     {
         cameraSwitcher = GameObject.Find("GameMgr").gameObject.MyGetComponent_NullChker<CameraSwitcher>();

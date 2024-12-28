@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using PlayerState;
 using HPBar;
+using ActionStatusChk;
 
 public class AfterGrowFactory : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class AfterGrowFactory : MonoBehaviour
     [SerializeField] float maxTime = 0.3f, minTime = 0.1f;
     [SerializeField] int defaultCapacity = 10;
     [SerializeField] private Transform parentTransform;
+    [SerializeField] private ActionStatusChecker actionStatusChecker;
 
     private GameObject effect;
     bool isInstantiable = true, isPlayerDamage_Death = false;
@@ -107,7 +109,7 @@ public class AfterGrowFactory : MonoBehaviour
     private GameObject CreateEffect()
     {
         var instance = Instantiate(effect, player.transform.position, Quaternion.identity);
-        instance.gameObject.MyGetComponent_NullChker<AfterGrowMain>().Init(pool, player.transform, playerStatus);
+        instance.gameObject.MyGetComponent_NullChker<AfterGrowMain>().Init(pool, player.transform, actionStatusChecker);
         instance.SetActive(false);
         return instance;
     }

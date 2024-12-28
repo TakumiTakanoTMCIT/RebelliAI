@@ -29,7 +29,6 @@ namespace KeyHandler
 
         [SerializeField]private bool
             isjumpkeyDown = false,
-            isjumingKeyNow = false,
             isdashKeydown = false,
             isAttackKeydown = false,
             isattackinKeyNow = false,

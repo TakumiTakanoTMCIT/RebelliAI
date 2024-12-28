@@ -10,7 +10,6 @@ public class BossMgr : MonoBehaviour
     public GameObject BossObj { get => bossObj; }
     IBoss boss;
     MonoBehaviour bossMonobehaviour;
-    bool isInitBoss;
 
     private void Awake()
     {
@@ -38,7 +37,6 @@ public class BossMgr : MonoBehaviour
         }
 
         bossMonobehaviour.gameObject.SetActive(true);
-        isInitBoss = false;
     }
 
     private void Start()
@@ -80,7 +78,6 @@ public class BossMgr : MonoBehaviour
         if (isDebugMode) Debug.LogAssertion("ボスが起きました");
 
         boss.WakeUp();
-        isInitBoss = true;
     }
 
     void Sleep()

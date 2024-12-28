@@ -32,16 +32,6 @@ namespace PlayerAction
             this.dashKeepManager = dashKeepManager;
         }
 
-        private void OnEnable()
-        {
-            BossDoorBody.onDoorTouched += () => { Stop(); StopY(); };
-        }
-
-        private void OnDisable()
-        {
-            BossDoorBody.onDoorTouched -= () => { Stop(); StopY(); };
-        }
-
         public void Stop()
         {
             //いい対処法ではないので、後で確実に修正
@@ -91,6 +81,11 @@ namespace PlayerAction
             rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
         }
 
+        public void WallFall()
+        {
+            rb.velocity = new Vector2(0, -status.WallFallSpeed);
+        }
+
         public void Dash(bool direction)
         {
             if (direction)
@@ -101,7 +96,7 @@ namespace PlayerAction
 
         public void Damage()
         {
-            if (status.playerdirection)
+            if (actionStatusChecker.Direction)
             {
                 rb.AddForce(new Vector2(-status.damageForce.x, status.damageForce.y), ForceMode2D.Impulse);
             }

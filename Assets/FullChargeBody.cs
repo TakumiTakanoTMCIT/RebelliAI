@@ -1,6 +1,8 @@
 using UniRx;
 using PlayerInfo;
 using UnityEngine;
+using ActionStatusChk;
+using PlayerState;
 
 namespace PlayerShot
 {
@@ -25,8 +27,10 @@ namespace PlayerShot
         protected Rigidbody2D rb;
         protected SpriteRenderer spriteRenderer;
         protected PlayerStatus playerStatus;
+        protected PlayerStateMgr playerStateMgr;
         protected IAnimatable animatorCtrl;
         protected Transform playerPos;
+        protected ActionStatusChecker actionStatusChecker;
 
         public abstract void DestroyShell();
         public abstract void End_BiginingAnim();
@@ -37,7 +41,9 @@ namespace PlayerShot
 
         protected void Awake()
         {
+            actionStatusChecker = GameObject.Find("Player").MyGetComponent_NullChker<ActionStatusChecker>();
             playerStatus = GameObject.Find("Player").MyGetComponent_NullChker<PlayerStatus>();
+            playerStateMgr = GameObject.Find("Player").MyGetComponent_NullChker<PlayerStateMgr>();
             rb = gameObject.MyGetComponent_NullChker<Rigidbody2D>();
             spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
             animatorCtrl = GetComponent<IAnimatable>();
@@ -51,10 +57,10 @@ namespace PlayerShot
         protected void MoveShell()
         {
             //ダッシュ中はダメージが増加する
-            gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().IsExtraDamage(playerStatus.IsDashNow());
+            gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().IsExtraDamage(playerStateMgr.WhatCurrentState(playerStateMgr.dashState));
 
             //プレイヤーの向きに合わせて速度を決める
-            if (playerStatus.playerdirection)
+            if (actionStatusChecker.Direction)
             {
                 rb.velocity = new Vector2(speed, 0);
             }
@@ -64,7 +70,7 @@ namespace PlayerShot
             }
 
             //プレイヤーの向きに合わせて画像を反転させる
-            spriteRenderer.flipX = !playerStatus.playerdirection;
+            spriteRenderer.flipX = !actionStatusChecker.Direction;
 
             //移動開始のフラグを立てる
             isStartedMove = true;
