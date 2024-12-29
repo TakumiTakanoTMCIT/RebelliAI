@@ -9,10 +9,9 @@ public class PlayerAnimStateHandler : MonoBehaviour
 {
     //向きに合わせて、スプライトを反転させるためのフィールド
     ActionStatusChecker actionStatusChecker;
-    //ワープアニメーションの終了を通知するためのイベントを発行するためのフィールド
-    [SerializeField] GameFlowManager gameFlowManager;//ガチで一瞬しか使ってない
-    //死亡時のエフェクトを生成するためのファクトリ
-    [SerializeField] private DeathGlitchSparkFactory deathGlitchSparkFactory;//ガチで一瞬だね
+
+    private GameFlowManager gameFlowManager;
+    private DeathGlitchSparkFactory deathGlitchSparkFactory;
     [SerializeField] public bool isDebugMode = false;
 
     public IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState, damageState, deathState, warpState, warpEscapeState, neutralIdleState;
@@ -76,6 +75,12 @@ public class PlayerAnimStateHandler : MonoBehaviour
         isChangeableAnim = true;
 
         Debug.Log("アニメーションステートハンドラが初期化されました");
+    }
+
+    public void OtherComponentGetter(DeathGlitchSparkFactory deathGlitchSparkFactory, GameFlowManager gameFlowManager)
+    {
+        this.deathGlitchSparkFactory = deathGlitchSparkFactory;
+        this.gameFlowManager = gameFlowManager;
     }
 
     private void OnEnable()

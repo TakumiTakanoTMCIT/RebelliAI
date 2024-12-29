@@ -19,9 +19,9 @@ public class WallKickDelayManager : MonoBehaviour
 
     private bool isJumpKey_Accepting = false;
 
-    public void Init(InputHandler inputHandler)
+    private void Awake()
     {
-        this.inputHandler = inputHandler;
+        inputHandler = this.gameObject.MyGetComponent_NullChker<InputHandler>();
     }
 
     /// <summary>

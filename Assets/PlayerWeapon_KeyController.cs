@@ -13,12 +13,16 @@ public class PlayerWeapon_KeyController : MonoBehaviour
 
     public static event Action onTooShortCharge;
 
-    public void Init(InputHandler inputHandler, ChargeShot_Handler chargeShotHandler, AllShellManager shellManager)
+    public void OtherComponentGetter(ChargeShot_Handler chargeShotHandler, AllShellManager shellManager)
     {
         this.allShellManager = shellManager;
         this.chargeShotHandler = chargeShotHandler;
-        this.inputHandler = inputHandler;
-        playerStateMgr = GetComponent<PlayerStateMgr>();
+    }
+
+    private void Awake()
+    {
+        inputHandler = this.gameObject.MyGetComponent_NullChker<InputHandler>();
+        playerStateMgr = this.gameObject.MyGetComponent_NullChker<PlayerStateMgr>();
     }
 
     private void OnEnable()

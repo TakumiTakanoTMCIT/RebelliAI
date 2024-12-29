@@ -12,10 +12,10 @@ public class PlayerDashKeepManager : MonoBehaviour
     ActionStatusChecker actionStatusChk;
     InputHandler inputHandler;
 
-    public void Init(ActionStatusChecker actionStatusChk, InputHandler inputHandler)
+    private void Awake()
     {
-        this.actionStatusChk = actionStatusChk;
-        this.inputHandler = inputHandler;
+        actionStatusChk = this.gameObject.MyGetComponent_NullChker<ActionStatusChecker>();
+        inputHandler = this.gameObject.MyGetComponent_NullChker<InputHandler>();
     }
 
     [SerializeField] private bool isKeepDashSpeed = false;

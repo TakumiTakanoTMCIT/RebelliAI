@@ -10,28 +10,32 @@ namespace ActionStatusChk
         PlayerStateMgr playerStateMgr;
         InputHandler inputHandler;
         PlayerAnimStateHandler animStateHandler;
+        Rigidbody2D rb;
 
         GroundChk groundChecker;
         SideChecker leftSideChecker, rightSideChecker, wallLeftChecker, wallRightChecker;
 
         [Inject]
         PlayerStats playerStatus;
-        Rigidbody2D rb;
 
         private bool _direction;
         public bool Direction => _direction;
 
-        public void Init(GroundChk groundChk, SideChecker left, SideChecker right, SideChecker wallleft, SideChecker wallright, Rigidbody2D rb, PlayerStateMgr playerStateMgr, InputHandler inputHandler, PlayerAnimStateHandler animStateHandler)
+        private void Awake()
+        {
+            animStateHandler = this.gameObject.MyGetComponent_NullChker<PlayerAnimStateHandler>();
+            inputHandler = this.gameObject.MyGetComponent_NullChker<InputHandler>();
+            playerStateMgr = this.gameObject.MyGetComponent_NullChker<PlayerStateMgr>();
+            rb = this.gameObject.MyGetComponent_NullChker<Rigidbody2D>();
+        }
+
+        public void ChildComponentGetter(GroundChk groundChk, SideChecker left, SideChecker right, SideChecker wallleft, SideChecker wallright)
         {
             this.groundChecker = groundChk;
             this.leftSideChecker = left;
             this.rightSideChecker = right;
             this.wallLeftChecker = wallleft;
             this.wallRightChecker = wallright;
-            this.rb = rb;
-            this.playerStateMgr = playerStateMgr;
-            this.inputHandler = inputHandler;
-            this.animStateHandler = animStateHandler;
         }
 
         public bool IsMovingNow()
@@ -124,7 +128,7 @@ namespace ActionStatusChk
             if (animStateHandler.WhatCurrentAnimState(animStateHandler.wallKickState)) return;
 
             //WallFall中の場合
-            if(playerStateMgr.WhatCurrentState(playerStateMgr.wallFallState))
+            if (playerStateMgr.WhatCurrentState(playerStateMgr.wallFallState))
             {
                 _direction = !_direction;
             }

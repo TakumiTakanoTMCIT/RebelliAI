@@ -4,14 +4,11 @@ using HPBar;
 
 public class PlayerBoundaryExitHandler : MonoBehaviour
 {
-    [SerializeField] private HPBarHandler hPBarHandler;
+    private HPBarHandler hPBarHandler;
 
-    private void Start()
+    public void OtherComponentGetter(HPBarHandler hPBarHandler)
     {
-        if (hPBarHandler == null)
-        {
-            Debug.LogWarning("HPBarHandler is not assigned!");
-        }
+        this.hPBarHandler = hPBarHandler;
     }
 
     //プレイヤーが画面外に出たら

@@ -37,4 +37,6 @@ public class PlayerStats : ScriptableObject
     public float damagingTime = 3f;
 
     public Vector2 damageForce = new Vector2(5, 5);
+
+    public float blikingInterval = 0.03f, invincibleTime = 1.8f;
 }

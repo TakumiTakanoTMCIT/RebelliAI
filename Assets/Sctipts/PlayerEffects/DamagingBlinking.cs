@@ -1,7 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
-using UnityEditor;
 using UnityEngine;
+using Zenject;
 
 public class DamagingBlinking : MonoBehaviour
 {
@@ -10,7 +10,14 @@ public class DamagingBlinking : MonoBehaviour
     [SerializeField] bool isDebugMode = false;
 
     SpriteRenderer spriteRenderer;
-    [SerializeField] float blikingInterval = 0.05f, invincibleTime = 1.5f;
+
+    [Inject]
+    PlayerStats playerStats;
+
+    public void SctiptableObjectGetter(PlayerStats playerStats)
+    {
+        this.playerStats = playerStats;
+    }
 
     private void Awake()
     {
@@ -39,7 +46,7 @@ public class DamagingBlinking : MonoBehaviour
 
         try
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(invincibleTime));
+            await UniTask.Delay(TimeSpan.FromSeconds(playerStats.invincibleTime));
         }
         catch (Exception e)
         {
@@ -68,13 +75,13 @@ public class DamagingBlinking : MonoBehaviour
             spriteRenderer.color = playerColor;
 
             //アルファ値のみ変更するように試してみる
-            await UniTask.Delay(TimeSpan.FromSeconds(blikingInterval));
+            await UniTask.Delay(TimeSpan.FromSeconds(playerStats.blikingInterval));
 
             playerColor = spriteRenderer.color;
             playerColor.a = 1f;
             spriteRenderer.color = playerColor;
 
-            await UniTask.Delay(TimeSpan.FromSeconds(blikingInterval));
+            await UniTask.Delay(TimeSpan.FromSeconds(playerStats.blikingInterval));
         }
 
         spriteRenderer.color = Color.white;

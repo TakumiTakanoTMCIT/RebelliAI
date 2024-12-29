@@ -1,6 +1,4 @@
 using UnityEngine;
-using System;
-using UnityEditor;
 
 public class PlayerShotAnimCtrl : MonoBehaviour
 {
@@ -11,9 +9,9 @@ public class PlayerShotAnimCtrl : MonoBehaviour
     float countTime = 0f;
     bool isShoting = false;
 
-    private void Start()
+    private void Awake()
     {
-        animator = GetComponent<Animator>();
+        animator = this.gameObject.MyGetComponent_NullChker<Animator>();
     }
 
     private void OnEnable()
@@ -28,9 +26,9 @@ public class PlayerShotAnimCtrl : MonoBehaviour
 
     private void Update()
     {
-        if(!isShoting) return;
+        if (!isShoting) return;
 
-        if(countTime >= shotAnimTime)
+        if (countTime >= shotAnimTime)
         {
             animator.SetBool("isShoting", false);
             isShoting = false;

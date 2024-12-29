@@ -10,7 +10,6 @@ using Zenject;
 
 namespace PlayerState
 {
-
     public class PlayerStateMgr : MonoBehaviour
     {
         [Inject]
@@ -21,7 +20,7 @@ namespace PlayerState
         [SerializeField]
         private bool isDebugCurrentState = false;
 
-        private PlayerAnimStateHandler animHandler;
+        private PlayerAnimStateHandler animStateHandler;
         private IState currentState;
         private bool isExecutable;
         private InputHandler inputHandler;
@@ -33,19 +32,16 @@ namespace PlayerState
         public IState idleState, walkState, jumpState, fallState, wallFallState, wallKick,
         dashState, damageState, deathState;
 
-        public void Init(Rigidbody2D rb, PlayerAnimStateHandler animStateHandler, ActionStatusChecker actionStatusChecker, InputHandler inputHandler, ActionHandler actionHandler,WallKickDelayManager wallKickDelayManager)
-        {
-            this.actionHandler = actionHandler;
-            this.inputHandler = inputHandler;
-            this.rb = rb;
-            this.animHandler = animStateHandler;
-            this.actionStatusChecker = actionStatusChecker;
-            this.wallKickDelayManager = wallKickDelayManager;
-        }
-
         private void Awake()
         {
-            playerStateData = new PlayerStateData(inputHandler, actionHandler, actionStatusChecker, animHandler);
+            //コンポーネントを取得
+            rb = gameObject.MyGetComponent_NullChker<Rigidbody2D>();
+            animStateHandler = gameObject.MyGetComponent_NullChker<PlayerAnimStateHandler>();
+            actionStatusChecker = gameObject.MyGetComponent_NullChker<ActionStatusChecker>();
+            inputHandler = gameObject.MyGetComponent_NullChker<InputHandler>();
+            wallKickDelayManager = gameObject.MyGetComponent_NullChker<WallKickDelayManager>();
+
+            playerStateData = new PlayerStateData(inputHandler, actionHandler, actionStatusChecker, animStateHandler);
 
             idleState = new Idle(playerStateData);
             walkState = new Walk(playerStateData);

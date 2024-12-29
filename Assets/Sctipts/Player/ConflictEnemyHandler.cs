@@ -7,10 +7,20 @@ public interface IConflictEnemy
 
 public class ConflictEnemyHandler : MonoBehaviour, IConflictEnemy
 {
-    [SerializeField] HPBar.HPBarHandler hPBarHandler;
-    [SerializeField] DamageTimeHandler damageTimeHandler;
+    HPBar.HPBarHandler hPBarHandler;
+    DamageTimeHandler damageTimeHandler;
 
     bool isInvincible = false;
+
+    public void OtherComponentGetter(HPBar.HPBarHandler hPBarHandler)
+    {
+        this.hPBarHandler = hPBarHandler;
+    }
+
+    public void ChildComponentGetter(DamageTimeHandler damageTimeHandler)
+    {
+        this.damageTimeHandler = damageTimeHandler;
+    }
 
     private void Awake()
     {
