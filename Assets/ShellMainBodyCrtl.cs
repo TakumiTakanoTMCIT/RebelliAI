@@ -28,7 +28,6 @@ public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
         rb = this.gameObject.MyGetComponent_NullChker<Rigidbody2D>();
         spriteRenderer = this.gameObject.MyGetComponent_NullChker<SpriteRenderer>();
         this.pool = pool;
-        Debug.Log($"INITされた!!pool: {pool}");
     }
 
     /// <summary>

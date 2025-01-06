@@ -39,4 +39,7 @@ public class PlayerStats : ScriptableObject
     public Vector2 damageForce = new Vector2(5, 5);
 
     public float blikingInterval = 0.03f, invincibleTime = 1.8f;
+
+    public float DefaultGravity => defaultGravity;
+    private float defaultGravity = 3.2f;
 }

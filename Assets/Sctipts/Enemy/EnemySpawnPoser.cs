@@ -1,4 +1,7 @@
+using System;
+using ObjectPoolFactory;
 using UnityEngine;
+using Zenject;
 
 public interface IEnemyPosController
 {
@@ -10,7 +13,9 @@ public interface IEnemyPosController
 
 public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
 {
-    IPoolHandler enemySpawnerHandler;
+    [Inject]
+    Lazy<EnemyBody.Factory> enemyBodyFactory;
+
     GameObject instance;
     ExplosionSpawner explosionSpawner;
 
@@ -19,12 +24,10 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
     //インターフェース実装
     public void GetSpawnHandler()
     {
+        Debug.Log($"EnemyBodyFactory is {enemyBodyFactory.Value}");
+        Debug.Log($"EnemyBodyFactory is {enemyBodyFactory}");
+
         explosionSpawner = GameObject.Find("ExplosionFactory").MyGetComponent_NullChker<ExplosionSpawner>();
-        enemySpawnerHandler = GameObject.Find("EnemyFactory").GetComponent<IPoolHandler>();
-        if (enemySpawnerHandler == null)
-        {
-            Debug.Log("enemySpaenerHandlerがnullです");
-        }
     }
 
     //インターフェース実装
@@ -32,7 +35,7 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
     {
         if (instance == null)
         {
-            instance = enemySpawnerHandler.GetObject();
+            instance = enemyBodyFactory.Value.Create().gameObject;
             instance.gameObject.MyGetComponent_NullChker<EnemyBody>().MyAwake(transform.position, transform, explosionSpawner);
             return;
         }

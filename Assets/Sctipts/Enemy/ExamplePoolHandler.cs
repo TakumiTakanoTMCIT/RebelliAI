@@ -9,32 +9,6 @@ public interface IPoolHandler
     void ReturnObjct(GameObject obj);
 }
 
-public class ExamplePoolHandler : MonoBehaviour, IPoolHandler
-{
-    [SerializeField] private int maxEnemyCount;
-    [SerializeField] private GameObject enmeyPrefab;
-    public GameObject wannaInstanceEnemy { get; set; }
-
-    public PoolHadnler spawnerHandler { get; set; }
-    private void Awake()
-    {
-        wannaInstanceEnemy = enmeyPrefab;
-        spawnerHandler = new PoolHadnler(maxEnemyCount, wannaInstanceEnemy);
-    }
-
-    //インターフェース実装
-    public GameObject GetObject()
-    {
-        return spawnerHandler.Get();
-    }
-
-    //インターフェース実装
-    public void ReturnObjct(GameObject obj)
-    {
-        spawnerHandler.Return(obj);
-    }
-}
-
 public class PoolHadnler
 {
     ObjectPool<GameObject> objectPool;

@@ -1,4 +1,7 @@
+using System;
+using ObjectPoolFactory;
 using UnityEngine;
+using Zenject;
 
 public interface IConflictableAndAttackableToPlayer
 {
@@ -18,8 +21,10 @@ public interface IPrefabEnemyBody
 }
 
 [RequireComponent(typeof(ConflictPlayerFinder))]
-public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody,IConflictableAndAttackableToPlayer
+public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody, IConflictableAndAttackableToPlayer
 {
+    public class Factory : PlaceholderFactory<EnemyBody> { }
+
     //インターフェース実装--------------------
     public ConflictPlayerFinder conflictPlayerFinder { get; set; }
 
@@ -31,16 +36,22 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody,IC
     EnemySpawnPoser spawnPoser;
     ExplosionSpawner explosionSpawner;
 
-    ExamplePoolHandler poolHandler;
+    Lazy<DanboruPool> poolHandler;
+
     DanboruAnimStateMgr animStateMgr;
     private void Awake()
     {
         IsAlivingNow = false;
-        poolHandler = GameObject.Find("EnemyFactory").MyGetComponent_NullChker<ExamplePoolHandler>();
         animStateMgr = gameObject.MyGetComponent_NullChker<DanboruAnimStateMgr>();
 
         conflictPlayerFinder = gameObject.MyGetComponent_NullChker<ConflictPlayerFinder>();
         conflictPlayerFinder.Init(conflictDamage);
+    }
+
+    [Inject]
+    public void Construct(Lazy<DanboruPool> danboruPool)
+    {
+        this.poolHandler = danboruPool;
     }
 
     //インターフェース実装------------------------------
@@ -61,7 +72,8 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody,IC
     {
         if (!IsAlivingNow) return;
         IsAlivingNow = false;
-        poolHandler.ReturnObjct(this.gameObject);
+        var pool = poolHandler.Value;
+        pool.ReturnObject(this.gameObject);
         spawnPoser.ResetInstance();
     }
 
@@ -75,7 +87,8 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody,IC
         {
             IsAlivingNow = false;
             hp = 0;
-            poolHandler.ReturnObjct(this.gameObject);
+            var pool = poolHandler.Value;
+            pool.ReturnObject(this.gameObject);
             spawnPoser.ResetInstance();
             explosionSpawner.MakeExplosion(transform.position);
         }

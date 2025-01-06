@@ -1,8 +1,9 @@
 using UnityEngine;
-using System.Collections;
 using Zenject;
 using KeyHandler;
 using System;
+using Cysharp.Threading.Tasks;
+using System.Threading;
 
 /// <summary>
 /// このクラスは、壁蹴りの受付時間を管理するクラスです。
@@ -19,48 +20,53 @@ public class WallKickDelayManager : MonoBehaviour
 
     private bool isJumpKey_Accepting = false;
 
+    private CancellationTokenSource cts;
+
     private void Awake()
     {
         inputHandler = this.gameObject.MyGetComponent_NullChker<InputHandler>();
     }
 
     /// <summary>
-    /// ジャンプキーを一瞬だけ受け付けるフラグの管理をするコルーチン
+    /// ジャンプキーを一瞬だけ受け付けるフラグの管理をするメソッドです。
     /// </summary>
-    Coroutine jumpKey_Accepting_Coroutine;
-    private IEnumerator jumpKey_Accepting()
+    private async UniTask JumpKey_Accepting(CancellationTokenSource cts)
     {
         isJumpKey_Accepting = true;
-        yield return new WaitForSeconds(playerStatus.delayKey_reception_time);
-        isJumpKey_Accepting = false;
-
-        //一応nullを代入しておく
-        jumpKey_Accepting_Coroutine = null;
+        try
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(playerStatus.delayKey_reception_time), cancellationToken: cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            //キャンセルされたら何もしない
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e);
+        }
+        finally
+        {
+            isJumpKey_Accepting = false;
+        }
     }
 
-    /// <summary>
-    /// ジャンプキーを一瞬だけ受け付けるコルーチンを開始する
-    /// </summary>
     public void Start_JumpKey_AcceptingTime()
     {
-        if (jumpKey_Accepting_Coroutine != null)
+        if (isJumpKey_Accepting)
         {
-            StopCoroutine(jumpKey_Accepting_Coroutine);
+            Stop_JumpKey_AcceptingTime();
         }
-        jumpKey_Accepting_Coroutine = StartCoroutine(jumpKey_Accepting());
+        cts = new CancellationTokenSource();
+        JumpKey_Accepting(cts).Forget();
     }
 
-    /// <summary>
-    /// コルーチンを停止する
-    /// </summary>
     public void Stop_JumpKey_AcceptingTime()
     {
-        if (jumpKey_Accepting_Coroutine != null)
+        if (isJumpKey_Accepting)
         {
-            StopCoroutine(jumpKey_Accepting_Coroutine);
-            jumpKey_Accepting_Coroutine = null;
+            cts.Cancel();
         }
-        isJumpKey_Accepting = false;
     }
 
     private void Update()

@@ -35,13 +35,12 @@ namespace PlayerState
         private void Awake()
         {
             //コンポーネントを取得
-            rb = gameObject.MyGetComponent_NullChker<Rigidbody2D>();
             animStateHandler = gameObject.MyGetComponent_NullChker<PlayerAnimStateHandler>();
             actionStatusChecker = gameObject.MyGetComponent_NullChker<ActionStatusChecker>();
             inputHandler = gameObject.MyGetComponent_NullChker<InputHandler>();
             wallKickDelayManager = gameObject.MyGetComponent_NullChker<WallKickDelayManager>();
 
-            playerStateData = new PlayerStateData(inputHandler, actionHandler, actionStatusChecker, animStateHandler);
+            playerStateData = new PlayerStateData(inputHandler, actionHandler, actionStatusChecker, animStateHandler, this.gameObject.MyGetComponent_NullChker<PlayerDashKeepManager>());
 
             idleState = new Idle(playerStateData);
             walkState = new Walk(playerStateData);
@@ -82,6 +81,9 @@ namespace PlayerState
             HPBarHandler.onPlayerDeath -= OnDeath;
             HPBarHandler.onPlayerDamage -= OnDamage;
 
+            //責務に反してるのかな...?でもどこかでDisposeしないといけないのでここでやるしかない。検討の余地あり！UniRxを使えばこんなのいらないかもしれない!!
+            actionHandler.Dispose();
+
             wallKickDelayManager.OnWallKickRequest += () => ChangeState(wallKick);
         }
 
@@ -120,11 +122,6 @@ namespace PlayerState
         void OnDeath()
         {
             ChangeState(deathState);
-
-            actionHandler.StopX();
-            actionHandler.StopY();
-            //TODO:ここで重力を操作するのは責務に反するので、後で修正
-            rb.gravityScale = 0;
         }
 
         public bool IsCurrentState_DashState()
@@ -168,13 +165,15 @@ namespace PlayerState
         public ActionHandler ActionHandler { get; }
         public ActionStatusChecker ActionStatusChecker { get; }
         public PlayerAnimStateHandler AnimHandler { get; }
+        public PlayerDashKeepManager DashKeepManager { get; }
 
-        public PlayerStateData(InputHandler inputHandler, ActionHandler actionHandler, ActionStatusChecker actionStatusChecker, PlayerAnimStateHandler animHandler)
+        public PlayerStateData(InputHandler inputHandler, ActionHandler actionHandler, ActionStatusChecker actionStatusChecker, PlayerAnimStateHandler animHandler, PlayerDashKeepManager dashKeepManager)
         {
             InputHandler = inputHandler;
             ActionHandler = actionHandler;
             ActionStatusChecker = actionStatusChecker;
             AnimHandler = animHandler;
+            DashKeepManager = dashKeepManager;
         }
     }
 
@@ -262,27 +261,17 @@ namespace PlayerState
         public void Exit(PlayerStateMgr stateMgr) { }
     }
 
-    public class Walk : IState, IWalker
+    public class Walk : IState
     {
         private readonly PlayerStateData stateData;
-        /// <summary>
-        /// 歩いているかどうかのプロパティです。
-        /// 正味、使用していないですが、今後の拡張性を考えて作成しました
-        /// </summary>
-        public bool isWalkNow { get; set; }
 
         public Walk(PlayerStateData playerStateData)
         {
-            this.stateData = playerStateData;
+            stateData = playerStateData;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            /// <summary>
-            /// 初期化
-            /// </summary>
-            isWalkNow = false;
-
             stateData.AnimHandler.ChangeAnimState(stateData.AnimHandler.walkState);
         }
 
@@ -345,11 +334,8 @@ namespace PlayerState
             if (!stateData.InputHandler.IsMoveKey())
             {
                 stateMgr.ChangeState(stateMgr.idleState);
-                isWalkNow = false;
                 return;
             }
-
-            isWalkNow = true;
 
             /// <summary>
             /// 壁の検知を行い、壁にぶつかっていたらIdleに遷移します
@@ -387,14 +373,11 @@ namespace PlayerState
         [Inject]
         private DashSparkFactory sparkFactory;
         [Inject]
-        private PlayerDashKeepManager dashKeepManager;
-        [Inject]
         private readonly PlayerDashTimeCtrl dashTimeCtrl;
 
         private readonly PlayerStateData stateData;
         private bool direction;
 
-        //インスタンスした時にdirectionを渡すようにしたい
         public Dash(PlayerStateData stateData)
         {
             this.stateData = stateData;
@@ -447,7 +430,7 @@ namespace PlayerState
                 /// <summary>
                 /// ダッシュしている最中に落下したら、ダッシュを維持したままFallに遷移
                 /// </summary>
-                dashKeepManager.KeepDashSpeed();
+                stateData.DashKeepManager.KeepDashSpeed();
 
                 stateMgr.ChangeState(stateMgr.fallState);
                 return;
@@ -455,14 +438,14 @@ namespace PlayerState
 
             if (stateData.ActionStatusChecker.IsWall(direction))
             {
-                dashKeepManager.StopDashSpeed();
+                stateData.DashKeepManager.StopDashSpeed();
                 stateMgr.ChangeState(stateMgr.idleState);
                 return;
             }
 
             if (stateData.InputHandler.IsJumpKeyDown())
             {
-                dashKeepManager.KeepDashSpeed();
+                stateData.DashKeepManager.KeepDashSpeed();
                 stateMgr.ChangeState(stateMgr.jumpState);
                 return;
             }
@@ -823,7 +806,6 @@ namespace PlayerState
 
         //Injectされるフィールド達
         private WallKickFactory wallKickFactory;
-        private PlayerDashKeepManager dashKeepManager;
 
         public bool isWalkNow { get; set; }
 
@@ -835,10 +817,9 @@ namespace PlayerState
         }
 
         [Inject]
-        public void MyInject(WallKickFactory wallKickFactory, PlayerDashKeepManager dashKeepManager)
+        public void MyInject(WallKickFactory wallKickFactory)
         {
             this.wallKickFactory = wallKickFactory;
-            this.dashKeepManager = dashKeepManager;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
@@ -936,12 +917,12 @@ namespace PlayerState
                 if (stateData.InputHandler.IsDashKeyDown() || stateData.InputHandler.IsDashKey())
                 {
                     //すでにKeepDashSpeedがオンになっていたら、何もしない
-                    if (dashKeepManager.IsKeepDashSpeed)
+                    if (stateData.DashKeepManager.IsKeepDashSpeed)
                         return;
                     if (isOneTimeAbleTo_TurnOn_KeepDashSpeed)
                         return;
 
-                    dashKeepManager.KeepDashSpeed();
+                    stateData.DashKeepManager.KeepDashSpeed();
                     isOneTimeAbleTo_TurnOn_KeepDashSpeed = true;
                 }
             }

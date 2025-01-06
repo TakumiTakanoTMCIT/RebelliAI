@@ -16,9 +16,9 @@ public class GameFlowManager : MonoBehaviour
     [SerializeField] GamePlayerManager gamePlayerManager;
     [SerializeField] GameStartTerminalCtrl gameStartTerminalCtrl;
     [SerializeField] BossCutSceneHandler bossCutSceneHandler;
-    [SerializeField] WarpFactory warpFactory;
     [SerializeField] SavePointHandler savePointHandler;
     [SerializeField] CameraGoBossStageController cameraGoBossStageController;
+    [SerializeField] WarpDirection warpDirection;
 
     public static Subject<Unit> onCompletedShowStandbyTerminal = new Subject<Unit>();
     public static Subject<Unit> onCompletedPlayerWarpIn = new Subject<Unit>();
@@ -62,7 +62,7 @@ public class GameFlowManager : MonoBehaviour
         //プレイヤーをワープ登場演出まで非表示にして、操作不可能にする。
         gamePlayerManager.DeactivePlayer.OnNext(Unit.Default);
         inputHandler.DisableInput.OnNext(Unit.Default);
-        Debug.LogAssertion("プレイヤーをワープ登場演出まで非表示にして、操作不可能にする。");
+        if (isDebugMode) Debug.LogAssertion("プレイヤーをワープ登場演出まで非表示にして、操作不可能にする。");
 
         //スタンバイターミナルを表示
         gameStartTerminalCtrl.onStartStandbyTerminal.OnNext(Unit.Default);
@@ -89,10 +89,10 @@ public class GameFlowManager : MonoBehaviour
         BGMCtrl.onPlayBGM.OnNext(0);
 
         //ワープエフェクトを表示し、終わるまで待機
-        warpFactory.StartWarpDirection(true).Forget();
+        warpDirection.StartWarpDirection().Forget();
         try
         {
-            await warpFactory.OnCompletedWarpEffect
+            await warpDirection.OnCompletedWarpEffect
                 .First()
                 .ToUniTask();
         }
@@ -160,7 +160,7 @@ public class GameFlowManager : MonoBehaviour
         //ワープエフェクトを表示し、終わるまで待機
         try
         {
-            await warpFactory.StartWarpDirection(false);
+            await warpDirection.StartWarpDirection();
         }
         catch (Exception e)
         {

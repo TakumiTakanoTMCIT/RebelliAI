@@ -20,7 +20,6 @@ public class PlayerStateInstaller : MonoInstaller
         Container.Bind<DashSparkFactory>().FromInstance(dashSparkFactory).AsSingle();
         Container.Bind<WallKickFactory>().FromInstance(wallKickFactory).AsSingle();
         Container.Bind<DamageTimeHandler>().FromInstance(damageTimeHandler).AsSingle();
-        Container.Bind<PlayerDashKeepManager>().FromInstance(playerDashKeepManager).AsSingle();
         Container.Bind<ActionHandler>().AsSingle().WithArguments(playerRb, actionStatusChecker, playerDashKeepManager);
         Container.Bind<WallKickDelayManager>().FromInstance(wallKickDelayManager).AsSingle();
         Container.Bind<PlayerDashTimeCtrl>().FromInstance(playerDashTimeCtrl).AsSingle();

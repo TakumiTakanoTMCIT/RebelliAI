@@ -1,10 +1,12 @@
+using System;
 using ActionStatusChk;
+using HPBar;
 using UnityEngine;
 using Zenject;
 
 namespace PlayerAction
 {
-    public class ActionHandler
+    public class ActionHandler : IDisposable
     {
         Rigidbody2D rb;
         ActionStatusChecker actionStatusChecker;
@@ -18,6 +20,33 @@ namespace PlayerAction
             this.rb = rb;
             this.actionStatusChecker = actionStatusChecker;
             this.dashKeepManager = dashKeepManager;
+
+            HPBarHandler.onPlayerDeath += OnPlayerDeath;
+        }
+
+        //PlayerStateMgrが破棄されたときに呼ばれる
+        public void Dispose()
+        {
+            HPBarHandler.onPlayerDeath -= OnPlayerDeath;
+        }
+
+        private void OnPlayerDeath()
+        {
+            StopX();
+            StopY();
+            DisableGravity();
+        }
+
+        public void EnableGravity()
+        {
+            if (rb == null) return;
+            rb.gravityScale = playerStatus.DefaultGravity;
+        }
+
+        public void DisableGravity()
+        {
+            if (rb == null) return;
+            rb.gravityScale = 0;
         }
 
         public void StopX()
