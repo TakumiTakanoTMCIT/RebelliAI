@@ -23,8 +23,6 @@ public interface IPrefabEnemyBody
 [RequireComponent(typeof(ConflictPlayerFinder))]
 public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody, IConflictableAndAttackableToPlayer
 {
-    public class Factory : PlaceholderFactory<EnemyBody> { }
-
     //インターフェース実装--------------------
     public ConflictPlayerFinder conflictPlayerFinder { get; set; }
 
@@ -35,10 +33,11 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody, I
 
     EnemySpawnPoser spawnPoser;
     ExplosionSpawner explosionSpawner;
-
-    Lazy<DanboruPool> poolHandler;
-
     DanboruAnimStateMgr animStateMgr;
+
+    //コールバック
+    Action<GameObject> releaseObject;
+
     private void Awake()
     {
         IsAlivingNow = false;
@@ -48,10 +47,9 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody, I
         conflictPlayerFinder.Init(conflictDamage);
     }
 
-    [Inject]
-    public void Construct(Lazy<DanboruPool> danboruPool)
+    public void SetReleaseObjCallBack(Action<GameObject> resetObj)
     {
-        this.poolHandler = danboruPool;
+        this.releaseObject = resetObj;
     }
 
     //インターフェース実装------------------------------
@@ -72,8 +70,7 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody, I
     {
         if (!IsAlivingNow) return;
         IsAlivingNow = false;
-        var pool = poolHandler.Value;
-        pool.ReturnObject(this.gameObject);
+        releaseObject(this.gameObject);
         spawnPoser.ResetInstance();
     }
 
@@ -87,10 +84,11 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody, I
         {
             IsAlivingNow = false;
             hp = 0;
-            var pool = poolHandler.Value;
-            pool.ReturnObject(this.gameObject);
+            releaseObject(this.gameObject);
             spawnPoser.ResetInstance();
             explosionSpawner.MakeExplosion(transform.position);
         }
     }
 }
+
+public class EnemyBodyFactory : PlaceholderFactory<EnemyBody> { }

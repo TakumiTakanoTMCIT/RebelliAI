@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using ObjectPoolFactory;
+using Zenject;
 
 /// <summary>
 /// このクラスの責務は、ワープエフェクトのアニメーションを制御することです。
@@ -10,28 +11,29 @@ namespace Warp
 {
     public class WarpEffectBody : MonoBehaviour
     {
-        //animatorのインスタンスを取得
-        Animator animator;
-        //WarpPoolのインスタンスを取得
-        WarpPool factory;
         //エフェクトが表示される時間
         private float showingTime;
 
         //各クラスのインスタンスを生成
         private AnimatorCtrl animatorCtrl;
         private Timer timer;
-        private Warp.PoolHandler poolHandler;
         private PositionSetter positionSetter;
+
+        //Injeect
+        private Warp.PoolHandler poolHandler;
+
+        [Inject]
+        public void Construct(Warp.PoolHandler poolHandler)
+        {
+            this.poolHandler = poolHandler;
+        }
 
         //オブジェクトプールで最初に生成されるので、このメソッドで初期化する
         private void Awake()
         {
-            //コンポーネントを取得
-            animator = gameObject.MyGetComponent_NullChker<Animator>();
-
             //各クラスのインスタンスを生成
-            animatorCtrl = new AnimatorCtrl(animator);
-            poolHandler = new PoolHandler(factory, gameObject);
+            animatorCtrl = new AnimatorCtrl(gameObject.MyGetComponent_NullChker<Animator>());
+            poolHandler.Init(gameObject);
             timer = new Timer(poolHandler);
             positionSetter = new PositionSetter(gameObject);
         }
@@ -44,10 +46,9 @@ namespace Warp
 
         //生成されたら、ポジションをXをプレイヤーの位置に、Yを指定の位置にする（YはFactoryで上から下になるように設定されます）
         //どのアニメーションにするのかここでランダムに指定する
-        public void Init(WarpPool factory, float showingTime, float playerPosX, float PosY)
+        public void Init(float showingTime, float playerPosX, float PosY)
         {
             //TODO:ここの数値をfactoryiinfoから取得するようにする(Inject)
-            this.factory = factory;
             this.showingTime = showingTime;
             positionSetter.SetPosition(playerPosX, PosY);
             animatorCtrl.StartAnim();
@@ -59,22 +60,6 @@ namespace Warp
             animatorCtrl.FinishStart();
             timer.CountReleaseTime(showingTime).Forget();
         }
-
-        /*//ある程度アニメーションしたら、エフェクトを消す
-        async UniTask CountReleaseTime()
-        {
-            try
-            {
-                await UniTask.Delay(TimeSpan.FromSeconds(showingTime));
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-                return;
-            }
-
-            factory.ReturnObject(gameObject);
-        }*/
     }
 
     //アニメーションの制御をするクラス
@@ -142,10 +127,15 @@ namespace Warp
         private WarpPool _factory;
         private GameObject _mySelftObj;
 
-        public PoolHandler(WarpPool factory, GameObject mySelftObj)
+        public void Init(GameObject mySelftObj)
         {
-            _factory = factory;
-            this._mySelftObj = mySelftObj;
+            _mySelftObj = mySelftObj;
+        }
+
+        [Inject]
+        public PoolHandler(WarpPool factory)
+        {
+            this._factory = factory;
         }
 
         public void ReturnMeToPool()

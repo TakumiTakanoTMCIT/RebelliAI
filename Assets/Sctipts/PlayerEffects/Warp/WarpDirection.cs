@@ -12,11 +12,16 @@ public class WarpDirection : MonoBehaviour
     [SerializeField] private float createIntervel = 0.1f, randomXRange = 1f, initialYPossition = 7f, showingTime = 1f;
     [SerializeField] private Transform playerTransform;
 
-    [Inject]
+    //Inject
     private WarpPool pool;
 
     private Subject<Unit> onCompletedWarpEffect = new Subject<Unit>();
     public IObservable<Unit> OnCompletedWarpEffect => onCompletedWarpEffect;
+
+    public void Construct(WarpPool pool)
+    {
+        this.pool = pool;
+    }
 
     public async UniTask StartWarpDirection()
     {
@@ -37,7 +42,6 @@ public class WarpDirection : MonoBehaviour
             }
 
             pool.GetObject().gameObject.MyGetComponent_NullChker<WarpEffectBody>().Init(
-                pool,
                 showingTime,
                 playerTransform.position.x + UnityEngine.Random.Range(-randomXRange, randomXRange),
                 UnityEngine.Random.Range(playerTransform.position.y, playerTransform.position.y + initialYPossition));

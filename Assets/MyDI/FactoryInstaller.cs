@@ -2,6 +2,7 @@ using UnityEngine;
 using Zenject;
 using ObjectPoolFactory;
 using System;
+using Warp;
 
 public class FactoryInstaller : MonoInstaller
 {
@@ -13,23 +14,27 @@ public class FactoryInstaller : MonoInstaller
             .AsSingle()
             .WithArguments(factoryManager.warpPrefab, factoryManager.warpMaxCapacity);
 
+        Container.Bind<PoolHandler>()
+            .AsSingle();
+
         Container.Bind<EnemySpawnPoser>()
             .FromComponentInHierarchy()
             .AsTransient();
 
-        Container.BindFactory<EnemyBody, EnemyBody.Factory>()
-            .FromComponentInNewPrefab(factoryManager.danboruPrefab);
-
-        Container.Bind<Lazy<EnemyBody.Factory>>()
-            .FromMethod(ctx => new Lazy<EnemyBody.Factory>(() => ctx.Container.Resolve<EnemyBody.Factory>()))
-            .AsSingle();
-
         Container.Bind<DanboruPool>()
             .AsSingle()
-            .WithArguments<GameObject, int, Lazy<EnemyBody.Factory>>(
+            .WithArguments(
                 factoryManager.danboruPrefab,
-                factoryManager.danboruMaxCapacity,
-                new Lazy<EnemyBody.Factory>(() => Container.Resolve<EnemyBody.Factory>())
+                factoryManager.danboruMaxCapacity
                 );
+
+        Container.Bind<IReturnable>()
+            .To<DanboruPool>()
+            .FromResolve();
+
+
+        Container.BindFactory<EnemyBody, EnemyBodyFactory>()
+            .FromComponentInNewPrefab(factoryManager.danboruPrefab)
+            .AsSingle();
     }
 }

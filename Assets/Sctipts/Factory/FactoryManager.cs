@@ -5,7 +5,12 @@ using Zenject;
 
 namespace ObjectPoolFactory
 {
-    public abstract class BasePool
+    public interface IReturnable
+    {
+        void ReturnObject(GameObject obj);
+    }
+
+    public abstract class BasePool : IReturnable
     {
         protected GameObject prefab;
         private int maxCapacity;
@@ -88,10 +93,10 @@ namespace ObjectPoolFactory
 
     public class DanboruPool : BasePool
     {
-        private readonly Lazy<EnemyBody.Factory> enmeyBodyFactory;
+        private readonly EnemyBodyFactory enmeyBodyFactory;
 
         [Inject]
-        public DanboruPool(GameObject prefab, int maxCapacity, Lazy<EnemyBody.Factory> enemyFactory) : base(prefab, maxCapacity)
+        public DanboruPool(GameObject prefab, int maxCapacity, EnemyBodyFactory enemyFactory) : base(prefab, maxCapacity)
         {
             enmeyBodyFactory = enemyFactory;
             InitPool();
@@ -99,7 +104,10 @@ namespace ObjectPoolFactory
 
         protected override GameObject CreateObj()
         {
-            return enmeyBodyFactory.Value.Create().gameObject;
+            var obj = enmeyBodyFactory.Create();
+            obj.SetReleaseObjCallBack((thisobj) => ReturnObject(thisobj.gameObject));
+
+            return obj.gameObject;
         }
     }
 }

@@ -73,8 +73,6 @@ public class PlayerAnimStateHandler : MonoBehaviour
         currentState = idleState;
 
         isChangeableAnim = true;
-
-        Debug.Log("アニメーションステートハンドラが初期化されました");
     }
 
     public void OtherComponentGetter(DeathGlitchSparkFactory deathGlitchSparkFactory, GameFlowManager gameFlowManager)

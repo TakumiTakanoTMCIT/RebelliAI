@@ -13,20 +13,23 @@ public interface IEnemyPosController
 
 public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
 {
-    [Inject]
-    Lazy<EnemyBody.Factory> enemyBodyFactory;
+    //Inject
+    EnemyBodyFactory enemyBodyFactory;
 
-    GameObject instance;
+    EnemyBody instance;
     ExplosionSpawner explosionSpawner;
+
+    [Inject]
+    public void Construct(EnemyBodyFactory enemyBodyFactory)
+    {
+        this.enemyBodyFactory = enemyBodyFactory;
+    }
 
     private void Awake() => GetSpawnHandler();
 
     //インターフェース実装
     public void GetSpawnHandler()
     {
-        Debug.Log($"EnemyBodyFactory is {enemyBodyFactory.Value}");
-        Debug.Log($"EnemyBodyFactory is {enemyBodyFactory}");
-
         explosionSpawner = GameObject.Find("ExplosionFactory").MyGetComponent_NullChker<ExplosionSpawner>();
     }
 
@@ -35,8 +38,8 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
     {
         if (instance == null)
         {
-            instance = enemyBodyFactory.Value.Create().gameObject;
-            instance.gameObject.MyGetComponent_NullChker<EnemyBody>().MyAwake(transform.position, transform, explosionSpawner);
+            instance = enemyBodyFactory.Create();
+            instance.MyAwake(transform.position, transform, explosionSpawner);
             return;
         }
         else return;
