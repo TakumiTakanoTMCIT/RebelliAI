@@ -1,7 +1,7 @@
 using UnityEngine;
 using Zenject;
 using ObjectPoolFactory;
-using Warp;
+using Enemy;
 
 public class FactoryInstaller : MonoInstaller
 {
@@ -9,19 +9,6 @@ public class FactoryInstaller : MonoInstaller
 
     public override void InstallBindings()
     {
-        Container.Bind<EnemySpawnPoser>()
-            .FromComponentInHierarchy()
-            .AsTransient();
 
-        Container.Bind<DanboruPool>()
-            .AsSingle()
-            .WithArguments(
-                factoryManager.danboruPrefab,
-                factoryManager.danboruMaxCapacity
-                );
-
-        Container.BindFactory<EnemyBody, EnemyBodyFactory>()
-            .FromComponentInNewPrefab(factoryManager.danboruPrefab)
-            .AsSingle();
     }
 }

@@ -23,6 +23,7 @@ public class WarpDirection : MonoBehaviour
     [Inject]
     public void Construct(WarpPool warpPool, [Inject(Id = "WarpDirection")] int MakeAmount)
     {
+        Debug.Log("WarpDirection Construct");
         this.warpPool = warpPool;
         this.MakeAmount = MakeAmount;
     }

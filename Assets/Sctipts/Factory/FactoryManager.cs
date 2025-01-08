@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Pool;
 using Warp;
 using Zenject;
+using Enemy;
 
 namespace ObjectPoolFactory
 {
@@ -47,10 +48,7 @@ namespace ObjectPoolFactory
             isInit = true;
         }
 
-        protected virtual GameObject CreateObj()
-        {
-            return GameObject.Instantiate(prefab);
-        }
+        protected abstract GameObject CreateObj();
 
         private void GetObj(GameObject getObj)
         {
@@ -86,6 +84,8 @@ namespace ObjectPoolFactory
 
         public WarpPool(GameObject prefab, int maxCapacity, WarpEffectBody.Factory factory, PoolHandler poolHandler) : base(prefab, maxCapacity)
         {
+            //Debug.Log($"poolHandler : {poolHandler}");
+            Debug.Log("WarpPool");
             poolHandler.SetReleaseObjCallBack((obj) => ReturnObject(obj));
             this.poolHandler = poolHandler;
             _factory = factory;
@@ -103,9 +103,16 @@ namespace ObjectPoolFactory
     {
         private readonly EnemyBodyFactory enmeyBodyFactory;
 
-        [Inject]
-        public DanboruPool(GameObject prefab, int maxCapacity, EnemyBodyFactory enemyFactory) : base(prefab, maxCapacity)
+        //Inject
+        public DanboruPool(GameObject prefab, int maxCapacity, EnemyBodyFactory enemyFactory, PoolReleaser poolReleaser) : base(prefab, maxCapacity)
         {
+            Debug.LogWarning($"DanboruPoolReleaser : {poolReleaser}");
+            poolReleaser.SetReleaseObjCallBack((obj) =>
+            {
+                ReturnObject(obj);
+                Debug.Log("ReturnObject");
+            });
+
             enmeyBodyFactory = enemyFactory;
             InitPool();
         }
@@ -113,7 +120,6 @@ namespace ObjectPoolFactory
         protected override GameObject CreateObj()
         {
             var obj = enmeyBodyFactory.Create();
-            obj.SetReleaseObjCallBack((thisobj) => ReturnObject(thisobj.gameObject));
 
             return obj.gameObject;
         }

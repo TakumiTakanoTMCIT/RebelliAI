@@ -84,7 +84,7 @@ public class GameFlowManager : MonoBehaviour
             Debug.LogError($"awaitでエラーが起きました。{e}");
             return;
         }
-        Debug.LogAssertion("スタンバイターミナルを表示完了");
+        //Debug.LogAssertion("スタンバイターミナルを表示完了");
         //BGMを再生
         BGMCtrl.onPlayBGM.OnNext(0);
 
@@ -107,7 +107,7 @@ public class GameFlowManager : MonoBehaviour
         gamePlayerManager.ActivePlayer.OnNext(Unit.Default);
         await UniTask.Yield(PlayerLoopTiming.Update);
         playerAnimCutSceneCtrl.PlayerWarpInDirection.OnNext(Unit.Default);
-        Debug.LogAssertion("プレイヤーがワープで登場");
+        //Debug.LogAssertion("プレイヤーがワープで登場");
         //ブラスターも表示
         Blaster.DisplayCtrl.OnDisplayBlaster.OnNext(Unit.Default);
 
@@ -133,12 +133,10 @@ public class GameFlowManager : MonoBehaviour
         gamePlayerManager.isInGameArea = true;
         //アクションスタート
         StartBattleAction.OnNext(Unit.Default);
-        //ちょっと待機
-        Debug.Log("0.1秒後にキーの受付を開始");
         await UniTask.Delay(TimeSpan.FromSeconds(0.1f));
         //キーの受付を開始
         inputHandler.EnableInput.OnNext(Unit.Default);
-        Debug.LogAssertion("キーの受付を開始、アクションスタート");
+        //Debug.LogAssertion("キーの受付を開始、アクションスタート");
         //プレイヤーをonStageにする
 
         //ボスの処理はBossCutSceneHandlerでやる

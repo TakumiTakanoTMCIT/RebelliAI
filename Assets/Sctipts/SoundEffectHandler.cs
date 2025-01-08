@@ -95,9 +95,9 @@ public class BGMCtrl
         {
             audioSourceBGM.clip = bgm[index];
             audioSourceBGM.Play();
-            Debug.Log("BGMを再生");
+            //Debug.Log("BGMを再生");
             await audioSourceBGM.DOFade(endValue: 0.4f, duration: 2.0f).ToUniTask();
-            Debug.Log("BGMのフェードインが完了");
+            //Debug.Log("BGMのフェードインが完了");
         }).AddTo(_disposables);
 
         onStopBGM.Subscribe(async _ =>

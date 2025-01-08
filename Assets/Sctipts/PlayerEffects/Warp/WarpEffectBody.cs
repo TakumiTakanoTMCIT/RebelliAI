@@ -130,12 +130,10 @@ namespace Warp
         public void SetReleaseObjCallBack(Action<GameObject> releaseObjCallBack)
         {
             this.releaseObjCallBack = releaseObjCallBack;
-            //Debug.Log($"SetReleaseObjCallBack : {releaseObjCallBack}");
         }
 
         public void ReturnMeToPool(GameObject myselfObj)
         {
-            //Debug.Log($"ReturnMeToPool : {releaseObjCallBack}");
             releaseObjCallBack?.Invoke(myselfObj);
         }
     }
