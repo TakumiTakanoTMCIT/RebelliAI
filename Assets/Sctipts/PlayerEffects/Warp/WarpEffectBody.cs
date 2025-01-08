@@ -1,7 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using ObjectPoolFactory;
 using Zenject;
 
 /// <summary>
@@ -11,32 +10,15 @@ namespace Warp
 {
     public class WarpEffectBody : MonoBehaviour
     {
+        public class Factory : PlaceholderFactory<WarpEffectBody> { }
+
         //エフェクトが表示される時間
         private float showingTime;
 
-        //各クラスのインスタンスを生成
-        private AnimatorCtrl animatorCtrl;
+        //Inject
         private Timer timer;
+        private AnimatorCtrl animatorCtrl;
         private PositionSetter positionSetter;
-
-        //Injeect
-        private Warp.PoolHandler poolHandler;
-
-        [Inject]
-        public void Construct(Warp.PoolHandler poolHandler)
-        {
-            this.poolHandler = poolHandler;
-        }
-
-        //オブジェクトプールで最初に生成されるので、このメソッドで初期化する
-        private void Awake()
-        {
-            //各クラスのインスタンスを生成
-            animatorCtrl = new AnimatorCtrl(gameObject.MyGetComponent_NullChker<Animator>());
-            poolHandler.Init(gameObject);
-            timer = new Timer(poolHandler);
-            positionSetter = new PositionSetter(gameObject);
-        }
 
         //ActiveSelfがfalseになったら、アニメーションをリセットする
         private void OnDisable()
@@ -44,12 +26,27 @@ namespace Warp
             animatorCtrl.ResetAnim();
         }
 
+        [Inject]
+        public void Construct(Timer timer, AnimatorCtrl animatorCtrl, PositionSetter positionSetter)
+        {
+            this.timer = timer;
+
+            this.animatorCtrl = animatorCtrl;
+            this.animatorCtrl.Construct(gameObject.MyGetComponent_NullChker<Animator>());
+
+            this.positionSetter = positionSetter;
+            this.positionSetter.Construct(gameObject);
+        }
+
         //生成されたら、ポジションをXをプレイヤーの位置に、Yを指定の位置にする（YはFactoryで上から下になるように設定されます）
         //どのアニメーションにするのかここでランダムに指定する
-        public void Init(float showingTime, float playerPosX, float PosY)
+        public void Init(float showingTime)
         {
-            //TODO:ここの数値をfactoryiinfoから取得するようにする(Inject)
             this.showingTime = showingTime;
+        }
+
+        public void StartDirection(float playerPosX, float PosY)
+        {
             positionSetter.SetPosition(playerPosX, PosY);
             animatorCtrl.StartAnim();
         }
@@ -58,7 +55,7 @@ namespace Warp
         void OnFinishStart()
         {
             animatorCtrl.FinishStart();
-            timer.CountReleaseTime(showingTime).Forget();
+            timer.CountReleaseTime(showingTime, gameObject).Forget();
         }
     }
 
@@ -66,7 +63,7 @@ namespace Warp
     public class AnimatorCtrl
     {
         Animator animator;
-        public AnimatorCtrl(Animator animator)
+        public void Construct(Animator animator)
         {
             this.animator = animator;
         }
@@ -92,16 +89,18 @@ namespace Warp
     }
 
     //表示する時間を制御するクラス
+    //Installerで登録します。
     public class Timer
     {
-        private Warp.PoolHandler poolHadnler;
+        private PoolHandler poolHandler;
 
-        public Timer(Warp.PoolHandler poolHadnler)
+        [Inject]
+        public Timer(PoolHandler poolHandler)
         {
-            this.poolHadnler = poolHadnler;
+            this.poolHandler = poolHandler;
         }
 
-        public async UniTask CountReleaseTime(float showingTime)
+        public async UniTask CountReleaseTime(float showingTime, GameObject myselfObj)
         {
             try
             {
@@ -115,32 +114,29 @@ namespace Warp
             finally
             {
                 //エフェクトを消す
-                poolHadnler.ReturnMeToPool();
+                //Debug.Log($"ReturnMeToPool : {poolHandler}");
+                poolHandler.ReturnMeToPool(myselfObj);
             }
         }
     }
 
     //プールを制御するクラス
     //自分自身をいつプールに返すかを制御するクラスです！
+    //Installerにてインスタンス化されます
     public class PoolHandler
     {
-        private WarpPool _factory;
-        private GameObject _mySelftObj;
+        private Action<GameObject> releaseObjCallBack;
 
-        public void Init(GameObject mySelftObj)
+        public void SetReleaseObjCallBack(Action<GameObject> releaseObjCallBack)
         {
-            _mySelftObj = mySelftObj;
+            this.releaseObjCallBack = releaseObjCallBack;
+            //Debug.Log($"SetReleaseObjCallBack : {releaseObjCallBack}");
         }
 
-        [Inject]
-        public PoolHandler(WarpPool factory)
+        public void ReturnMeToPool(GameObject myselfObj)
         {
-            this._factory = factory;
-        }
-
-        public void ReturnMeToPool()
-        {
-            _factory.ReturnObject(_mySelftObj);
+            //Debug.Log($"ReturnMeToPool : {releaseObjCallBack}");
+            releaseObjCallBack?.Invoke(myselfObj);
         }
     }
 
@@ -149,7 +145,7 @@ namespace Warp
     {
         private GameObject mySelftObj;
 
-        public PositionSetter(GameObject mySelftObj)
+        public void Construct(GameObject mySelftObj)
         {
             this.mySelftObj = mySelftObj;
         }

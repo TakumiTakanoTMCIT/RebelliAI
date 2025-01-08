@@ -252,8 +252,6 @@ public class SoundEffectCtrl
 
     private void PlayHealHPSound()
     {
-        Debug.Log($"audioSourceSE: {audioSourceSE}");
-        Debug.Log($"healHPSound: {healHPSound}");
         audioSourceSE.PlayOneShot(healHPSound);
     }
 

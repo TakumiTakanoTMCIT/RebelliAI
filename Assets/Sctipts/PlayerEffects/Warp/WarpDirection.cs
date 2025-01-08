@@ -3,24 +3,28 @@ using UniRx;
 using Cysharp.Threading.Tasks;
 using System;
 using Zenject;
-using ObjectPoolFactory;
 using Warp;
+using ObjectPoolFactory;
 
 public class WarpDirection : MonoBehaviour
 {
-    [SerializeField] private int MakeAmount = 20;
+    //Inject
+    private int MakeAmount;
+
     [SerializeField] private float createIntervel = 0.1f, randomXRange = 1f, initialYPossition = 7f, showingTime = 1f;
     [SerializeField] private Transform playerTransform;
 
     //Inject
-    private WarpPool pool;
+    private WarpPool warpPool;
 
     private Subject<Unit> onCompletedWarpEffect = new Subject<Unit>();
     public IObservable<Unit> OnCompletedWarpEffect => onCompletedWarpEffect;
 
-    public void Construct(WarpPool pool)
+    [Inject]
+    public void Construct(WarpPool warpPool, [Inject(Id = "WarpDirection")] int MakeAmount)
     {
-        this.pool = pool;
+        this.warpPool = warpPool;
+        this.MakeAmount = MakeAmount;
     }
 
     public async UniTask StartWarpDirection()
@@ -41,10 +45,14 @@ public class WarpDirection : MonoBehaviour
                 return;
             }
 
-            pool.GetObject().gameObject.MyGetComponent_NullChker<WarpEffectBody>().Init(
-                showingTime,
+            var warpBody = warpPool.GetObject().gameObject.MyGetComponent_NullChker<WarpEffectBody>();
+
+            warpBody.Init(showingTime);
+
+            warpBody.StartDirection(
                 playerTransform.position.x + UnityEngine.Random.Range(-randomXRange, randomXRange),
-                UnityEngine.Random.Range(playerTransform.position.y, playerTransform.position.y + initialYPossition));
+                UnityEngine.Random.Range(playerTransform.position.y, playerTransform.position.y + initialYPossition
+                ));
         }
         //すべて生成し終わったらプレイヤーのワープアニメーションが終わるまで待つ
         onCompletedWarpEffect.OnNext(Unit.Default);

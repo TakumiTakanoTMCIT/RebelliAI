@@ -1,16 +1,11 @@
-using System;
 using UnityEngine;
 using UnityEngine.Pool;
+using Warp;
 using Zenject;
 
 namespace ObjectPoolFactory
 {
-    public interface IReturnable
-    {
-        void ReturnObject(GameObject obj);
-    }
-
-    public abstract class BasePool : IReturnable
+    public abstract class BasePool
     {
         protected GameObject prefab;
         private int maxCapacity;
@@ -85,9 +80,22 @@ namespace ObjectPoolFactory
 
     public class WarpPool : BasePool
     {
-        public WarpPool(GameObject prefab, int maxCapacity) : base(prefab, maxCapacity)
+        //Inject
+        WarpEffectBody.Factory _factory;
+        PoolHandler poolHandler;
+
+        public WarpPool(GameObject prefab, int maxCapacity, WarpEffectBody.Factory factory, PoolHandler poolHandler) : base(prefab, maxCapacity)
         {
+            poolHandler.SetReleaseObjCallBack((obj) => ReturnObject(obj));
+            this.poolHandler = poolHandler;
+            _factory = factory;
             InitPool();
+        }
+
+        protected override GameObject CreateObj()
+        {
+            var obj = _factory.Create();
+            return obj.gameObject;
         }
     }
 

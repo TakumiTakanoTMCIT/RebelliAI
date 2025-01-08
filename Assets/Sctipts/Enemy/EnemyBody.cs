@@ -70,8 +70,7 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody, I
     {
         if (!IsAlivingNow) return;
         IsAlivingNow = false;
-        releaseObject(this.gameObject);
-        spawnPoser.ResetInstance();
+        releaseObject?.Invoke(gameObject);
     }
 
     public void TakeDamage(int damage)
@@ -84,7 +83,7 @@ public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody, I
         {
             IsAlivingNow = false;
             hp = 0;
-            releaseObject(this.gameObject);
+            releaseObject?.Invoke(gameObject);
             spawnPoser.ResetInstance();
             explosionSpawner.MakeExplosion(transform.position);
         }
