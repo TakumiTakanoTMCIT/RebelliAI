@@ -30,7 +30,7 @@ ScriptedImporter:
     sRGBTexture: 1
     spriteMode: 2
     spriteExtrude: 1
-    spriteMeshType: 0
+    spriteMeshType: 1
     alignment: 0
     spritePivot: {x: 0.5, y: 0.5}
     spritePixelsToUnits: 32
@@ -95,7 +95,7 @@ ScriptedImporter:
     addSortingGroup: 1
     addShadowCasters: 0
   importFileNodeState: 1
-  platformSettingsDirtyTick: 638723007492619570
+  platformSettingsDirtyTick: 638728509802794050
   textureAssetName: 
   singleSpriteImportData:
   - name: 
@@ -821,7 +821,7 @@ ScriptedImporter:
     uvTransform: {x: 74, y: 680}
   - name: Player_Sozai_Frame_27
     originalName: 
-    pivot: {x: 0.7045455, y: -0.12820514}
+    pivot: {x: 0.6136364, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
@@ -841,7 +841,7 @@ ScriptedImporter:
     uvTransform: {x: 145, y: 466}
   - name: Player_Sozai_Frame_30
     originalName: 
-    pivot: {x: 0.7045455, y: -0.12820514}
+    pivot: {x: 0.6136364, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
@@ -1661,7 +1661,7 @@ ScriptedImporter:
     uvTransform: {x: 4, y: 793}
   - name: Player_Sozai_Frame_77
     originalName: 
-    pivot: {x: 0.49206352, y: -0.12820514}
+    pivot: {x: 0.42857146, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
@@ -1681,7 +1681,7 @@ ScriptedImporter:
     uvTransform: {x: 74, y: 4}
   - name: Player_Sozai_Frame_78
     originalName: 
-    pivot: {x: 0.49206352, y: -0.12820514}
+    pivot: {x: 0.42857143, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
