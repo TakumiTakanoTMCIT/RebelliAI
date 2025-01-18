@@ -2,6 +2,7 @@ using System;
 using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Zenject;
 
 namespace KeyHandler
 {
@@ -36,6 +37,7 @@ namespace KeyHandler
             isdashingKeyNow = false;
 
         public static event Action onAcceptInputCtrl;
+        public static event Action onJumpKeyReleased;
 
         public Subject<Unit> EnableInput = new Subject<Unit>();
         public Subject<Unit> DisableInput = new Subject<Unit>();
@@ -209,6 +211,12 @@ namespace KeyHandler
             if (context.performed)
             {
                 isJumpKey = true;
+            }
+
+            if (context.canceled)
+            {
+                //終了のイベントを発行
+                onJumpKeyReleased?.Invoke();
             }
         }
 

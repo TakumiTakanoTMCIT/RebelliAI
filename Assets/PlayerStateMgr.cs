@@ -504,6 +504,8 @@ namespace PlayerState
             stateData.AnimHandler.ChangeAnimState(stateData.AnimHandler.jumpState);
 
             PlayerAcitonSECtrl.OnPlaySE.OnNext(PlayerAcitonSECtrl.jumpSound);
+
+            InputHandler.onJumpKeyReleased += StopJump;
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -579,7 +581,15 @@ namespace PlayerState
             }
         }
 
-        public void Exit(PlayerStateMgr stateMgr) { }
+        public void Exit(PlayerStateMgr stateMgr)
+        {
+            InputHandler.onJumpKeyReleased -= StopJump;
+        }
+
+        private void StopJump()
+        {
+            stateData.ActionHandler.StopY();
+        }
     }
 
     public class Fall : IState, IWalker
