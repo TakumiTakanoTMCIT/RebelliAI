@@ -861,7 +861,7 @@ ScriptedImporter:
     uvTransform: {x: 145, y: 513}
   - name: Player_Sozai_Frame_32
     originalName: 
-    pivot: {x: 0.59375, y: -0.020408163}
+    pivot: {x: 0.5, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
@@ -881,7 +881,7 @@ ScriptedImporter:
     uvTransform: {x: 197, y: 325}
   - name: Player_Sozai_Frame_2
     originalName: 
-    pivot: {x: 0.59375, y: 0}
+    pivot: {x: 0.5, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
@@ -1701,7 +1701,7 @@ ScriptedImporter:
     uvTransform: {x: 74, y: 51}
   - name: Player_Sozai_Frame_79
     originalName: 
-    pivot: {x: 0.3877551, y: -0.020408163}
+    pivot: {x: 0.2857143, y: -0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
@@ -1721,7 +1721,7 @@ ScriptedImporter:
     uvTransform: {x: 74, y: 348}
   - name: Player_Sozai_Frame_80
     originalName: 
-    pivot: {x: 0.3877551, y: 0}
+    pivot: {x: 0.2857143, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
