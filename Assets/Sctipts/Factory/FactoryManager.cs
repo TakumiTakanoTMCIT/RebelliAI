@@ -106,7 +106,6 @@ namespace ObjectPoolFactory
         //Inject
         public DanboruPool(GameObject prefab, int maxCapacity, EnemyBodyFactory enemyFactory, PoolReleaser poolReleaser) : base(prefab, maxCapacity)
         {
-            Debug.LogWarning($"DanboruPoolReleaser : {poolReleaser}");
             poolReleaser.SetReleaseObjCallBack((obj) =>
             {
                 ReturnObject(obj);

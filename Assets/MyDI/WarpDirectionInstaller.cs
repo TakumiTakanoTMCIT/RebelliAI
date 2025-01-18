@@ -29,6 +29,8 @@ public class WarpDirectionInstaller : MonoInstaller
                 factoryManager.danboruMaxCapacity
                 );
 
+        //EnemySpawnerについてのサブコンテナを登録します。今からやります
+
         Container.Bind<EnemySpawnPoser>()
             .FromComponentInHierarchy()
             .AsTransient();
@@ -37,7 +39,19 @@ public class WarpDirectionInstaller : MonoInstaller
             .FromComponentInNewPrefab(factoryManager.danboruPrefab)
             .AsSingle();
 
+        //必要なものはここで登録
+        Container.Bind<PositionSetter>()
+            .AsTransient();
+
+        Container.Bind<Warp.AnimatorCtrl>()
+            .AsTransient();
+
+        Container.Bind<Timer>()
+            .AsTransient();
+
         Container.Bind<WarpEffectBody>()
+            .FromSubContainerResolve()
+            .ByNewContextPrefab(warpDirectionInfo.Prefab)
             .AsTransient();
 
         Container.Bind<int>()
@@ -46,14 +60,5 @@ public class WarpDirectionInstaller : MonoInstaller
 
         Container.Bind<PoolHandler>()
             .AsSingle();
-
-        Container.Bind<Timer>()
-            .AsTransient();
-
-        Container.Bind<Warp.AnimatorCtrl>()
-            .AsTransient();
-
-        Container.Bind<PositionSetter>()
-            .AsTransient();
     }
 }

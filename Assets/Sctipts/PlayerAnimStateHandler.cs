@@ -4,6 +4,7 @@ using UnityEngine;
 using HPBar;
 using UniRx;
 using ActionStatusChk;
+using PlayerAnimCtrl;
 
 public class PlayerAnimStateHandler : MonoBehaviour
 {
@@ -15,6 +16,8 @@ public class PlayerAnimStateHandler : MonoBehaviour
     [SerializeField] public bool isDebugMode = false;
 
     public IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState, damageState, deathState, warpState, warpEscapeState, neutralIdleState;
+
+    PlayerShotAnimCtrl shotAnimCtrl;
 
     IPlayerAnimState currentState;
     Animator animator;
@@ -35,6 +38,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
         actionStatusChecker = gameObject.MyGetComponent_NullChker<ActionStatusChecker>();
         animator = gameObject.MyGetComponent_NullChker<Animator>();
         spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
+        shotAnimCtrl = gameObject.MyGetComponent_NullChker<PlayerShotAnimCtrl>();
 
         GameFlowManager.StartBattleAction.Subscribe(_ =>
         {
@@ -109,8 +113,17 @@ public class PlayerAnimStateHandler : MonoBehaviour
         if (currentState == newState) return;
 
         if (currentState != null) currentState.Exit();
+
+        IPlayerAnimState prevState = currentState;
         currentState = newState;
         currentState.Enter();
+
+        //他のステートからアイドルステートになったときにはショットのステートを終了する
+        if (prevState != idleState && newState == idleState)
+        {
+            //ショットアニメーションを終了する
+            shotAnimCtrl.EndShotAnim();
+        }
     }
 
     //アニメーションイベント

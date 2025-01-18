@@ -1,48 +1,110 @@
+using System;
+using HPBar;
 using UnityEngine;
 
-public class PlayerShotAnimCtrl : MonoBehaviour
+namespace PlayerAnimCtrl
 {
-    private Animator animator;
-
-    [SerializeField] float shotAnimTime = 2f;
-
-    float countTime = 0f;
-    bool isShoting = false;
-
-    private void Awake()
+    public class PlayerShotAnimCtrl : MonoBehaviour
     {
-        animator = this.gameObject.MyGetComponent_NullChker<Animator>();
-    }
+        [SerializeField] float shotAnimTime = 0.5f;
 
-    private void OnEnable()
-    {
-        AllShellManager.onShotNow += OnShotNow;
-    }
+        private ITimer timer;
+        private Animator animator;
+        bool isShoting = false;
 
-    private void OnDisable()
-    {
-        AllShellManager.onShotNow -= OnShotNow;
-    }
-
-    private void Update()
-    {
-        if (!isShoting) return;
-
-        if (countTime >= shotAnimTime)
+        private void Awake()
         {
-            animator.SetBool("isShoting", false);
+            animator = this.gameObject.MyGetComponent_NullChker<Animator>();
+            timer = new Timer(shotAnimTime);
+
             isShoting = false;
-            return;
         }
 
-        countTime += Time.deltaTime;
+        private void OnEnable()
+        {
+            HPBarHandler.onPlayerDamage += EndShotAnim;
+            HPBarHandler.onPlayerDeath += EndShotAnim;
+
+            AllShellManager.onShotNow += OnShotNow;
+        }
+
+        private void OnDisable()
+        {
+            AllShellManager.onShotNow -= OnShotNow;
+        }
+
+        private void Update()
+        {
+            if (!isShoting) return;
+
+            timer.Update();
+            if (timer.IsTimeOver())
+            {
+                EndShotAnim();
+            }
+        }
+
+        //イベントハンドラー
+        //ショットしたら呼ばれる
+        private void OnShotNow()
+        {
+            timer.Reset();
+
+            //もしいまショットアニメーションなら最初から再生し直す
+            if (animator.GetCurrentAnimatorStateInfo(1).IsName("ShotIdle"))
+            {
+                animator.Play("ShotIdle", 1, 0f);
+                return;
+            }
+
+            animator.SetBool("isShoting", true);
+
+            if (!isShoting)
+                isShoting = true;
+        }
+
+        //タイマーが終了したら呼ばれる
+        //ダメージか死んだときにも呼ばれる
+        public void EndShotAnim()
+        {
+            //もしタイマーが再生中なら終了する
+            if (isShoting) timer.Reset();
+
+            animator.SetBool("isShoting", false);
+            isShoting = false;
+        }
     }
 
-    //イベントハンドラー
-    private void OnShotNow()
+    public interface ITimer
     {
-        animator.SetBool("isShoting", true);
-        countTime = 0f;
-        isShoting = true;
+        void Update();
+        void Reset();
+        bool IsTimeOver();
+    }
+
+    public class Timer : ITimer
+    {
+        private float time = 0;
+        private float limitTime = 0;
+
+        public Timer(float limitTime)
+        {
+            this.limitTime = limitTime;
+        }
+
+        public void Update()
+        {
+            time += Time.deltaTime;
+        }
+
+        public void Reset()
+        {
+            time = 0;
+        }
+
+        public bool IsTimeOver()
+        {
+            return time >= limitTime;
+        }
     }
 }

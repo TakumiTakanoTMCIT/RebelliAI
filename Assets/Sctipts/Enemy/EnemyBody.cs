@@ -112,13 +112,13 @@ namespace Enemy
 
         public void SetReleaseObjCallBack(Action<GameObject> releaseObj)
         {
-            Debug.Log($"releaseObj : {releaseObj}");
+            //Debug.Log($"releaseObj : {releaseObj}");
             this.releaseObj = releaseObj;
         }
 
         public void ReleaseObj(GameObject obj)
         {
-            Debug.Log("ReleaseObj");
+            //Debug.Log("ReleaseObj");
             if(releaseObj != null)
                 releaseObj.Invoke(obj);
             else
