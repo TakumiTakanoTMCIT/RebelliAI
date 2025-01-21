@@ -2,11 +2,11 @@ using UnityEngine;
 using Zenject;
 using Enemy;
 using ObjectPoolFactory;
+using UniRx;
 
 public interface IEnemyPosController
 {
     void GetSpawnHandler();
-    void OnBecameVisible();
     void MakeInstance();
     void ResetInstance();
 }
@@ -16,16 +16,60 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
     //Inject
     DanboruPool danboruPool;
 
-    GameObject instance;
+    EnemyBody instance;
     ExplosionSpawner explosionSpawner;
+    SpriteRenderer spriteRenderer;
 
     [Inject]
     public void Construct(DanboruPool danboruPool)
     {
         this.danboruPool = danboruPool;
+        //Debug.Log("EnemySpawnPoser Constructed");
     }
 
-    private void Awake() => GetSpawnHandler();
+    private void Awake()
+    {
+        GetSpawnHandler();
+    }
+
+    private void Start()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+
+        //画面外に自身とインスタンスが見えない場合、インスタンスをReleaseする
+        //毎フレーム監視
+        Observable.EveryUpdate()
+            //もし自身が見えない場合
+            .Where(_ => spriteRenderer.isVisible == false)
+            //もしインスタンスが見えない場合
+            .Where(_ => instance?.IsVisible() == false)
+            //インスタンスをReleaseする
+            .Subscribe(_ =>
+            {
+                DieAndReleaseObj();
+            })
+            .AddTo(this);
+
+        //画面内に自身が見える場合、インスタンスを生成する
+        //毎フレーム監視
+        Observable.EveryUpdate()
+            //もし自身が見える場合
+            .Where(_ => spriteRenderer.isVisible)
+            //もしインスタンスがnullの場合
+            .Where(_ => instance == null)
+            //インスタンスを生成する
+            .Subscribe(_ =>
+            {
+                MakeInstance();
+            })
+            .AddTo(this);
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = new Color(1, 0, 0, 0.5f);
+        Gizmos.DrawCube(transform.position, new Vector3(1, 1, 1));
+    }
 
     //インターフェース実装
     public void GetSpawnHandler()
@@ -33,38 +77,21 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
         explosionSpawner = GameObject.Find("ExplosionFactory").MyGetComponent_NullChker<ExplosionSpawner>();
     }
 
-    private bool IsAbleToMakeInstance()
-    {
-        //一度も生成したことがないなら生成する
-        if(instance == null)
-        {
-            return true;
-        }
-
-        //画面上に残っているのならば生成しない
-        if(instance.activeSelf)
-        {
-            return false;
-        }
-
-        //画面外に出たら生成する
-        return true;
-    }
-
     //インターフェース実装
     public void MakeInstance()
     {
-        //生成できるかどうか
-        if(!IsAbleToMakeInstance()) return;
-
         Debug.Log("MakeInstance");
-        instance = danboruPool.GetObject();
-        instance.GetComponent<EnemyBody>().MyAwake(transform.position, transform, explosionSpawner);
+        instance = danboruPool.GetObject().GetComponent<EnemyBody>();
+        instance.MyAwake(transform.position, transform, explosionSpawner);
     }
 
-    //Unityから呼び出されます(インターフェース実装)
-    public void OnBecameVisible() => MakeInstance();
+    private void DieAndReleaseObj()
+    {
+        instance.DieAndReleaseObj();
+        instance = null;
+    }
 
     //インターフェース実装
-    public void ResetInstance() => instance = null;
+    //実装なし
+    public void ResetInstance() { }
 }

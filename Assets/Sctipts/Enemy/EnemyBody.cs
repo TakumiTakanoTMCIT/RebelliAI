@@ -23,6 +23,13 @@ public interface IPrefabEnemyBody
 
 namespace Enemy
 {
+    public interface IEnemy
+    {
+        public void MyAwake(Vector3 position, Transform parent, ExplosionSpawner explosionSpawner);
+        Action<GameObject> releaseObject { get; set; }
+        void DieAndReleaseObj();
+    }
+
     [RequireComponent(typeof(ConflictPlayerFinder))]
     public class EnemyBody : MonoBehaviour, IDamageableFromShot, IPrefabEnemyBody, IConflictableAndAttackableToPlayer
     {
@@ -37,10 +44,11 @@ namespace Enemy
         EnemySpawnPoser spawnPoser;
         ExplosionSpawner explosionSpawner;
         DanboruAnimStateMgr animStateMgr;
+        SpriteRenderer spRenderer;
 
         //コールバック
         //Inject
-        Action<GameObject> releaseObject;
+        public Action<GameObject> releaseObject;
 
         [Inject]
         public void Construct(PoolReleaser poolReleaser)
@@ -55,6 +63,8 @@ namespace Enemy
 
             conflictPlayerFinder = gameObject.MyGetComponent_NullChker<ConflictPlayerFinder>();
             conflictPlayerFinder.Init(conflictDamage);
+
+            spRenderer = GetComponent<SpriteRenderer>();
         }
 
         //インターフェース実装------------------------------
@@ -74,8 +84,7 @@ namespace Enemy
         public void OnBecameInvisible()
         {
             if (!IsAlivingNow) return;
-            IsAlivingNow = false;
-            releaseObject?.Invoke(gameObject);
+            DieAndReleaseObj();
         }
 
         public void TakeDamage(int damage)
@@ -87,14 +96,26 @@ namespace Enemy
 
             if (hp <= 0)
             {
-                IsAlivingNow = false;
-                hp = 0;
-                //Debug.Log($"{releaseObject} : releaseObject");
-                releaseObject?.Invoke(gameObject);
-                spawnPoser.ResetInstance();
+                DieAndReleaseObj();
                 explosionSpawner.MakeExplosion(transform.position);
-                Debug.Log("Dead");
             }
+        }
+
+        public void DieAndReleaseObj()
+        {
+            if(!IsAlivingNow) return;
+
+            hp = 0;
+            IsAlivingNow = false;
+            Debug.Log("Dead");
+            //TODO: これでいいんじゃないの？↓この書き方でも問題ない気がする。おそらくZenjectの関係でこうなっています
+            //spawnPoser.ResetInstance();
+            releaseObject?.Invoke(gameObject);
+        }
+
+        public bool IsVisible()
+        {
+            return spRenderer.isVisible;
         }
     }
 
@@ -112,14 +133,13 @@ namespace Enemy
 
         public void SetReleaseObjCallBack(Action<GameObject> releaseObj)
         {
-            //Debug.Log($"releaseObj : {releaseObj}");
             this.releaseObj = releaseObj;
         }
 
         public void ReleaseObj(GameObject obj)
         {
             //Debug.Log("ReleaseObj");
-            if(releaseObj != null)
+            if (releaseObj != null)
                 releaseObj.Invoke(obj);
             else
             {

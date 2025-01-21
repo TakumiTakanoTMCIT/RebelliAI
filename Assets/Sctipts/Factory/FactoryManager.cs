@@ -52,6 +52,11 @@ namespace ObjectPoolFactory
 
         private void GetObj(GameObject getObj)
         {
+            if(getObj == null)
+            {
+                Debug.LogError("getObj is null");
+                return;
+            }
             getObj.SetActive(true);
         }
 
@@ -62,6 +67,7 @@ namespace ObjectPoolFactory
 
         private void DestroyObj(GameObject destroyObj)
         {
+            Debug.LogWarning("DestroyObj");
             GameObject.Destroy(destroyObj);
         }
 
@@ -108,16 +114,25 @@ namespace ObjectPoolFactory
         {
             poolReleaser.SetReleaseObjCallBack((obj) =>
             {
-                ReturnObject(obj);
                 Debug.Log("ReturnObject");
+                ReturnObject(obj);
             });
 
             enmeyBodyFactory = enemyFactory;
             InitPool();
+            Debug.Log("DanboruPoolInitted");
         }
 
         protected override GameObject CreateObj()
         {
+            if(enmeyBodyFactory == null)
+            {
+                Debug.LogError("enmeyBodyFactory is null");
+                return null;
+            }
+
+            Debug.Log("CreateDanboru");
+
             var obj = enmeyBodyFactory.Create();
 
             return obj.gameObject;
