@@ -23,7 +23,7 @@ class LowChargeBody : ShellBase
         //移動を始めていなかったらプレイヤーの位置に合わせる
         if(!isStartedMove)
         {
-            transform.position = playerTransform.position;
+            transform.position = muzzleObj.transform.position;
         }
     }
 

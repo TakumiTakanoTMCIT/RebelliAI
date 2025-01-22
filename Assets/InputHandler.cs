@@ -140,12 +140,6 @@ namespace KeyHandler
                 return false;
 
             /// <summary>
-            /// 同時押しは無効
-            /// </summary>
-            /*if (Input.GetKey(KeyCode.A) && Input.GetKey(KeyCode.D))
-                return false;*/
-
-            /// <summary>
             /// どのキーも押されていない場合はfalse
             /// </summary>
             if (!isWalkKey)

@@ -9,7 +9,7 @@ using Zenject;
 
 public class AllShellManager : MonoBehaviour
 {
-    [SerializeField] private Transform mameParentTransform;
+    [SerializeField] private Transform mameParentTransform, muzzleTransform;
     [SerializeField] private int defaultCapacity = 3;
     [SerializeField] private float shootMameInterval = 0.5f;
     [SerializeField] private ActionStatusChecker actionStatusChecker;
@@ -28,6 +28,8 @@ public class AllShellManager : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log(gameObject.name + "が生成されました");
+
         isMameShootable = true;
         player = transform.parent.gameObject;
         playerStateMgr = player.MyGetComponent_NullChker<PlayerStateMgr>();
@@ -73,7 +75,7 @@ public class AllShellManager : MonoBehaviour
     {
         shell.SetActive(true);
         shell.MyGetComponent_NullChker<ShellMainBodyCrtl>().GetShellAndSetDirection(actionStatusChecker.Direction, playerStateMgr.WhatCurrentState(playerStateMgr.dashState));
-        shell.transform.position = player.transform.position;
+        shell.transform.position = muzzleTransform.position;
     }
 
     private void ReleaseShell(GameObject shell)

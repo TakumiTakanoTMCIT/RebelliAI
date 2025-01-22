@@ -24,6 +24,9 @@ namespace PlayerShot
         [Inject]
         protected PlayerStats playerStatus;
 
+        [Inject(Id = "Muzzle")]
+        protected GameObject muzzleObj;
+
         [SerializeField]
         protected GameObject playerOriginalPrefab;
         protected GameObject playerObject;
@@ -34,7 +37,6 @@ namespace PlayerShot
         protected SpriteRenderer spriteRenderer;
         protected PlayerStateMgr playerStateMgr;
         protected IAnimatable animatorCtrl;
-        protected Transform playerTransform;
         protected ActionStatusChecker actionStatusChecker;
 
         public abstract void DestroyShell();
@@ -53,9 +55,6 @@ namespace PlayerShot
             animatorCtrl = GetComponent<IAnimatable>();
 
             playerObject = GameObject.Find(playerOriginalPrefab.name);
-
-            playerTransform = playerObject.transform;
-            gameObject.transform.position = playerTransform.position;
 
             isStartedMove = false;
 
@@ -147,7 +146,7 @@ namespace PlayerShot
         {
             //スタートアニメーション中はプレイヤーの銃口に追従する
             if (isStartedMove) return;
-            transform.position = playerTransform.position;
+            transform.position = muzzleObj.transform.position;
         }
 
         /// <summary>

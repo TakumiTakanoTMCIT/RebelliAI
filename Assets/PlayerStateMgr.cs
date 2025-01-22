@@ -7,6 +7,7 @@ using HPBar;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using Zenject;
+using Muzzle;
 
 namespace PlayerState
 {
@@ -20,37 +21,31 @@ namespace PlayerState
         [SerializeField]
         private bool isDebugCurrentState = false;
 
-        private PlayerAnimStateHandler animStateHandler;
         private IState currentState;
         private bool isExecutable;
-        private InputHandler inputHandler;
-        private ActionStatusChecker actionStatusChecker;
-        private Rigidbody2D rb;
-        private PlayerStateData playerStateData;
         private WallKickDelayManager wallKickDelayManager;
 
         public IState idleState, walkState, jumpState, fallState, wallFallState, wallKick,
         dashState, damageState, deathState;
 
+        [Inject]
+        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death)
+        {
+            dashState = dash;
+            idleState = idle;
+            walkState = walk;
+            jumpState = jump;
+            fallState = fall;
+            wallFallState = wallFall;
+            this.wallKick = wallKick;
+            damageState = damage;
+            deathState = death;
+        }
+
         private void Awake()
         {
             //コンポーネントを取得
-            animStateHandler = gameObject.MyGetComponent_NullChker<PlayerAnimStateHandler>();
-            actionStatusChecker = gameObject.MyGetComponent_NullChker<ActionStatusChecker>();
-            inputHandler = gameObject.MyGetComponent_NullChker<InputHandler>();
             wallKickDelayManager = gameObject.MyGetComponent_NullChker<WallKickDelayManager>();
-
-            playerStateData = new PlayerStateData(inputHandler, actionHandler, actionStatusChecker, animStateHandler, this.gameObject.MyGetComponent_NullChker<PlayerDashKeepManager>());
-
-            idleState = new Idle(playerStateData);
-            walkState = new Walk(playerStateData);
-            dashState = new Dash(playerStateData);
-            jumpState = new Jump(playerStateData);
-            fallState = new Fall(playerStateData);
-            wallFallState = new WallFall(playerStateData);
-            wallKick = new WallKick(playerStateData);
-            damageState = new DamageState(playerStateData);
-            deathState = new DeathState();
 
             //Injectしています
             container.Inject(dashState);
@@ -180,10 +175,12 @@ namespace PlayerState
     public class Idle : IState
     {
         private readonly PlayerStateData stateData;
+        private readonly MuzzulePositionManager muzzleManager;
 
-        public Idle(PlayerStateData playerStateData)
+        public Idle(PlayerStateData playerStateData, MuzzulePositionManager muzzulePositionManager)
         {
             this.stateData = playerStateData;
+            this.muzzleManager = muzzulePositionManager;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
@@ -194,6 +191,8 @@ namespace PlayerState
             stateData.ActionHandler.StopX();
 
             stateData.AnimHandler.ChangeAnimState(stateData.AnimHandler.idleState);
+
+            muzzleManager.SetPosition(State.Idle);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -264,15 +263,19 @@ namespace PlayerState
     public class Walk : IState
     {
         private readonly PlayerStateData stateData;
+        private readonly MuzzulePositionManager muzzulePositionManager;
 
-        public Walk(PlayerStateData playerStateData)
+        public Walk(PlayerStateData playerStateData, MuzzulePositionManager muzzulePositionManager)
         {
             stateData = playerStateData;
+            this.muzzulePositionManager = muzzulePositionManager;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
         {
             stateData.AnimHandler.ChangeAnimState(stateData.AnimHandler.walkState);
+
+            muzzulePositionManager.SetPosition(State.Walk);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -367,7 +370,6 @@ namespace PlayerState
         public void Exit(PlayerStateMgr stateMgr) { }
     }
 
-    //Injectしています
     public class Dash : IState
     {
         [Inject]
@@ -376,11 +378,13 @@ namespace PlayerState
         private readonly PlayerDashTimeCtrl dashTimeCtrl;
 
         private readonly PlayerStateData stateData;
+        private readonly MuzzulePositionManager muzzulePositionManager;
         private bool direction;
 
-        public Dash(PlayerStateData stateData)
+        public Dash(PlayerStateData stateData, MuzzulePositionManager muzzulePositionManager)
         {
             this.stateData = stateData;
+            this.muzzulePositionManager = muzzulePositionManager;
         }
 
         public void DirectionSetter(bool direction)
@@ -400,6 +404,8 @@ namespace PlayerState
             stateData.AnimHandler.ChangeAnimState(stateData.AnimHandler.dashState);
 
             PlayerAcitonSECtrl.OnPlaySE.OnNext(PlayerAcitonSECtrl.dashSound);
+
+            muzzulePositionManager.SetPosition(State.Dash);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -489,10 +495,12 @@ namespace PlayerState
         public bool isWalkNow { get; set; }
 
         private readonly PlayerStateData stateData;
+        private readonly MuzzulePositionManager muzzulePositionManager;
 
-        public Jump(PlayerStateData stateData)
+        public Jump(PlayerStateData stateData, MuzzulePositionManager muzzulePositionManager)
         {
             this.stateData = stateData;
+            this.muzzulePositionManager = muzzulePositionManager;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
@@ -506,6 +514,8 @@ namespace PlayerState
             PlayerAcitonSECtrl.OnPlaySE.OnNext(PlayerAcitonSECtrl.jumpSound);
 
             InputHandler.onJumpKeyReleased += StopJump;
+
+            muzzulePositionManager.SetPosition(State.Jump);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -595,17 +605,22 @@ namespace PlayerState
     public class Fall : IState, IWalker
     {
         private readonly PlayerStateData stateData;
+        private readonly MuzzulePositionManager muzzulePositionManager;
+
         //IWalkerインターフェースを実装しているため、このプロパティを持っています
         public bool isWalkNow { get; set; }
 
-        public Fall(PlayerStateData stateData)
+        public Fall(PlayerStateData stateData, MuzzulePositionManager muzzulePositionManager)
         {
             this.stateData = stateData;
+            this.muzzulePositionManager = muzzulePositionManager;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
         {
             stateData.AnimHandler.ChangeAnimState(stateData.AnimHandler.fallState);
+
+            muzzulePositionManager.SetPosition(State.Fall);
 
             /// <summary>
             /// 初期化
@@ -684,6 +699,8 @@ namespace PlayerState
     public class WallFall : IState
     {
         private readonly PlayerStateData stateData;
+        private readonly MuzzulePositionManager muzzulePositionManager;
+
         //壁にぶつかっている方向を判定するための変数
         //enterしたら初期化される
         bool wall_facing_which;
@@ -697,9 +714,10 @@ namespace PlayerState
         [Inject]
         WallKickDelayManager wallKickManger;
 
-        public WallFall(PlayerStateData stateData)
+        public WallFall(PlayerStateData stateData, MuzzulePositionManager muzzulePositionManager)
         {
             this.stateData = stateData;
+            this.muzzulePositionManager = muzzulePositionManager;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
@@ -710,6 +728,8 @@ namespace PlayerState
             IsWallFallExecutable = true;
 
             stateData.AnimHandler.ChangeAnimState(stateData.AnimHandler.wallFallState);
+
+            muzzulePositionManager.SetPosition(State.WallFall);
 
             /// <summary>
             /// 壁にぶつかっている方向を判定
@@ -809,10 +829,10 @@ namespace PlayerState
         }
     }
 
-    //Injectしています
     public class WallKick : IState, IWalker
     {
         private readonly PlayerStateData stateData;
+        private readonly MuzzulePositionManager muzzulePositionManager;
 
         //Injectされるフィールド達
         private WallKickFactory wallKickFactory;
@@ -821,15 +841,11 @@ namespace PlayerState
 
         private bool isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
 
-        public WallKick(PlayerStateData stateData)
-        {
-            this.stateData = stateData;
-        }
-
-        [Inject]
-        public void MyInject(WallKickFactory wallKickFactory)
+        public WallKick(WallKickFactory wallKickFactory,PlayerStateData stateData, MuzzulePositionManager muzzulePositionManager)
         {
             this.wallKickFactory = wallKickFactory;
+            this.stateData = stateData;
+            this.muzzulePositionManager = muzzulePositionManager;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
@@ -838,6 +854,8 @@ namespace PlayerState
             isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
 
             stateData.AnimHandler.ChangeAnimState(stateData.AnimHandler.wallKickState);
+
+            muzzulePositionManager.SetPosition(State.WallKick);
 
             if (wallKickFactory != null)
             {
@@ -968,7 +986,6 @@ namespace PlayerState
         public void Exit(PlayerStateMgr stateMgr) { }
     }
 
-    // Injectしています
     public class DamageState : IState
     {
         private readonly PlayerStateData stateData;
