@@ -3,20 +3,26 @@ using UnityEngine;
 
 public class MuzzlePositionDrawer : MonoBehaviour
 {
-    [SerializeField] Transform playerTrans;
-    [SerializeField] MuzzlePositions muzzlePositions;
+    //Inject
+    private MuzzlePositions muzzlePositions;
+    private Transform playerTrans;
 
     bool isToggle, force;
 
+    public void Construct(MuzzlePositions muzzlePositions)
+    {
+        this.muzzlePositions = muzzlePositions;
+    }
+
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Alpha1))
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             force = false;
             isToggle = !isToggle;
         }
 
-        if(Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             force = true;
             isToggle = false;
@@ -24,12 +30,12 @@ public class MuzzlePositionDrawer : MonoBehaviour
             return;
         }
 
-        if(force)
+        if (force)
         {
             return;
         }
 
-        if(isToggle)
+        if (isToggle)
         {
             Time.timeScale = 0.1f;
         }

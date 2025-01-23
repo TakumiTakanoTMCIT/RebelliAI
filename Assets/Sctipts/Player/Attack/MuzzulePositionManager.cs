@@ -21,19 +21,17 @@ namespace Muzzle
 
     public class MuzzulePositionManager : MonoBehaviour
     {
-        private ActionStatusChk.ActionStatusChecker actionStatusChecker;
-
         private MuzzlePositions.MuzzlePositionDatas currentState;
 
-        [SerializeField] MuzzlePositions muzzlePositions;
-        //インスペクタからクラスを生成して、それをリストに格納する;
-
         //Inject
-        GameObject muzzleObj;
+        private GameObject muzzleObj;
+        private MuzzlePositions muzzlePositions;
+        private ActionStatusChk.ActionStatusChecker actionStatusChecker;
 
         [Inject]
-        public void Construct(ActionStatusChk.ActionStatusChecker actionStatusChecker, [Inject(Id = "Muzzle")] GameObject muzzleObj)
+        public void Construct(ActionStatusChk.ActionStatusChecker actionStatusChecker, [Inject(Id = "Muzzle")] GameObject muzzleObj, MuzzlePositions muzzlePositions)
         {
+            this.muzzlePositions = muzzlePositions;
             this.actionStatusChecker = actionStatusChecker;
             this.muzzleObj = muzzleObj;
         }
@@ -71,6 +69,7 @@ namespace Muzzle
 
             Observable.EveryUpdate()
                 .Where(_ => muzzleObj != null)
+                .Where(_ => currentState != null)
                 .Subscribe(_ =>
                     //muzzleObjはプレイヤーの子オブジェクトなので、ローカルの座標を変えてあげるだけdえ位置を変えれます！
                     muzzleObj.transform.localPosition = currentState.pos
