@@ -21,7 +21,7 @@ class LowChargeBody : ShellBase
     private void Update()
     {
         //移動を始めていなかったらプレイヤーの位置に合わせる
-        if(!isStartedMove)
+        if (!isStartedMove)
         {
             transform.position = muzzleObj.transform.position;
         }
@@ -37,6 +37,8 @@ class LowChargeBody : ShellBase
 
     public override void DestroyShell()
     {
+        if (!gameObject.activeSelf) return;
+
         Debug.LogError("LowChargeBody DestroyShell");
         Destroy(gameObject);
     }
