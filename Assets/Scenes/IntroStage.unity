@@ -15737,7 +15737,7 @@ MonoBehaviour:
   playerObj: {fileID: 906999080}
   playerPanelObj: {fileID: 808041808}
   isInGameArea: 0
-  isDebugMode: 0
+  isDebugMode: 1
   settingSceneMovingSpeed: 2
 --- !u!4 &1264633629
 Transform:
@@ -19023,7 +19023,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Path: {fileID: 763531505}
-  m_PathPosition: 1
+  m_PathPosition: 0
   m_PositionUnits: 0
   m_PathOffset: {x: 0, y: 0, z: 0}
   m_XDamping: 0
@@ -19384,7 +19384,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2315021898221821596, guid: e8b3436b1c6d14a389e83d173d398ffb, type: 3}
       propertyPath: doorID
-      value: "\u9EC4\u660F\u306E\u865A\u7121\u304C\u3001\u9759\u304B\u306B\u6B4C\u3046\u3002"
+      value: "\u5947\u5999\u306A\u6B8B\u97FF\u304C\u3001\u697D\u3057\u304F\u8003\u3048\u308B\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 2315021898221821596, guid: e8b3436b1c6d14a389e83d173d398ffb, type: 3}
       propertyPath: stageObj
@@ -19644,7 +19644,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2315021898221821596, guid: e8b3436b1c6d14a389e83d173d398ffb, type: 3}
       propertyPath: doorID
-      value: "\u6CE1\u6CAB\u306E\u6B8B\u97FF\u304C\u3001\u6025\u306B\u6CF3\u3050\u3002"
+      value: "\u9EC4\u660F\u306E\u7834\u6EC5\u304C\u3001\u6025\u306B\u6CF3\u3050\u3002"
       objectReference: {fileID: 0}
     - target: {fileID: 2315021898221821596, guid: e8b3436b1c6d14a389e83d173d398ffb, type: 3}
       propertyPath: stageObj

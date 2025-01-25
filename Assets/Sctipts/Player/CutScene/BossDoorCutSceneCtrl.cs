@@ -40,6 +40,11 @@ namespace Door
             this.playerCtrl = playerCtrl;
         }
 
+        private void Update()
+        {
+            //Debug.Log($"Time.timeScale: {Time.timeScale}");
+        }
+
         private async UniTask BossDoorAutoScroll(DoorAnimHandler doorAnimHandler)
         {
             Debug.Log("ボス部屋のドアに触れました");

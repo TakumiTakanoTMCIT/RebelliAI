@@ -49,11 +49,13 @@ public class GamePlayerManager : MonoBehaviour
 
         EnableTime.Subscribe(_ =>
         {
+            Debug.LogWarning("時間を再開");
             Time.timeScale = 1;
         }).AddTo(this);
 
         PauseTime.Subscribe(_ =>
         {
+            Debug.LogWarning("時間を止める");
             Time.timeScale = 0;
         }).AddTo(this);
     }

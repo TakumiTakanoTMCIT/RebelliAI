@@ -79,6 +79,7 @@ namespace Door
             if (other.gameObject.name == playerObj.name)
             {
                 //プレイヤーとの距離が一定以上の場合は処理を行わない。つまり近くないと行わない
+                //演出のためです
                 if (Vector2.Distance(playerObj.transform.position, transform.position) > canEnterDistance) return;
 
                 //カットシーンコントローラーにプレイヤーの情報を渡す
@@ -87,8 +88,6 @@ namespace Door
 
                 //カットシーンを再生
                 bossDoorCutSceneCtrl.OnStartBossDoorCutScene.OnNext(doorAnimHandler);
-
-                //ドアに触れたことを記録
 
                 boxCollider2D.isTrigger = false;
                 gameObject.tag = "Ground";

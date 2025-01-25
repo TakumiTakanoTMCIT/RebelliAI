@@ -10,46 +10,6 @@ public class MuzzlePositionDrawer : MonoBehaviour
     [SerializeField]
     private Transform playerTrans;
 
-    bool isToggle, force;
-
-    /*[Inject]
-    public void Construct(MuzzlePositions muzzlePositions, [Inject(Id = "PlayerTrans")]Transform playerTrans)
-    {
-        this.muzzlePositions = muzzlePositions;
-        this.playerTrans = playerTrans;
-    }*/
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            force = false;
-            isToggle = !isToggle;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            force = true;
-            isToggle = false;
-            Time.timeScale = 0;
-            return;
-        }
-
-        if (force)
-        {
-            return;
-        }
-
-        if (isToggle)
-        {
-            Time.timeScale = 0.1f;
-        }
-        else
-        {
-            Time.timeScale = 1;
-        }
-    }
-
     private void OnDrawGizmos()
     {
         foreach (var muzzlePosition in muzzlePositions.muzzlePositions)
