@@ -10,38 +10,39 @@ namespace LowChargeShot
     {
         [SerializeField] private int myLevel = 1;
 
-        BoxCollider2D boxCollider2D;
-
         //Inject
         MoveCtrl moveCtrl;
         VisualCtrl visualCtrl;
         InitPositioner initPositioner;
+        HitBoxCtrl hitBoxCtrl;
+        StateCtrl stateCtrl;
 
         [Inject]
-        public void Construct(MoveCtrl moveCtrl, VisualCtrl visualCtrl, InitPositioner initPositioner)
+        public void Construct(MoveCtrl moveCtrl, VisualCtrl visualCtrl, InitPositioner initPositioner, HitBoxCtrl hitBoxCtrl, StateCtrl stateCtrl)
         {
             this.moveCtrl = moveCtrl;
             this.visualCtrl = visualCtrl;
             this.initPositioner = initPositioner;
+            this.hitBoxCtrl = hitBoxCtrl;
+            this.stateCtrl = stateCtrl;
         }
 
         protected override void CustomAwake()
         {
-            boxCollider2D = gameObject.MyGetComponent_NullChker<BoxCollider2D>();
-
             moveCtrl.GetShellStats(rb, speed);
             visualCtrl.GetPlayerStats(spriteRenderer, actionStatusChecker);
             initPositioner.GetShellStats(muzzleObj, transform);
+            hitBoxCtrl.GetBoxCollider2D(gameObject.MyGetComponent_NullChker<BoxCollider2D>());
         }
 
         protected override void CustomStart()
         {
-            boxCollider2D.enabled = false;
-            isStartedMove = false;
+            hitBoxCtrl.SetActive(false);
+            stateCtrl.Stop();
 
             //移動を始めていなかったらプレイヤーの位置に合わせる
             Observable.EveryUpdate()
-                .Where(_ => !isStartedMove)
+                .Where(_ => !stateCtrl.IsStarted)
                 .Subscribe(_ =>
                 {
                     initPositioner.SetMuzzlePositoin();
@@ -51,8 +52,8 @@ namespace LowChargeShot
 
         public override void End_BiginingAnim()
         {
-            boxCollider2D.enabled = true;
-            isStartedMove = true;
+            hitBoxCtrl.SetActive(true);
+            stateCtrl.Start();
 
             animatorCtrl.MoveAnim();
             moveCtrl.Move();
@@ -166,6 +167,36 @@ namespace LowChargeShot
         public void SetMuzzlePositoin()
         {
             shellTrans.position = muzzleObj.transform.position;
+        }
+    }
+
+    public class HitBoxCtrl
+    {
+        private BoxCollider2D boxCollider2D;
+
+        public void GetBoxCollider2D(BoxCollider2D boxCollider2D)
+        {
+            this.boxCollider2D = boxCollider2D;
+        }
+
+        public void SetActive(bool isActive)
+        {
+            boxCollider2D.enabled = isActive;
+        }
+    }
+
+    public class StateCtrl
+    {
+        public bool IsStarted{get; private set;}
+
+        public void Start()
+        {
+            IsStarted = true;
+        }
+
+        public void Stop()
+        {
+            IsStarted = false;
         }
     }
 }

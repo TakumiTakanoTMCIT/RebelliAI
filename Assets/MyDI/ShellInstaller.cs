@@ -23,6 +23,12 @@ public class ShellInstaller : MonoInstaller
         Container.Bind<InitPositioner>()
             .AsTransient();
 
+        Container.Bind<HitBoxCtrl>()
+            .AsTransient();
+
+        Container.Bind<StateCtrl>()
+            .AsTransient();
+
         /*Container.Bind<IMovable>()
             .WithId("LowerCharge")
             .To<ShellMoveCtrlBase>()
