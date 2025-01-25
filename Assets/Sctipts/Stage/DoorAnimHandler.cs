@@ -1,7 +1,5 @@
-using System;
 using UnityEngine;
 using UniRx;
-using Door;
 
 public class DoorAnimHandler : MonoBehaviour
 {
@@ -15,23 +13,9 @@ public class DoorAnimHandler : MonoBehaviour
         animator = gameObject.MyGetComponent_NullChker<Animator>();
     }
 
-    /*private void OnEnable()
-    {
-        BossDoorBody.onDoorTouched += OnOpenDoorStart;
-        CameraGoBossStageController.onCameraMovingFinish += OnClosingDoorStart;
-    }
-
-    private void OnDisable()
-    {
-        BossDoorBody.onDoorTouched -= OnOpenDoorStart;
-        CameraGoBossStageController.onCameraMovingFinish -= OnClosingDoorStart;
-    }*/
-
     //イベントハンドラー
     public void OnOpenDoorStart()
     {
-        /*if (doorBody.IsEnterDoor) return;
-        if (!doorBody.IsTouchDoor) return;*/
         animator.SetBool("isOpen", true);
         DoorSoundCtrl.onPlayDoorOpenSE.OnNext(Unit.Default);
     }
@@ -39,7 +23,6 @@ public class DoorAnimHandler : MonoBehaviour
     //イベントハンドラー
     public void OnClosingDoorStart()
     {
-        //if (!doorBody.IsTouchDoor) return;
         animator.SetBool("isOpen", false);
         DoorSoundCtrl.onPlayDoorCloseSE.OnNext(Unit.Default);
     }
@@ -56,6 +39,5 @@ public class DoorAnimHandler : MonoBehaviour
         onDoorClosedSubject.OnNext(Unit.Default);
         animator.SetTrigger("onClose");
         Debug.LogAssertion("onDoorClosedイベント発火");
-        //onDoorClosed?.Invoke();
     }
 }
