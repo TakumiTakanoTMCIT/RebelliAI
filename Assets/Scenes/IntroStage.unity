@@ -15172,7 +15172,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 242c20006180e4b98a1ee612c4e3247a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lowerChargeStats: {fileID: 11400000, guid: 7cb4d3453d98744b4a356dc2ffd84ef4, type: 2}
 --- !u!1001 &1134130826
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17464,6 +17463,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aec01b1288b524ebaaf1fbb262edac41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  muzzlePositions: {fileID: 11400000, guid: db6bbe00a45ff4510a870c36847ff526, type: 2}
+  playerTrans: {fileID: 906999094}
 --- !u!1 &1627929301
 GameObject:
   m_ObjectHideFlags: 3
@@ -18302,7 +18303,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Path: {fileID: 1807062460}
-  m_PathPosition: 0
+  m_PathPosition: 0.5246446
   m_PositionUnits: 0
   m_PathOffset: {x: 0, y: 0, z: 0}
   m_XDamping: 0

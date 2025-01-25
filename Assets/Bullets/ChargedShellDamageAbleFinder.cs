@@ -8,9 +8,11 @@ public class ChargedShellDamageAbleFinder : MonoBehaviour
 
     bool isExtraDamage = false;
 
-    private void Awake()
+    //LowChargeBodyから注入しました。
+    //同じインスタンスを使いまわすために、LowChargeBodyから注入しました。
+    public void Construct(IAnimatable animatorCtrl)
     {
-        animatorCtrl = GetComponent<IAnimatable>();
+        this.animatorCtrl = animatorCtrl;
     }
 
     public void IsExtraDamage(bool isExtraDamage)
@@ -24,7 +26,8 @@ public class ChargedShellDamageAbleFinder : MonoBehaviour
         RefrectableBody refrectableBody = other.GetComponent<RefrectableBody>();
 
         //同時にダメージを受けるオブジェクトと、反射可能なオブジェクトがある場合
-        if(damageable != null && refrectableBody != null)
+        //攻撃を優先します
+        if (damageable != null && refrectableBody != null)
         {
             damageable.TakeDamage(extraDamageAmount);
             animatorCtrl.TakeDamage();

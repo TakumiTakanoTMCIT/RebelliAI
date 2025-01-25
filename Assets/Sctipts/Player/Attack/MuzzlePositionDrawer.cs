@@ -1,18 +1,23 @@
 using System;
 using UnityEngine;
+using Zenject;
 
 public class MuzzlePositionDrawer : MonoBehaviour
 {
     //Inject
+    [SerializeField]
     private MuzzlePositions muzzlePositions;
+    [SerializeField]
     private Transform playerTrans;
 
     bool isToggle, force;
 
-    public void Construct(MuzzlePositions muzzlePositions)
+    /*[Inject]
+    public void Construct(MuzzlePositions muzzlePositions, [Inject(Id = "PlayerTrans")]Transform playerTrans)
     {
         this.muzzlePositions = muzzlePositions;
-    }
+        this.playerTrans = playerTrans;
+    }*/
 
     private void Update()
     {

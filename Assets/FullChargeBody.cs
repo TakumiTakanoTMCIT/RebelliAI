@@ -54,7 +54,6 @@ namespace PlayerShot
             playerStateMgr = GameObject.Find("Player").MyGetComponent_NullChker<PlayerStateMgr>();
             rb = gameObject.MyGetComponent_NullChker<Rigidbody2D>();
             spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
-            animatorCtrl = GetComponent<IAnimatable>();
 
             playerObject = GameObject.Find(playerOriginalPrefab.name);
 
@@ -103,6 +102,7 @@ namespace PlayerShot
 
     public interface IAnimatable
     {
+        void Construct(Animator animator);
         void StartAnim();
         void MoveAnim();
         void TakeDamage();
@@ -118,6 +118,7 @@ namespace PlayerShot
             animator = gameObject.MyGetComponent_NullChker<Animator>();
         }
 
+        public abstract void Construct(Animator animator);
         public abstract void StartAnim();
         public abstract void MoveAnim();
         public abstract void TakeDamage();
@@ -155,9 +156,17 @@ namespace PlayerShot
 
         BoxCollider2D boxCollider2D;
 
+        [Inject]
+        public void Construct([Inject(Id = "FullCharge")] IAnimatable animCtrl)
+        {
+            animatorCtrl = animCtrl;
+        }
+
         protected override void CustomAwake()
         {
             boxCollider2D = gameObject.MyGetComponent_NullChker<BoxCollider2D>();
+            animatorCtrl.Construct(gameObject.MyGetComponent_NullChker<Animator>());
+            gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().Construct(animatorCtrl);
         }
 
         protected override void CustomStart()
@@ -224,7 +233,7 @@ namespace PlayerShot
         }
     }
 
-    public class FullChargeBodyAnim : ShellAnimCtrlBase
+    /*public class FullChargeBodyAnim : ShellAnimCtrlBase
     {
         FullChargeBody bodyCtrl;
 
@@ -232,6 +241,13 @@ namespace PlayerShot
         {
             this.animator = animator;
             this.bodyCtrl = bodyCtrl;
+
+
+        }
+
+        public override void Construct(Animator animator)
+        {
+            //this.animator = animator;
         }
 
         public override void StartAnim()
@@ -255,5 +271,5 @@ namespace PlayerShot
             bodyCtrl.StopMove();
             animator.SetTrigger("isRefrect");
         }
-    }
+    }*/
 }

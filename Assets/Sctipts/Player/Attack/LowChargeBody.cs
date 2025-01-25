@@ -16,15 +16,17 @@ namespace LowChargeShot
         InitPositioner initPositioner;
         HitBoxCtrl hitBoxCtrl;
         StateCtrl stateCtrl;
+        IAnimatable animCtrl;
 
         [Inject]
-        public void Construct(MoveCtrl moveCtrl, VisualCtrl visualCtrl, InitPositioner initPositioner, HitBoxCtrl hitBoxCtrl, StateCtrl stateCtrl)
+        public void Construct(MoveCtrl moveCtrl, VisualCtrl visualCtrl, InitPositioner initPositioner, HitBoxCtrl hitBoxCtrl, StateCtrl stateCtrl, [Inject(Id = "LowCharge")] IAnimatable animCtrl)
         {
             this.moveCtrl = moveCtrl;
             this.visualCtrl = visualCtrl;
             this.initPositioner = initPositioner;
             this.hitBoxCtrl = hitBoxCtrl;
             this.stateCtrl = stateCtrl;
+            this.animCtrl = animCtrl;
         }
 
         protected override void CustomAwake()
@@ -33,12 +35,13 @@ namespace LowChargeShot
             visualCtrl.GetPlayerStats(spriteRenderer, actionStatusChecker);
             initPositioner.GetShellStats(muzzleObj, transform);
             hitBoxCtrl.GetBoxCollider2D(gameObject.MyGetComponent_NullChker<BoxCollider2D>());
+            animCtrl.Construct(gameObject.MyGetComponent_NullChker<Animator>());
+            gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().Construct(animCtrl);
         }
 
         protected override void CustomStart()
         {
             hitBoxCtrl.SetActive(false);
-            stateCtrl.Stop();
 
             //移動を始めていなかったらプレイヤーの位置に合わせる
             Observable.EveryUpdate()
@@ -46,6 +49,7 @@ namespace LowChargeShot
                 .Subscribe(_ =>
                 {
                     initPositioner.SetMuzzlePositoin();
+                    visualCtrl.SetFlip();
                 })
                 .AddTo(this);
         }
@@ -55,7 +59,7 @@ namespace LowChargeShot
             hitBoxCtrl.SetActive(true);
             stateCtrl.Start();
 
-            animatorCtrl.MoveAnim();
+            animCtrl.MoveAnim();
             moveCtrl.Move();
             visualCtrl.SetFlip();
             SoundEffectCtrl.OnPlayShotSE.OnNext(myLevel);
@@ -65,7 +69,6 @@ namespace LowChargeShot
         {
             if (!gameObject.activeSelf) return;
 
-            Debug.LogError("LowChargeBody DestroyShell");
             Destroy(gameObject);
         }
 
@@ -122,8 +125,6 @@ namespace LowChargeShot
 
         public void Move()
         {
-            Debug.Log($"Move , actionStatusChk {actionStatusChecker}, rb {rb}");
-
             if (actionStatusChecker.Direction)
                 rb.velocity = new Vector2(speed, 0);
             else
@@ -187,7 +188,7 @@ namespace LowChargeShot
 
     public class StateCtrl
     {
-        public bool IsStarted{get; private set;}
+        public bool IsStarted { get; private set; }
 
         public void Start()
         {
@@ -197,6 +198,40 @@ namespace LowChargeShot
         public void Stop()
         {
             IsStarted = false;
+        }
+    }
+
+    public class AnimCtrl : IAnimatable
+    {
+        private Animator animator;
+
+        public void Construct(Animator animator)
+        {
+            this.animator = animator;
+            Debug.LogWarning("AnimCtrl Construct");
+        }
+
+        public void StartAnim()
+        {
+            //animator.SetTrigger("Start");
+        }
+
+        //普通に呼ばれる
+        public void MoveAnim()
+        {
+            animator.SetTrigger("onFinishBigin");
+        }
+
+        //普通に呼ばれる
+        public void TakeDamage()
+        {
+            animator.SetTrigger("isHit");
+        }
+
+        //普通に呼ばれる
+        public void RefrectShell()
+        {
+            animator.SetTrigger("isRefrect");
         }
     }
 }

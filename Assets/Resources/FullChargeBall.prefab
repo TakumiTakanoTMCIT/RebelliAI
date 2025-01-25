@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 3049028290327607100}
   - component: {fileID: 2127065398702683043}
   - component: {fileID: 4034020311666730795}
-  - component: {fileID: 4530731428122706323}
   m_Layer: 0
   m_Name: FullChargeBall
   m_TagString: Untagged
@@ -187,15 +186,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damageAmount: 4
   extraDamageAmount: 6
---- !u!114 &4530731428122706323
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4650480833402195142}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c7afed9ef48a41828f82b7b9a581417, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

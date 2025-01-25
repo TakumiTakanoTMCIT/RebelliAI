@@ -5,15 +5,8 @@ using LowChargeShot;
 
 public class ShellInstaller : MonoInstaller
 {
-    [SerializeField] private ShellMoveStats lowerChargeStats;
-
     public override void InstallBindings()
     {
-        Container.Bind<ShellMoveStats>()
-            .WithId("LowerCharge")
-            .FromInstance(lowerChargeStats)
-            .AsSingle();
-
         Container.Bind<MoveCtrl>()
             .AsTransient();
 
@@ -29,9 +22,14 @@ public class ShellInstaller : MonoInstaller
         Container.Bind<StateCtrl>()
             .AsTransient();
 
-        /*Container.Bind<IMovable>()
-            .WithId("LowerCharge")
-            .To<ShellMoveCtrlBase>()
-            .AsSingle();*/
+        Container.Bind<IAnimatable>()
+            .WithId("LowCharge")
+            .To<LowChargeShot.AnimCtrl>()
+            .AsTransient();
+
+        Container.Bind<IAnimatable>()
+            .WithId("FullCharge")
+            .To<FullChargeShotAnimCtrl>()
+            .AsTransient();
     }
 }

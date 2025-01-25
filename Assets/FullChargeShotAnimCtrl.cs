@@ -1,25 +1,32 @@
 using UnityEngine;
 using PlayerShot;
 
-public class FullChargeShotAnimCtrl : ShellAnimCtrlBase
+public class FullChargeShotAnimCtrl : IAnimatable
 {
-    public override void StartAnim()
+    private Animator anim;
+
+    public void Construct(Animator animator)
+    {
+        this.anim = animator;
+    }
+
+    public void StartAnim()
     {
         //animator.SetTrigger("Start");
     }
 
-    public override void MoveAnim()
+    public void MoveAnim()
     {
-        animator.SetTrigger("onFinishBigin");
+        anim.SetTrigger("onFinishBigin");
     }
 
-    public override void TakeDamage()
+    public void TakeDamage()
     {
-        animator.SetTrigger("isHit");
+        anim.SetTrigger("isHit");
     }
 
-    public override void RefrectShell()
+    public void RefrectShell()
     {
-        animator.SetTrigger("isRefrect");
+        anim.SetTrigger("isRefrect");
     }
 }

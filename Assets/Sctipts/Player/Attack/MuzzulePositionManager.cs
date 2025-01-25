@@ -36,13 +36,6 @@ namespace Muzzle
             this.muzzleObj = muzzleObj;
         }
 
-        private void OnDrawGizmos()
-        {
-            Gizmos.color = Color.green;
-
-            Gizmos.DrawCube(transform.position, new Vector3(1, 1, 1));
-        }
-
         private void Start()
         {
             Observable.EveryUpdate()
