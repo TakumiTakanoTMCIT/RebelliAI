@@ -40,6 +40,7 @@ namespace PlayerState
             this.wallKick = wallKick;
             damageState = damage;
             deathState = death;
+            Debug.Log("Inject完了");
         }
 
         private void Awake()
