@@ -9,11 +9,9 @@ public class DoorAnimHandler : MonoBehaviour
     public Subject<Unit> onDoorClosedSubject = new Subject<Unit>();
 
     Animator animator;
-    BossDoorBody doorBody;
 
     private void Awake()
     {
-        doorBody = gameObject.MyGetComponent_NullChker<BossDoorBody>();
         animator = gameObject.MyGetComponent_NullChker<Animator>();
     }
 
