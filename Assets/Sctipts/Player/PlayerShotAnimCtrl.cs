@@ -30,6 +30,8 @@ namespace PlayerAnimCtrl
 
         private void OnDisable()
         {
+            HPBarHandler.onPlayerDamage -= EndShotAnim;
+            HPBarHandler.onPlayerDeath -= EndShotAnim;
             AllShellManager.onShotNow -= OnShotNow;
         }
 

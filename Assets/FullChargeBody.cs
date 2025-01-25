@@ -2,6 +2,8 @@ using UnityEngine;
 using ActionStatusChk;
 using PlayerState;
 using Zenject;
+using UniRx;
+using LowChargeShot;
 
 namespace PlayerShot
 {
@@ -109,18 +111,41 @@ namespace PlayerShot
 
     public abstract class ShellAnimCtrlBase : MonoBehaviour, IAnimatable
     {
+        protected Animator animator;
+
         private void Awake()
         {
             animator = gameObject.MyGetComponent_NullChker<Animator>();
         }
-
-        protected Animator animator;
 
         public abstract void StartAnim();
         public abstract void MoveAnim();
         public abstract void TakeDamage();
         public abstract void RefrectShell();
     }
+
+    /*public abstract class PositionInitializer : MonoBehaviour
+    {
+        protected bool isStartedMove;
+
+        //Inject
+        protected GameObject muzzleObj;
+
+        //このInjectでスタートしたかどうかの判断ができるインスタンスを取得する
+        //銃口の座標を取得する
+
+        private void Start()
+        {
+            //スタートアニメーション時にはプレイヤーの銃口に追従する
+            Observable.EveryUpdate()
+                .Where(_ => !isStartedMove)
+                .Subscribe(_ =>
+                {
+                    transform.position = muzzleObj.transform.position;
+                })
+                .AddTo(this);
+        }
+    }*/
 
     //--ここから具象クラスの実装をしていきます--
 

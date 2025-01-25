@@ -2176,7 +2176,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 105.77, y: 1.5847316, z: -15.032515}
+  m_LocalPosition: {x: 68.18, y: 3.8099968, z: -6.011218}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -14995,6 +14995,7 @@ GameObject:
   - component: {fileID: 1110060453}
   - component: {fileID: 1110060454}
   - component: {fileID: 1110060455}
+  - component: {fileID: 1110060456}
   m_Layer: 0
   m_Name: SceneContext
   m_TagString: Untagged
@@ -15043,6 +15044,7 @@ MonoBehaviour:
   - {fileID: 1110060453}
   - {fileID: 1110060454}
   - {fileID: 1110060455}
+  - {fileID: 1110060456}
   _installerPrefabs: []
   _autoRun: 1
   OnPreInstall:
@@ -15158,6 +15160,19 @@ MonoBehaviour:
   playerTrans: {fileID: 906999094}
   muzzleManager: {fileID: 1621539329}
   muzzlePositions: {fileID: 11400000, guid: db6bbe00a45ff4510a870c36847ff526, type: 2}
+--- !u!114 &1110060456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110060446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 242c20006180e4b98a1ee612c4e3247a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lowerChargeStats: {fileID: 11400000, guid: 7cb4d3453d98744b4a356dc2ffd84ef4, type: 2}
 --- !u!1001 &1134130826
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18287,7 +18302,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Path: {fileID: 1807062460}
-  m_PathPosition: 0.2757538
+  m_PathPosition: 1
   m_PositionUnits: 0
   m_PathOffset: {x: 0, y: 0, z: 0}
   m_XDamping: 0

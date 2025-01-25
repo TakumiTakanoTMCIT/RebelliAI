@@ -1,71 +1,171 @@
 using UnityEngine;
 using PlayerShot;
+using Zenject;
+using ActionStatusChk;
+using UniRx;
 
-class LowChargeBody : ShellBase
+namespace LowChargeShot
 {
-    [SerializeField] private int myLevel = 1;
-
-    BoxCollider2D boxCollider2D;
-
-    protected override void CustomAwake()
+    public class LowChargeBody : ShellBase
     {
-        boxCollider2D = gameObject.MyGetComponent_NullChker<BoxCollider2D>();
-    }
+        [SerializeField] private int myLevel = 1;
 
-    protected override void CustomStart()
-    {
-        boxCollider2D.enabled = false;
-        isStartedMove = false;
-    }
+        BoxCollider2D boxCollider2D;
 
-    private void Update()
-    {
-        //移動を始めていなかったらプレイヤーの位置に合わせる
-        if (!isStartedMove)
+        //Inject
+        MoveCtrl moveCtrl;
+        VisualCtrl visualCtrl;
+        InitPositioner initPositioner;
+
+        [Inject]
+        public void Construct(MoveCtrl moveCtrl, VisualCtrl visualCtrl, InitPositioner initPositioner)
         {
-            transform.position = muzzleObj.transform.position;
+            this.moveCtrl = moveCtrl;
+            this.visualCtrl = visualCtrl;
+            this.initPositioner = initPositioner;
+        }
+
+        protected override void CustomAwake()
+        {
+            boxCollider2D = gameObject.MyGetComponent_NullChker<BoxCollider2D>();
+
+            moveCtrl.GetShellStats(rb, speed);
+            visualCtrl.GetPlayerStats(spriteRenderer, actionStatusChecker);
+            initPositioner.GetShellStats(muzzleObj, transform);
+        }
+
+        protected override void CustomStart()
+        {
+            boxCollider2D.enabled = false;
+            isStartedMove = false;
+
+            //移動を始めていなかったらプレイヤーの位置に合わせる
+            Observable.EveryUpdate()
+                .Where(_ => !isStartedMove)
+                .Subscribe(_ =>
+                {
+                    initPositioner.SetMuzzlePositoin();
+                })
+                .AddTo(this);
+        }
+
+        public override void End_BiginingAnim()
+        {
+            boxCollider2D.enabled = true;
+            isStartedMove = true;
+
+            animatorCtrl.MoveAnim();
+            moveCtrl.Move();
+            visualCtrl.SetFlip();
+            SoundEffectCtrl.OnPlayShotSE.OnNext(myLevel);
+        }
+
+        public override void DestroyShell()
+        {
+            if (!gameObject.activeSelf) return;
+
+            Debug.LogError("LowChargeBody DestroyShell");
+            Destroy(gameObject);
+        }
+
+        protected override void OnBecameInvisible()
+        {
+            DestroyShell();
+        }
+
+        public override void StopMove()
+        {
+            //rb.velocity = Vector2.zero;
+        }
+
+        protected override void CustomMoveShell()
+        {
+            //SoundEffectCtrl.OnPlayShotSE.OnNext(myLevel);
+        }
+
+        //インターフェース
+        public override void TakeDamage()
+        {
+            moveCtrl.Stop();
+        }
+
+        public override void Refrect()
+        {
+            moveCtrl.Stop();
         }
     }
 
-    public override void End_BiginingAnim()
+    public class MoveCtrl
     {
-        boxCollider2D.enabled = true;
-        isStartedMove = true;
-        animatorCtrl.MoveAnim();
-        MoveShell();
+        //Inject
+        private float speed;
+        private Rigidbody2D rb;
+        private ActionStatusChecker actionStatusChecker;
+
+        [Inject]
+        public MoveCtrl(ActionStatusChecker actionStatusChecker)
+        {
+            this.actionStatusChecker = actionStatusChecker;
+        }
+
+        public void GetShellStats(Rigidbody2D rb, float speed)
+        {
+            this.speed = speed;
+            this.rb = rb;
+        }
+
+        public void CallAble()
+        {
+            Debug.LogError("MoveCtrl CallAble");
+        }
+
+        public void Move()
+        {
+            Debug.Log($"Move , actionStatusChk {actionStatusChecker}, rb {rb}");
+
+            if (actionStatusChecker.Direction)
+                rb.velocity = new Vector2(speed, 0);
+            else
+                rb.velocity = new Vector2(-speed, 0);
+        }
+
+        public void Stop()
+        {
+            rb.velocity = Vector2.zero;
+        }
     }
 
-    public override void DestroyShell()
+    public class VisualCtrl
     {
-        if (!gameObject.activeSelf) return;
+        private SpriteRenderer spriteRenderer;
+        private ActionStatusChecker actionStatusChecker;
 
-        Debug.LogError("LowChargeBody DestroyShell");
-        Destroy(gameObject);
+        public void GetPlayerStats(SpriteRenderer spriteRenderer, ActionStatusChecker actionStatusChecker)
+        {
+            this.spriteRenderer = spriteRenderer;
+            this.actionStatusChecker = actionStatusChecker;
+        }
+
+        public void SetFlip()
+        {
+            spriteRenderer.flipX = !actionStatusChecker.Direction;
+        }
     }
 
-    protected override void OnBecameInvisible()
+    public class InitPositioner
     {
-        DestroyShell();
-    }
+        private GameObject muzzleObj;
+        private Transform shellTrans;
 
-    public override void StopMove()
-    {
-        rb.velocity = Vector2.zero;
-    }
+        public void GetShellStats(GameObject muzzleObj, Transform transform)
+        {
+            this.muzzleObj = muzzleObj;
+            this.shellTrans = transform;
+        }
 
-    protected override void CustomMoveShell()
-    {
-        SoundEffectCtrl.OnPlayShotSE.OnNext(myLevel);
-    }
-
-    //インターフェース
-    public override void TakeDamage()
-    {
-        StopMove();
-    }
-
-    public override void Refrect()
-    {
-        StopMove();
+        public void SetMuzzlePositoin()
+        {
+            shellTrans.position = muzzleObj.transform.position;
+        }
     }
 }
