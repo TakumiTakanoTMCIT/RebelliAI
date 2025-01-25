@@ -16,7 +16,6 @@ namespace LowChargeShot
         InitPositioner initPositioner;
         HitBoxCtrl hitBoxCtrl;
         StateCtrl stateCtrl;
-        IAnimatable animCtrl;
 
         [Inject]
         public void Construct(MoveCtrl moveCtrl, VisualCtrl visualCtrl, InitPositioner initPositioner, HitBoxCtrl hitBoxCtrl, StateCtrl stateCtrl, [Inject(Id = "LowCharge")] IAnimatable animCtrl)
@@ -26,20 +25,20 @@ namespace LowChargeShot
             this.initPositioner = initPositioner;
             this.hitBoxCtrl = hitBoxCtrl;
             this.stateCtrl = stateCtrl;
-            this.animCtrl = animCtrl;
+            this.animatorCtrl = animCtrl;
         }
 
         protected override void CustomAwake()
         {
             moveCtrl.GetShellStats(rb, speed);
-            visualCtrl.GetPlayerStats(spriteRenderer, actionStatusChecker);
+            visualCtrl.GetPlayerStats(gameObject.MyGetComponent_NullChker<SpriteRenderer>(), actionStatusChecker);
             initPositioner.GetShellStats(muzzleObj, transform);
             hitBoxCtrl.GetBoxCollider2D(gameObject.MyGetComponent_NullChker<BoxCollider2D>());
-            animCtrl.Construct(gameObject.MyGetComponent_NullChker<Animator>());
-            gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().Construct(animCtrl);
+            animatorCtrl.Construct(gameObject.MyGetComponent_NullChker<Animator>());
+            gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().Construct(animatorCtrl);
         }
 
-        protected override void CustomStart()
+        private void Start()
         {
             hitBoxCtrl.SetActive(false);
 
@@ -59,10 +58,11 @@ namespace LowChargeShot
             hitBoxCtrl.SetActive(true);
             stateCtrl.Start();
 
-            animCtrl.MoveAnim();
+            animatorCtrl.MoveAnim();
             moveCtrl.Move();
             visualCtrl.SetFlip();
             SoundEffectCtrl.OnPlayShotSE.OnNext(myLevel);
+            gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().IsExtraDamage(playerStateMgr.WhatCurrentState(playerStateMgr.dashState));
         }
 
         public override void DestroyShell()

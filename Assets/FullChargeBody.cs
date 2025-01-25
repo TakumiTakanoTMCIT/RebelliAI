@@ -3,7 +3,7 @@ using ActionStatusChk;
 using PlayerState;
 using Zenject;
 using UniRx;
-using LowChargeShot;
+using PlayerShot;
 
 namespace PlayerShot
 {
@@ -13,32 +13,19 @@ namespace PlayerShot
         void Refrect();
     }
 
-    public interface IDestroyable
-    {
-        void DestroyShell();
-    }
-
-    public abstract class ShellBase : MonoBehaviour, IDestroyable, IChargeShot
+    public abstract class ShellBase : MonoBehaviour, IChargeShot
     {
         [SerializeField]
         protected float speed;
 
-        [Inject]
-        protected PlayerStats playerStatus;
-
         [Inject(Id = "Muzzle")]
         protected GameObject muzzleObj;
 
-        [SerializeField]
-        protected GameObject playerOriginalPrefab;
-        protected GameObject playerObject;
-
-        protected bool isStartedMove;
-
         protected Rigidbody2D rb;
-        protected SpriteRenderer spriteRenderer;
         protected PlayerStateMgr playerStateMgr;
         protected IAnimatable animatorCtrl;
+
+        [Inject]
         protected ActionStatusChecker actionStatusChecker;
 
         public abstract void DestroyShell();
@@ -50,47 +37,10 @@ namespace PlayerShot
 
         protected void Awake()
         {
-            actionStatusChecker = GameObject.Find("Player").MyGetComponent_NullChker<ActionStatusChecker>();
             playerStateMgr = GameObject.Find("Player").MyGetComponent_NullChker<PlayerStateMgr>();
             rb = gameObject.MyGetComponent_NullChker<Rigidbody2D>();
-            spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
-
-            playerObject = GameObject.Find(playerOriginalPrefab.name);
-
-            isStartedMove = false;
 
             CustomAwake();
-        }
-
-        protected void Start()
-        {
-            CustomStart();
-        }
-
-        abstract protected void CustomStart();
-
-        protected void MoveShell()
-        {
-            //ダッシュ中はダメージが増加する
-            gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().IsExtraDamage(playerStateMgr.WhatCurrentState(playerStateMgr.dashState));
-
-            //プレイヤーの向きに合わせて速度を決める
-            if (actionStatusChecker.Direction)
-            {
-                rb.velocity = new Vector2(speed, 0);
-            }
-            else
-            {
-                rb.velocity = new Vector2(-speed, 0);
-            }
-
-            //プレイヤーの向きに合わせて画像を反転させる
-            spriteRenderer.flipX = !actionStatusChecker.Direction;
-
-            //移動開始のフラグを立てる
-            isStartedMove = true;
-
-            CustomMoveShell();
         }
 
         //Awakeを継承先で少し内容を変えたい場合は、CustomAwakeを使う
@@ -125,62 +75,57 @@ namespace PlayerShot
         public abstract void RefrectShell();
     }
 
-    /*public abstract class PositionInitializer : MonoBehaviour
-    {
-        protected bool isStartedMove;
+}
 
-        //Inject
-        protected GameObject muzzleObj;
-
-        //このInjectでスタートしたかどうかの判断ができるインスタンスを取得する
-        //銃口の座標を取得する
-
-        private void Start()
-        {
-            //スタートアニメーション時にはプレイヤーの銃口に追従する
-            Observable.EveryUpdate()
-                .Where(_ => !isStartedMove)
-                .Subscribe(_ =>
-                {
-                    transform.position = muzzleObj.transform.position;
-                })
-                .AddTo(this);
-        }
-    }*/
-
-    //--ここから具象クラスの実装をしていきます--
-
+namespace FullCharge
+{
     public class FullChargeBody : ShellBase
     {
         [SerializeField] private int myLevel = 1;
 
-        BoxCollider2D boxCollider2D;
+        MoveCtrl moveCtrl;
+        HitBoxCtrl hitBoxCtrl;
+        InitPositioner initPositioner;
+        StateCtrl stateCtrl;
+        VisualCtrl visualCtrl;
 
         [Inject]
-        public void Construct([Inject(Id = "FullCharge")] IAnimatable animCtrl)
+        public void Construct([Inject(Id = "FullCharge")] IAnimatable animCtrl, MoveCtrl moveCtrl, HitBoxCtrl hitBoxCtrl, InitPositioner initPositioner, StateCtrl stateCtrl, VisualCtrl visualCtrl)
         {
             animatorCtrl = animCtrl;
+            this.moveCtrl = moveCtrl;
+            this.hitBoxCtrl = hitBoxCtrl;
+            this.initPositioner = initPositioner;
+            this.stateCtrl = stateCtrl;
+            this.visualCtrl = visualCtrl;
         }
 
         protected override void CustomAwake()
         {
-            boxCollider2D = gameObject.MyGetComponent_NullChker<BoxCollider2D>();
             animatorCtrl.Construct(gameObject.MyGetComponent_NullChker<Animator>());
             gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().Construct(animatorCtrl);
+
+            moveCtrl.GetBodyStats(rb, actionStatusChecker, speed);
+            hitBoxCtrl.GetHitBox(gameObject.MyGetComponent_NullChker<BoxCollider2D>());
+            initPositioner.GetShellStats(muzzleObj.transform, transform);
+            visualCtrl.GetPlayerStats(gameObject.MyGetComponent_NullChker<SpriteRenderer>(), actionStatusChecker);
         }
 
-        protected override void CustomStart()
+        private void Start()
         {
             animatorCtrl.StartAnim();
-            boxCollider2D.enabled = false;
-            isStartedMove = false;
-        }
+            hitBoxCtrl.HitBoxStats(false);
+            stateCtrl.SetStartedMove(false);
 
-        private void Update()
-        {
             //スタートアニメーション中はプレイヤーの銃口に追従する
-            if (isStartedMove) return;
-            transform.position = muzzleObj.transform.position;
+            Observable.EveryUpdate()
+                .Where(_ => !stateCtrl.IsStartedMove)
+                .Subscribe(_ =>
+                {
+                    initPositioner.SetMuzzlePositoin();
+                    visualCtrl.SetFlip();
+                })
+                .AddTo(this);
         }
 
         /// <summary>
@@ -189,19 +134,23 @@ namespace PlayerShot
         public override void End_BiginingAnim()
         {
             animatorCtrl.MoveAnim();
-            boxCollider2D.enabled = true;
-            MoveShell();
+            hitBoxCtrl.HitBoxStats(true);
+            stateCtrl.SetStartedMove(true);
+            visualCtrl.SetFlip();
+            gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().IsExtraDamage(playerStateMgr.WhatCurrentState(playerStateMgr.dashState));
         }
 
         protected override void CustomMoveShell()
         {
             //発射音を再生
             SoundEffectCtrl.OnPlayShotSE.OnNext(myLevel);
+
+            moveCtrl.MoveShell();
         }
 
         protected override void OnBecameInvisible()
         {
-            if (!isStartedMove) return;
+            if (!stateCtrl.IsStartedMove) return;
             DestroyShell();
         }
 
@@ -212,7 +161,7 @@ namespace PlayerShot
 
         public override void StopMove()
         {
-            rb.velocity = Vector2.zero;
+            moveCtrl.Stop();
         }
 
         //アニメーションイベント
@@ -233,43 +182,94 @@ namespace PlayerShot
         }
     }
 
-    /*public class FullChargeBodyAnim : ShellAnimCtrlBase
+    public class MoveCtrl
     {
-        FullChargeBody bodyCtrl;
+        private Rigidbody2D rb;
+        private ActionStatusChecker actionStatusChecker;
+        private float speed;
 
-        public FullChargeBodyAnim(Animator animator, FullChargeBody bodyCtrl)
+        public void GetBodyStats(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, float speed)
         {
-            this.animator = animator;
-            this.bodyCtrl = bodyCtrl;
-
-
+            this.rb = rb;
+            this.actionStatusChecker = actionStatusChecker;
+            this.speed = speed;
         }
 
-        public override void Construct(Animator animator)
+        public void MoveShell()
         {
-            //this.animator = animator;
+            //プレイヤーの向きに合わせて速度を決める
+            if (actionStatusChecker.Direction)
+            {
+                rb.velocity = new Vector2(speed, 0);
+            }
+            else
+            {
+                rb.velocity = new Vector2(-speed, 0);
+            }
         }
 
-        public override void StartAnim()
+        public void Stop()
         {
-            animator.SetTrigger("onReset");
+            rb.velocity = Vector2.zero;
+        }
+    }
+
+    public class HitBoxCtrl
+    {
+        private BoxCollider2D boxCollider2D;
+
+        public void GetHitBox(BoxCollider2D boxCollider2D)
+        {
+            this.boxCollider2D = boxCollider2D;
         }
 
-        public override void MoveAnim()
+        public void HitBoxStats(bool stats)
         {
-            animator.SetTrigger("onFinishBigin");
+            boxCollider2D.enabled = stats;
+        }
+    }
+
+    public class InitPositioner
+    {
+        private Transform muzzleTrans;
+        private Transform shellTrans;
+
+        public void GetShellStats(Transform muzzleTrans, Transform shellTrans)
+        {
+            this.muzzleTrans = muzzleTrans;
+            this.shellTrans = shellTrans;
         }
 
-        public override void TakeDamage()
+        public void SetMuzzlePositoin()
         {
-            bodyCtrl.StopMove();
-            animator.SetTrigger("isHit");
+            shellTrans.position = muzzleTrans.position;
+        }
+    }
+
+    public class StateCtrl
+    {
+        public bool IsStartedMove { get; private set; }
+
+        public void SetStartedMove(bool isStartedMove)
+        {
+            IsStartedMove = isStartedMove;
+        }
+    }
+
+    public class VisualCtrl
+    {
+        private SpriteRenderer spriteRenderer;
+        private ActionStatusChecker actionStatusChecker;
+
+        public void GetPlayerStats(SpriteRenderer spriteRenderer, ActionStatusChecker actionStatusChecker)
+        {
+            this.spriteRenderer = spriteRenderer;
+            this.actionStatusChecker = actionStatusChecker;
         }
 
-        public override void RefrectShell()
+        public void SetFlip()
         {
-            bodyCtrl.StopMove();
-            animator.SetTrigger("isRefrect");
+            spriteRenderer.flipX = !actionStatusChecker.Direction;
         }
-    }*/
+    }
 }

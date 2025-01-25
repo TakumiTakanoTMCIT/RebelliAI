@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Pool;
 using PlayerShot;
 
-public class ShellMainBodyCrtl : MonoBehaviour, IDestroyable
+public class ShellMainBodyCrtl : MonoBehaviour
 {
     Rigidbody2D rb;
     SpriteRenderer spriteRenderer;

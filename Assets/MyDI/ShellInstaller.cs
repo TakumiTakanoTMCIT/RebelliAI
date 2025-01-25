@@ -31,5 +31,20 @@ public class ShellInstaller : MonoInstaller
             .WithId("FullCharge")
             .To<FullChargeShotAnimCtrl>()
             .AsTransient();
+
+        Container.Bind<FullCharge.MoveCtrl>()
+            .AsTransient();
+
+        Container.Bind<FullCharge.HitBoxCtrl>()
+            .AsTransient();
+
+        Container.Bind<FullCharge.InitPositioner>()
+            .AsTransient();
+
+        Container.Bind<FullCharge.StateCtrl>()
+            .AsTransient();
+
+        Container.Bind<FullCharge.VisualCtrl>()
+            .AsTransient();
     }
 }
