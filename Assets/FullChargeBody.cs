@@ -31,9 +31,7 @@ namespace PlayerShot
         public abstract void DestroyShell();
         public abstract void End_BiginingAnim();
         protected abstract void OnBecameInvisible();
-        public abstract void StopMove();
         public abstract void Refrect();
-        protected abstract void CustomMoveShell();
 
         protected void Awake()
         {
@@ -138,10 +136,6 @@ namespace FullCharge
             stateCtrl.SetStartedMove(true);
             visualCtrl.SetFlip();
             gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().IsExtraDamage(playerStateMgr.WhatCurrentState(playerStateMgr.dashState));
-        }
-
-        protected override void CustomMoveShell()
-        {
             //発射音を再生
             SoundEffectCtrl.OnPlayShotSE.OnNext(myLevel);
 
@@ -159,11 +153,6 @@ namespace FullCharge
             Destroy(this.gameObject);
         }
 
-        public override void StopMove()
-        {
-            moveCtrl.Stop();
-        }
-
         //アニメーションイベント
         void FinishRefrectAnim()
         {
@@ -173,12 +162,12 @@ namespace FullCharge
         //インターフェースの実装
         public override void TakeDamage()
         {
-            StopMove();
+            moveCtrl.Stop();
         }
 
         public override void Refrect()
         {
-            StopMove();
+            moveCtrl.Stop();
         }
     }
 

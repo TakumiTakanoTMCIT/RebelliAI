@@ -77,16 +77,6 @@ namespace LowChargeShot
             DestroyShell();
         }
 
-        public override void StopMove()
-        {
-            //rb.velocity = Vector2.zero;
-        }
-
-        protected override void CustomMoveShell()
-        {
-            //SoundEffectCtrl.OnPlayShotSE.OnNext(myLevel);
-        }
-
         //インターフェース
         public override void TakeDamage()
         {
