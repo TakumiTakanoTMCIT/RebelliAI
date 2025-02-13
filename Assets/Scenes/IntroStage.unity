@@ -2732,16 +2732,7 @@ MonoBehaviour:
   healAndDamageAmount: 5
   intervalTime: 0.1
   addMidBarIntervalTime: 0.4
-  Base: {fileID: 523439752}
-  midPrefab: {fileID: 8834646035787069811, guid: fabc994778aa84f75975fbf1c22f0d50, type: 3}
-  Top: {fileID: 2035044711}
-  hpUnit: {fileID: 5212956201096586392, guid: 9760c61caeafa41619eb017104c2c7e8, type: 3}
-  barHeight: 12
-  isDebugMode: 0
   gamePlayerManager: {fileID: 1264633628}
-  hpUnitList: []
-  playerMaxLife: 0
-  currentLife: 0
 --- !u!4 &585496184
 Transform:
   m_ObjectHideFlags: 0
@@ -14884,6 +14875,7 @@ GameObject:
   - component: {fileID: 1110060454}
   - component: {fileID: 1110060455}
   - component: {fileID: 1110060456}
+  - component: {fileID: 1110060457}
   m_Layer: 0
   m_Name: SceneContext
   m_TagString: Untagged
@@ -14933,6 +14925,7 @@ MonoBehaviour:
   - {fileID: 1110060454}
   - {fileID: 1110060455}
   - {fileID: 1110060456}
+  - {fileID: 1110060457}
   _installerPrefabs: []
   _autoRun: 1
   OnPreInstall:
@@ -15060,6 +15053,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 242c20006180e4b98a1ee612c4e3247a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1110060457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110060446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 829ca4a28ce58416393bf8df6126e19f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseObj: {fileID: 523439752}
+  midPrefab: {fileID: 8834646035787069811, guid: fabc994778aa84f75975fbf1c22f0d50, type: 3}
+  topObj: {fileID: 2035044711}
+  hpUnitPrefab: {fileID: 5212956201096586392, guid: 9760c61caeafa41619eb017104c2c7e8, type: 3}
 --- !u!1001 &1134130826
 PrefabInstance:
   m_ObjectHideFlags: 0

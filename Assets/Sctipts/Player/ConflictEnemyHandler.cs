@@ -1,4 +1,5 @@
 using UnityEngine;
+using Zenject;
 
 public interface IConflictEnemy
 {
@@ -7,14 +8,16 @@ public interface IConflictEnemy
 
 public class ConflictEnemyHandler : MonoBehaviour, IConflictEnemy
 {
-    HPBar.HPBarHandler hPBarHandler;
+    HPBar.IPlayerHP playerHP;
     DamageTimeHandler damageTimeHandler;
 
     bool isInvincible = false;
 
-    public void OtherComponentGetter(HPBar.HPBarHandler hPBarHandler)
+    [Inject]
+    public void Construct(HPBar.IPlayerHP playerHP)
     {
-        this.hPBarHandler = hPBarHandler;
+        Debug.Log("ConflictEnemyHandler Construct");
+        this.playerHP = playerHP;
     }
 
     public void ChildComponentGetter(DamageTimeHandler damageTimeHandler)
@@ -56,6 +59,6 @@ public class ConflictEnemyHandler : MonoBehaviour, IConflictEnemy
     {
         if (isInvincible) return;
         if (damageTimeHandler.IsDamaging) return;
-        hPBarHandler.Damage(damage);
+        playerHP.Damage(damage);
     }
 }

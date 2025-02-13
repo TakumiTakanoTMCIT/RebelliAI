@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Threading.Tasks;
 using UniRx;
+using Zenject;
 
 namespace HPBar
 {
@@ -101,27 +102,22 @@ namespace HPBar
         [SerializeField] int InitialMaxLife = 1, InitialCurrentLife = 1;
         [SerializeField] int healAndDamageAmount = 5;
         [SerializeField] float intervalTime = 0.05f, addMidBarIntervalTime = 0.1f;
-        [SerializeField] GameObject Base;
-        [SerializeField] GameObject midPrefab;
-        [SerializeField] GameObject Top;
-        [SerializeField] GameObject hpUnit;
-        [SerializeField] float barHeight = 6;
-        [SerializeField] bool isDebugMode = false;
         [SerializeField] GamePlayerManager gamePlayerManager;
-
-        int cacheMaxLife;
-
-        bool isDead = false;
-
-        RectTransform topTransform;
-
-        [SerializeField] List<GameObject> hpUnitList;
-
-        [SerializeField] private int playerMaxLife = 0, currentLife = 0;
 
         public static event Action onPlayerDeath, onPlayerDamage;
 
         public Subject<Unit> onPlayerInVoid = new Subject<Unit>();
+
+        //ここでPlayerHPのインスタンスを作成したくない、ZenjectでInjectするようにします。とにかく実装するためにここで作成します。
+        PlayerHPVisual playerHPVisual;
+        PlayerHP playerHP;
+
+        [Inject]
+        public void Construct(PlayerHP playerHP, PlayerHPVisual playerHPVisual)
+        {
+            this.playerHP = playerHP;
+            this.playerHPVisual = playerHPVisual;
+        }
 
         /// <summary>
         /// コンポーネントのインスタンスの取得のみを行う
@@ -130,91 +126,44 @@ namespace HPBar
         {
             onPlayerInVoid.Subscribe(_ =>
             {
-                if (gamePlayerManager.isInGameArea) Damage(playerMaxLife);
+                if (gamePlayerManager.isInGameArea) playerHP.Damage(playerHP.MaxLife);
             })
             .AddTo(this);
-
-            topTransform = Top.MyGetComponent_NullChker<RectTransform>();
-            hpUnitList = new List<GameObject>();
         }
 
-        private async void Start()
+        private void Start()
         {
-            topTransform.anchoredPosition = Vector2.zero;
-
-            await AddLife(InitialMaxLife);
-            Heal(InitialCurrentLife);
+            playerHPVisual.InitVisual();
         }
 
-        //デバッグ用です
-        //isDebugModeがtrueの時のみ、以下の処理が行われます
-        private async void Update()
+        private void Update()
         {
-            if (!isDebugMode) return;
-
-            if (Input.GetKeyDown(KeyCode.Backspace))
+            if (Input.GetKeyDown(KeyCode.Return))
             {
-                Debug.LogWarning("Playerを死なせます: HPBarHandler");
-                Damage(playerMaxLife);
+                playerHPVisual.ChangeMaxLife(1);
             }
 
-            if (Input.GetKeyDown(KeyCode.C))
+            if (Input.GetKeyDown(KeyCode.Tab))
             {
-                Damage(healAndDamageAmount);
-            }
-
-            if (Input.GetKeyDown(KeyCode.X))
-            {
-                Heal(healAndDamageAmount);
-            }
-
-            if (Input.GetKeyDown(KeyCode.Z))
-            {
-                await AddLife(2);
-            }
-
-            if (Input.GetKeyDown(KeyCode.V))
-            {
-                Heal(playerMaxLife);
+                playerHPVisual.ChangeMaxLife(-1);
             }
         }
 
-        public async void Heal(int healAmount)
-        {
-            if (healAmount <= 0)
-                return;
-
-            for (int i = 0; i < healAmount; i++)
-            {
-                if (currentLife >= playerMaxLife)
-                {
-                    return;
-                }
-
-                await HealLife();
-            }
-        }
-
-        public void Damage(int damageAmount)
-        {
-            if (damageAmount <= 0)
-            {
-                Debug.Log("プラスの値を入力しないとダメージを受けません");
-                return;
-            }
-            DamageLife(damageAmount);
-        }
-
-        public async UniTask AddLife(int addAmount)
+        /*public async UniTask AddLife(int addAmount)
         {
             if (addAmount <= 0)
+            {
+                Debug.LogError("プラスの値を入力しないと体力が増えません");
                 return;
+            }
 
-            cacheMaxLife = playerMaxLife;
+            //TODO : ここで謎にキャッシュを取っているので、後で調べる
+            cacheMaxLife = playerHP.MaxLife;
 
-            //数値上だけ増やしたあとに、見た目の処理をします
-            playerMaxLife += addAmount;
+            //数値上の処理
+            playerHP.Heal(addAmount);
 
+            //見た目の処理
             for (int i = 0; i < addAmount; i++)
             {
                 await MakeMidBar();
@@ -226,13 +175,14 @@ namespace HPBar
         /// 呼び出すときには、上記の関数を使用してください。
         /// </summary>
 
-        void DamageLife(int damageAmount)
+        //TODO : 描画の処理と数値の処理を分ける
+        /*void DamageLife(int damageAmount)
         {
+            playerHP.Damage(damageAmount);
+
             for (int count = 0; count < damageAmount; count++)
             {
-                if (isDead) return;
-
-                currentLife--;
+                if (playerStats.IsDead) return;
 
                 try
                 {
@@ -241,35 +191,27 @@ namespace HPBar
                 catch (Exception e)
                 {
                     Debug.Log($"[hpUnitList.Count - 1] : {hpUnitList.Count - 1}");
-                    Debug.Log($"currentLife : {currentLife}");
+                    Debug.Log($"currentLife : {playerHP.CurrentLife}");
                     Debug.LogError($"エラー発生しました、{e.Message}");
-                    //UnityEditor.EditorApplication.isPaused = true;
                     return;
                 }
 
                 try
                 {
                     hpUnitList.RemoveAt(hpUnitList.Count - 1);
-                    Debug.Log($"hpUnitList.Count : {hpUnitList.Count}");
                 }
                 catch (Exception e)
                 {
                     Debug.LogError($"エラー発生しました、{e.Message}");
-                    //UnityEditor.EditorApplication.isPaused = true;
                     return;
                 }
 
                 if (hpUnitList.Count == 0)
                 {
-                    isDead = true;
-                    Debug.LogWarning("HPUnitListが空です。");
+                    playerStats.Dead();
                     onPlayerDeath?.Invoke();
                     SoundEffectCtrl.OnPlayDeathSE.OnNext(1);
                     return;
-                    /*Debug.LogWarning("HPUnitListが空です。");
-                    Debug.Log($"currentLife : {currentLife}");
-                    //UnityEditor.EditorApplication.isPaused = true;
-                    return;*/
                 }
 
                 //最初に体力を減らしたときのみ呼び出す
@@ -278,13 +220,6 @@ namespace HPBar
                     onPlayerDamage?.Invoke();
                     SoundEffectCtrl.OnPlayDamageSE.OnNext(0);
                 }
-
-                /*if (currentLife <= 0)
-                {
-                    currentLife = 0;
-                    onPlayerDeath?.Invoke();
-                    return;
-                }*/
             }
         }
 
@@ -322,10 +257,9 @@ namespace HPBar
             var instance = Instantiate(hpUnit);
             instance.transform.SetParent(Base.transform);
             var rectTrasnform = instance.MyGetComponent_NullChker<RectTransform>();
-            rectTrasnform.anchoredPosition = new Vector2(0, currentLife * barHeight);
+            rectTrasnform.anchoredPosition = new Vector2(0, playerHP.CurrentLife * barHeight);
 
             hpUnitList.Add(instance);
-            currentLife++;
             SoundEffectCtrl.onPlayHealHPSound.OnNext(Unit.Default);
 
             try
@@ -339,6 +273,269 @@ namespace HPBar
                 //UnityEditor.EditorApplication.isPaused = true;
                 return;
             }
+        }*/
+    }
+
+    /// <summary>
+    /// 見た目の処理を行うクラスです
+    /// </summary>
+    public class PlayerHPVisual
+    {
+        //Injectするために必要な変数
+        GameObject Base;
+        GameObject midPrefab;
+        GameObject TopObj;
+        GameObject hpUnit;
+        PlayerHP playerHP;
+
+
+        //TODO : マジックナンバーはあぶないっす！
+        int barHeight = 12;
+
+        List<GameObject> hpUnitList = new List<GameObject>();
+        List<GameObject> midBarList = new List<GameObject>();
+
+        RectTransform topTransform;
+
+        int cachedMaxLifeYPos = 0;
+
+        [Inject]
+        public PlayerHPVisual(PlayerHP playerHP, [Inject(Id = "Base")] GameObject Base, [Inject(Id = "Mid")] GameObject midPrefab, [Inject(Id = "Top")] GameObject TopObj, [Inject(Id = "HPUnit")] GameObject hpUnit)
+        {
+            this.playerHP = playerHP;
+
+            this.Base = Base;
+            this.midPrefab = midPrefab;
+            this.TopObj = TopObj;
+            this.hpUnit = hpUnit;
+        }
+
+        public void InitVisual()
+        {
+            //TopObjを初期化
+            topTransform = TopObj.GetComponent<RectTransform>();
+            Vector2 pos = topTransform.anchoredPosition;
+            pos.y = 0f;
+            topTransform.anchoredPosition = pos;
+
+            Debug.Log("初期化できました");
+
+            //初期最大HP分だけ初期化
+            ChangeMaxLife(playerHP.MaxLife);
+            /*ChangeCurrentLife(playerHP.MaxLife);*/
+        }
+
+        //amountの値分だけ最大体力を変更する
+        public void ChangeMaxLife(int amount)
+        {
+            if (amount > 0)
+            {
+                for (int i = 0; i < amount; i++)
+                {
+                    //中間のバーを作成
+                    var instance = GameObject.Instantiate(midPrefab);
+                    var instanceTrans = instance.GetComponent<RectTransform>();
+                    midBarList.Add(instance);
+
+                    //中間のバーの位置を変更
+                    instance.transform.SetParent(Base.transform);
+                    instanceTrans.anchoredPosition = new Vector3(
+                        0,
+                        cachedMaxLifeYPos + (barHeight * i));
+                    //なぜcachedMaxLifeYPosを使うのか？
+                    //中間バーを作成するたびに基準点をcachedMaxLifeYPosに加算しているためです。
+
+                    //TopObjを中間バーの子オブジェクトにして、座標を0にすると自動的に中間バーの上に配置される
+                    //アンカーを正しく設定しているためです。
+                    //子オブジェクトにしたら0の座標が中間バーの上となります
+                    //毎回forで実行する必要が無い気がしますが、"最後のforのみ実行"ということができないので毎回実行するようにしています。
+                    TopObj.transform.SetParent(instance.transform);
+                    topTransform.anchoredPosition = Vector2.zero;
+                }
+
+                cachedMaxLifeYPos += barHeight * amount;
+
+                return;
+            }
+            else if (amount < 0)
+            {
+                if(midBarList.Count == 0)
+                {
+                    return;
+                }
+
+                amount = -amount;
+
+                //TopObjの親子関係をBaseに変更
+                //これをしないと、上から中間バーを消してしまうとTopObjが消えてしまいます
+                TopObj.transform.SetParent(Base.transform);
+
+                for (int i = 0; i < amount; i++)
+                {
+                    //中間のバーを削除
+                    GameObject.Destroy(midBarList[midBarList.Count - 1]);
+                    midBarList.RemoveAt(midBarList.Count - 1);
+
+                    //最上位の中間バーの位置を正す
+                    cachedMaxLifeYPos -= barHeight;
+
+                    //forが最後のループのときだけTopObjの位置を変更
+                    //TopObjの親子関係を一番上の中間バーに変更
+                    if (i == amount - 1)
+                    {
+                        if(midBarList.Count == 0)
+                        {
+                            //TopObjの位置を変更
+                            topTransform.anchoredPosition = Vector2.zero;
+
+                            //親子関係もBaseに変更
+                            //明示的に戻しておきます
+                            TopObj.transform.SetParent(Base.transform);
+                            return;
+                        }
+
+                        //TopObjの位置を変更
+                        Vector2 pos = topTransform.anchoredPosition;
+                        pos.y = midBarList[midBarList.Count - 1].GetComponent<RectTransform>().anchoredPosition.y;
+                        topTransform.anchoredPosition = pos;
+
+                        //TopObjの親子関係を一番上の中間バーに変更
+                        //座標も正しておく
+                        TopObj.transform.SetParent(midBarList[midBarList.Count - 1].transform);
+                        topTransform.anchoredPosition = Vector2.zero;
+                    }
+                }
+                return;
+            }
+            else
+            {
+                Debug.LogError("0を入力することはできません");
+                return;
+            }
+        }
+
+        //amountの値分だけ現在の体力を変更する
+        public void ChangeCurrentLife(int amount)
+        {
+            int cachedCurrentLife = playerHP.CurrentLife;
+
+            if (amount > 0)
+            {
+                for (int i = 0; i > amount; i++)
+                {
+                    if (hpUnitList.Count == playerHP.MaxLife)
+                    {
+                        return;
+                    }
+
+                    //HPのユニットを作成
+                    var instance = GameObject.Instantiate(hpUnit);
+                    var instanceTrans = instance.GetComponent<RectTransform>();
+                    hpUnitList.Add(instance);
+
+                    instance.transform.SetParent(Base.transform);
+                    instanceTrans.anchoredPosition = new Vector3(
+                        0,
+                        (cachedCurrentLife * barHeight) + (i * barHeight));
+                }
+            }
+            else if (amount < 0)
+            {
+                for (int i = 0; i < -amount; i++)
+                {
+                    //HPのユニットを削除
+                    GameObject.Destroy(hpUnitList[hpUnitList.Count - 1]);
+                    hpUnitList.RemoveAt(hpUnitList.Count - 1);
+
+                    if (hpUnitList.Count == 0)
+                    {
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                Debug.LogError("0を入力することはできません");
+                return;
+            }
+        }
+    }
+
+    public interface IPlayerHP
+    {
+        void Heal(int amount);
+        void Damage(int amount);
+        void UpdateMaxLife(int amount);
+    }
+
+    /// <summary>
+    /// プレイヤーのHPを数値上で管理するクラスです
+    /// </summary>
+    public class PlayerHP : IPlayerHP
+    {
+        public int MaxLife => maxLife;
+        public int CurrentLife => currentLife;
+        private int maxLife, currentLife;
+
+        public PlayerHP()
+        {
+            maxLife = 10;
+            currentLife = maxLife;
+        }
+
+        public void Heal(int amount)
+        {
+            if (amount <= 0)
+            {
+                Debug.LogError("プラスの値を入力しないと体力が増えません");
+                return;
+            }
+
+            currentLife += amount;
+        }
+
+        public void Damage(int amount)
+        {
+            if (amount <= 0)
+            {
+                Debug.LogError("プラスの値を入力しないとダメージを受けません");
+                return;
+            }
+
+            currentLife -= amount;
+            if (currentLife <= 0)
+            {
+                currentLife = 0;
+            }
+        }
+
+        public void UpdateMaxLife(int amount)
+        {
+            if (amount == 0)
+            {
+                Debug.LogError("0を入力することはできません");
+                return;
+            }
+
+            maxLife += amount;
+            if (maxLife < 0)
+            {
+                maxLife = 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// プレイヤーのステータスを管理するクラスです
+    /// </summary>
+    public class PlayerStats
+    {
+        public bool IsDead => isDead;
+        private bool isDead = false;
+
+        public void Dead()
+        {
+            isDead = true;
         }
     }
 }

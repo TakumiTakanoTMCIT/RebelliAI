@@ -51,7 +51,6 @@ namespace ComponentProvider
         {
             playerAnimStateHandler.OtherComponentGetter(deathGlitchSparkFactory, gameFlowManager);
             playerWeapon_KeyController.OtherComponentGetter(chargeShot_Handler, allShellManager);
-            conflictEnemyHandler.OtherComponentGetter(hPBarHandler);
             playerBoundaryExitHandler.OtherComponentGetter(hPBarHandler);
         }
     }
