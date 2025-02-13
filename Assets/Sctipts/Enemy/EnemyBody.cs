@@ -83,13 +83,12 @@ namespace Enemy
         //Unityから呼び出されます
         public void OnBecameInvisible()
         {
-            if (!IsAlivingNow) return;
             DieAndReleaseObj();
         }
 
         public void TakeDamage(int damage)
         {
-            Debug.Log("TakeDamage");
+            //Debug.Log("TakeDamage");
             if (!gameObject.activeSelf)
                 return;
             hp -= damage;

@@ -20,6 +20,8 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
     ExplosionSpawner explosionSpawner;
     SpriteRenderer spriteRenderer;
 
+    [SerializeField] private bool isViewing = false, isInstanceAlive = false, isActive = false;
+
     [Inject]
     public void Construct(DanboruPool danboruPool)
     {
@@ -36,7 +38,7 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        //画面外に自身とインスタンスが見えない場合、インスタンスをReleaseする
+        //画面外に自身が居て、インスタンスが見えない場合、インスタンスをReleaseする
         //毎フレーム監視
         Observable.EveryUpdate()
             //もし自身が見えない場合
@@ -50,9 +52,22 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
             })
             .AddTo(this);
 
-        //画面内に自身が見える場合、インスタンスを生成する
+        //instanceが存在する時に、instanceが死んだらinstanceをnullにする
         //毎フレーム監視
         Observable.EveryUpdate()
+            //インスタンスのNullチェック
+            //もしインスタンスが死んでいる場合
+            .Where(_ => instance?.IsAlivingNow == false)
+            //インスタンスをnullにする
+            .Subscribe(_ =>
+            {
+                DieAndReleaseObj();
+            })
+            .AddTo(this);
+
+        //画面内に自身が見える場合、インスタンスを生成する
+        //毎フレーム監視
+        /*Observable.EveryUpdate()
             //もし自身が見える場合
             .Where(_ => spriteRenderer.isVisible)
             //もしインスタンスがnullの場合
@@ -62,7 +77,35 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
             {
                 MakeInstance();
             })
-            .AddTo(this);
+            .AddTo(this);*/
+    }
+
+    private void OnBecameVisible()
+    {
+        //スポナーが画面内に入ったら、インスタンスを生成する
+        MakeInstance();
+    }
+
+    private void Update()
+    {
+        //画面内にスポナー（自身）が見えているかどうか
+        if (spriteRenderer.isVisible)
+            isViewing = true;
+        else
+            isViewing = false;
+
+        //インスタンスが生きているかどうか
+        if (instance == null)
+            isInstanceAlive = false;
+        else
+            isInstanceAlive = true;
+
+        //isActiveの更新
+        //生きていて、画面内に居て、インスタンスが生きている場合にtrue
+        /*if (instance != null && instance.IsVisible() && instance.IsAlivingNow)
+            isActive = true;
+        else
+            isActive = false;*/
     }
 
     private void OnDrawGizmos()
@@ -80,6 +123,9 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
     //インターフェース実装
     public void MakeInstance()
     {
+        //もしインスタンスが存在するなら、何もしない
+        if (instance != null) return;
+
         Debug.Log("MakeInstance");
         instance = danboruPool.GetObject().GetComponent<EnemyBody>();
         instance.MyAwake(transform.position, transform, explosionSpawner);
@@ -87,7 +133,6 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
 
     private void DieAndReleaseObj()
     {
-        instance.DieAndReleaseObj();
         instance = null;
     }
 
