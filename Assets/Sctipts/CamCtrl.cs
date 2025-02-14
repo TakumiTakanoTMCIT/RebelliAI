@@ -1,9 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using HPBar;
+using UniRx;
+using Zenject;
 
 public class CamCtrl : MonoBehaviour
 {
+    //Inject
+    LifeManager lifeManager;
+
     [SerializeField] List<CamFollowZone> camFollowZones;
 
     Vector3 pos, targetPos;
@@ -12,21 +17,20 @@ public class CamCtrl : MonoBehaviour
     bool isFreezeCam = false;
     [SerializeField] bool isDebugMode = false;
 
+    [Inject]
+    public void Construct(LifeManager lifeManager)
+    {
+        this.lifeManager = lifeManager;
+    }
+
     private void Awake()
     {
         isFreezeCam = false;
-    }
 
-    //イベントの登録
-    private void OnEnable()
-    {
-        HPBarHandler.onPlayerDeath += OnPlayerDeath;
-    }
-
-    //イベントの解除
-    private void OnDisable()
-    {
-        HPBarHandler.onPlayerDeath -= OnPlayerDeath;
+        lifeManager.OnPlayerDead.Subscribe(_ =>
+        {
+            OnPlayerDeath();
+        }).AddTo(this);
     }
 
     private void Start()

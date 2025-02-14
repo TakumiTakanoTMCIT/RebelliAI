@@ -5,6 +5,7 @@ using HPBar;
 public class HPBarInstaller : MonoInstaller
 {
     [SerializeField] GameObject baseObj, midPrefab, topObj, hpUnitPrefab;
+    [SerializeField] HPBarHandler health;
 
     public override void InstallBindings()
     {
@@ -33,5 +34,13 @@ public class HPBarInstaller : MonoInstaller
         Container.Bind<GameObject>()
             .WithId("HPUnit")
             .FromInstance(hpUnitPrefab);
+
+        Container.Bind<int>()
+            .WithId("BarHeight")
+            .FromInstance(12);
+
+        Container.Bind<IHealth>()
+            .FromInstance(health)
+            .AsSingle();
     }
 }

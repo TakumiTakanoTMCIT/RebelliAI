@@ -1,12 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using System;
-using IntroBossExperimenter;
-using HPBar;
 using System.Threading;
-using UnityEditor;
+using Zenject;
 using KeyHandler;
 using UniRx;
 
@@ -35,11 +31,26 @@ public class BossCutSceneHandler : MonoBehaviour, IBossCutSceneHandler
     [SerializeField] private InputHandler inputHandler;
     [SerializeField] private ExplosionPanelCtrl explosionPanelCtrl;
 
+    //Inject
+    LifeManager lifeManager;
+
     CancellationTokenSource cts;
+
+    [Inject]
+    public void Construct(LifeManager lifeManager)
+    {
+        this.lifeManager = lifeManager;
+    }
 
     private void Awake()
     {
         bossMgr = GetComponent<BossMgr>();
+
+        lifeManager.OnPlayerDead.Subscribe(_ =>
+        {
+            OnPlayerDead();
+        })
+        .AddTo(this);
     }
 
     private void OnEnable()
@@ -47,7 +58,6 @@ public class BossCutSceneHandler : MonoBehaviour, IBossCutSceneHandler
         BackGroundTalkPanelAnimCtrl.onHideBackGround += OnEndTalk;
         IntroBossHPBarHandler.onFinishInitializeHPBar += OnFinishInitializeHPBar;
         IntroBossHPBarHandler.onDead += OnDead;
-        HPBarHandler.onPlayerDeath += OnPlayerDead;
     }
 
     private void OnDisable()
@@ -55,7 +65,6 @@ public class BossCutSceneHandler : MonoBehaviour, IBossCutSceneHandler
         BackGroundTalkPanelAnimCtrl.onHideBackGround -= OnEndTalk;
         IntroBossHPBarHandler.onFinishInitializeHPBar -= OnFinishInitializeHPBar;
         IntroBossHPBarHandler.onDead -= OnDead;
-        HPBarHandler.onPlayerDeath -= OnPlayerDead;
     }
 
     //イベントハンドラー

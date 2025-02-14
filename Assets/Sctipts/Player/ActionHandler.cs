@@ -3,6 +3,7 @@ using ActionStatusChk;
 using HPBar;
 using UnityEngine;
 using Zenject;
+using UniRx;
 
 namespace PlayerAction
 {
@@ -14,20 +15,25 @@ namespace PlayerAction
         [Inject]
         PlayerStats playerStatus;
         PlayerDashKeepManager dashKeepManager;
+        LifeManager lifeManager;
 
-        public ActionHandler(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerDashKeepManager dashKeepManager)
+        public ActionHandler(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerDashKeepManager dashKeepManager, LifeManager lifeManager)
         {
             this.rb = rb;
             this.actionStatusChecker = actionStatusChecker;
             this.dashKeepManager = dashKeepManager;
+            this.lifeManager = lifeManager;
 
-            HPBarHandler.onPlayerDeath += OnPlayerDeath;
+            lifeManager.OnPlayerDead.Subscribe(_ =>
+            {
+                OnPlayerDeath();
+            })
+            .AddTo(lifeManager);
         }
 
         //PlayerStateMgrが破棄されたときに呼ばれる
         public void Dispose()
         {
-            HPBarHandler.onPlayerDeath -= OnPlayerDeath;
         }
 
         private void OnPlayerDeath()

@@ -2,27 +2,50 @@ using UnityEngine;
 using UnityEngine.Pool;
 using HPBar;
 using ActionStatusChk;
+using UniRx;
+using Zenject;
 
 public class AfterGrowMain : MonoBehaviour
 {
-    [SerializeField] private float AddPosY = 0.5f;
+    public class Factory : PlaceholderFactory<AfterGrowMain>
+    {
+    }
+
+    //Inject
+    LifeManager lifeManager;
+
+    [SerializeField]
+    private float AddPosY = 0.5f;
 
     ActionStatusChecker actionStatusChecker;
     ObjectPool<GameObject> pool;
     Transform playerTransform;
     SpriteRenderer spriteRenderer;
 
+    [Inject]
+    public void Construct(LifeManager lifeManager)
+    {
+        this.lifeManager = lifeManager;
+    }
+
+    private void Awake()
+    {
+        lifeManager.OnPlayerDead.Subscribe(_ =>
+        {
+            OnPlayerDeathAndEndAnim();
+        })
+        .AddTo(this);
+    }
+
     private void OnEnable()
     {
         //イベントの登録
-        HPBarHandler.onPlayerDeath += OnPlayerDeathAndEndAnim;
         HPBarHandler.onPlayerDamage += OnPlayerDeathAndEndAnim;
     }
 
     private void OnDisable()
     {
         //イベントの解除
-        HPBarHandler.onPlayerDeath -= OnPlayerDeathAndEndAnim;
         HPBarHandler.onPlayerDamage -= OnPlayerDeathAndEndAnim;
     }
 

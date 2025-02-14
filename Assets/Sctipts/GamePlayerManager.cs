@@ -7,6 +7,7 @@ using Door;
 
 public class GamePlayerManager : MonoBehaviour
 {
+    [SerializeField] PlayerAnimStateHandler playerAnimStateHandler;
     [SerializeField] GameObject playerObj, playerPanelObj;
 
     [SerializeField] internal bool isInGameArea = false, isDebugMode = false;
@@ -58,12 +59,18 @@ public class GamePlayerManager : MonoBehaviour
             Debug.LogWarning("時間を止める");
             Time.timeScale = 0;
         }).AddTo(this);
+
+        //プレイヤーが死んだ時の処理
+        playerAnimStateHandler.OnPlayerDeathAnimEnd.Subscribe(_ =>
+        {
+            InvisiblePlayer();
+        })
+        .AddTo(this);
     }
 
     private void OnEnable()
     {
         DeathPanelCtrl.onFinishDeathPanel += RestartStage;
-        PlayerAnimStateHandler.onPlayerDeathAnimEnd += InvisiblePlayer;
 
         BossCutSceneHandler.onStartExplodeCutScene += StopTime;
         BossCutSceneHandler.onExplode += StartTime;
@@ -74,7 +81,6 @@ public class GamePlayerManager : MonoBehaviour
     private void OnDisable()
     {
         DeathPanelCtrl.onFinishDeathPanel -= RestartStage;
-        PlayerAnimStateHandler.onPlayerDeathAnimEnd -= InvisiblePlayer;
 
         BossCutSceneHandler.onStartExplodeCutScene -= StopTime;
         BossCutSceneHandler.onExplode -= StartTime;

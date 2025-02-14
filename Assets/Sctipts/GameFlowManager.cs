@@ -44,6 +44,7 @@ public class GameFlowManager : MonoBehaviour
             inputHandler.EnableInput.OnNext(Unit.Default);
             StartBattleAction.OnNext(Unit.Default);
             Blaster.DisplayCtrl.OnDisplayBlaster.OnNext(Unit.Default);
+            gamePlayerManager.isInGameArea = true;
             return;
         }
         //プレイヤーの初期化

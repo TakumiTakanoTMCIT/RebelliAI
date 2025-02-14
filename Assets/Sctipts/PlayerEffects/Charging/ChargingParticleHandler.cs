@@ -2,6 +2,8 @@ using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using HPBar;
+using UniRx;
+using Zenject;
 
 public class ChargingParticleHandler : MonoBehaviour
 {
@@ -14,10 +16,20 @@ public class ChargingParticleHandler : MonoBehaviour
 
     [SerializeField] bool isLowCharging, isFullCharging, isColorChanging;
 
+    //Inject
+    LifeManager lifeManager;
+
     readonly string oneLowColorString = "#f164ff", twoLowColorString = "#ffde00", oneFullColorString = "#a6ffed", twoFullColorString = "#226cff";
     Color oneLowColor, twoLowColor, oneFullColor, twoFullColor;
 
     Animator animator;
+
+    [Inject]
+    public void Construct(LifeManager lifeManager)
+    {
+        this.lifeManager = lifeManager;
+    }
+
     private void Awake()
     {
         ColorUtility.TryParseHtmlString(oneLowColorString, out oneLowColor);
@@ -30,6 +42,12 @@ public class ChargingParticleHandler : MonoBehaviour
         particleBody = GameObject.Find("ChargingParticle");
 
         GetAnimator();
+
+        lifeManager.OnPlayerDead.Subscribe(_ =>
+        {
+            OnResetCharge();
+        })
+        .AddTo(this);
     }
 
     void GetAnimator()
@@ -43,7 +61,6 @@ public class ChargingParticleHandler : MonoBehaviour
         ChargeShot_Handler.onFullCharge += OnFullCharge;
 
         HPBarHandler.onPlayerDamage += OnResetCharge;
-        HPBarHandler.onPlayerDeath += OnResetCharge;
 
         AllShellManager.onShootChargedShell += OnResetCharge;
         PlayerWeapon_KeyController.onTooShortCharge += OnResetCharge;
@@ -57,7 +74,6 @@ public class ChargingParticleHandler : MonoBehaviour
         ChargeShot_Handler.onFullCharge -= OnFullCharge;
 
         HPBarHandler.onPlayerDamage -= OnResetCharge;
-        HPBarHandler.onPlayerDeath -= OnResetCharge;
 
         AllShellManager.onShootChargedShell -= OnResetCharge;
         PlayerWeapon_KeyController.onTooShortCharge -= OnResetCharge;

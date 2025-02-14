@@ -4,6 +4,8 @@ using Cysharp.Threading.Tasks;
 using System;
 using HPBar;
 using ActionStatusChk;
+using UniRx;
+using Zenject;
 
 public class AfterGrowFactory : MonoBehaviour
 {
@@ -12,6 +14,10 @@ public class AfterGrowFactory : MonoBehaviour
     [SerializeField] int defaultCapacity = 10;
     [SerializeField] private Transform parentTransform;
     [SerializeField] private ActionStatusChecker actionStatusChecker;
+
+    //Inject
+    LifeManager lifeManager;
+    AfterGrowMain.Factory afterGrowMainFactory;
 
     private GameObject effect;
     bool isInstantiable = true, isPlayerDamage_Death = false;
@@ -25,6 +31,13 @@ public class AfterGrowFactory : MonoBehaviour
         isInstantiable = false;
         await UniTask.Delay(TimeSpan.FromSeconds(UnityEngine.Random.Range(minTime, maxTime)));
         isInstantiable = true;
+    }
+
+    [Inject]
+    public void Construct(LifeManager lifeManager , AfterGrowMain.Factory factory)
+    {
+        this.lifeManager = lifeManager;
+        this.afterGrowMainFactory = factory;
     }
 
     private void Awake()
@@ -42,13 +55,19 @@ public class AfterGrowFactory : MonoBehaviour
         isPlayerDamage_Death = false;
 
         InitPool();
+
+        lifeManager.OnPlayerDead.Subscribe(_ =>
+        {
+            OnPlayerDeath_Damage();
+        })
+        .AddTo(this);
     }
 
     private void Update()
     {
         if (!isInstantiable) return;
 
-        if(isPlayerDamage_Death) return;
+        if (isPlayerDamage_Death) return;
 
         if (playerDashTimeCtrl.IsDashNow || playerDashKeepManager.IsKeepDashSpeed)
         {
@@ -62,7 +81,6 @@ public class AfterGrowFactory : MonoBehaviour
 
     private void OnEnable()
     {
-        HPBarHandler.onPlayerDeath += OnPlayerDeath_Damage;
         HPBarHandler.onPlayerDamage += OnPlayerDeath_Damage;
 
         PlayerState.DamageState.onPlayerDamageRecover += OnPlayerRecoverDamage;
@@ -70,7 +88,6 @@ public class AfterGrowFactory : MonoBehaviour
 
     private void OnDisable()
     {
-        HPBarHandler.onPlayerDeath -= OnPlayerDeath_Damage;
         HPBarHandler.onPlayerDamage -= OnPlayerDeath_Damage;
 
         PlayerState.DamageState.onPlayerDamageRecover -= OnPlayerRecoverDamage;
@@ -103,10 +120,11 @@ public class AfterGrowFactory : MonoBehaviour
 
     private GameObject CreateEffect()
     {
-        var instance = Instantiate(effect, player.transform.position, Quaternion.identity);
+        var instance = afterGrowMainFactory.Create();
+        instance.Init(pool, player.transform, actionStatusChecker);
         instance.gameObject.MyGetComponent_NullChker<AfterGrowMain>().Init(pool, player.transform, actionStatusChecker);
-        instance.SetActive(false);
-        return instance;
+        instance.gameObject.SetActive(false);
+        return instance.gameObject;
     }
 
     private void GetEffect(GameObject effect)

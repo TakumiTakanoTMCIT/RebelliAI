@@ -1,16 +1,26 @@
-using System;
+using Zenject;
 using HPBar;
 using UnityEngine;
+using UniRx;
 
 namespace PlayerAnimCtrl
 {
     public class PlayerShotAnimCtrl : MonoBehaviour
     {
+        //Inject
+        LifeManager lifeManager;
+
         [SerializeField] float shotAnimTime = 0.5f;
 
         private ITimer timer;
         private Animator animator;
         bool isShoting = false;
+
+        [Inject]
+        public void Construct(LifeManager lifeManager)
+        {
+            this.lifeManager = lifeManager;
+        }
 
         private void Awake()
         {
@@ -18,20 +28,23 @@ namespace PlayerAnimCtrl
             timer = new Timer(shotAnimTime);
 
             isShoting = false;
+
+            lifeManager.OnPlayerDead.Subscribe(_ =>
+            {
+                EndShotAnim();
+            })
+            .AddTo(this);
         }
 
         private void OnEnable()
         {
             HPBarHandler.onPlayerDamage += EndShotAnim;
-            HPBarHandler.onPlayerDeath += EndShotAnim;
-
             AllShellManager.onShotNow += OnShotNow;
         }
 
         private void OnDisable()
         {
             HPBarHandler.onPlayerDamage -= EndShotAnim;
-            HPBarHandler.onPlayerDeath -= EndShotAnim;
             AllShellManager.onShotNow -= OnShotNow;
         }
 

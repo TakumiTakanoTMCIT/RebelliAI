@@ -1,9 +1,14 @@
 using System;
 using UnityEngine;
 using HPBar;
+using UniRx;
+using Zenject;
 
 public class ChargeShot_Handler : MonoBehaviour
 {
+    //Inject
+    LifeManager lifeManager;
+
     [SerializeField] public GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
 
     private bool isMinimumChargeTime = false;
@@ -24,6 +29,12 @@ public class ChargeShot_Handler : MonoBehaviour
 
     public static event Action onLowCharge, onFullCharge;
 
+    [Inject]
+    public void Construct(LifeManager lifeManager)
+    {
+        this.lifeManager = lifeManager;
+    }
+
     private void Awake()
     {
         ResetSettings();
@@ -33,12 +44,17 @@ public class ChargeShot_Handler : MonoBehaviour
 
         if (fullLevel_EnergyBall == null)
             Debug.Log("FullChargeBallがResourcesディレクトリにありません。確認してください!!");
+
+        lifeManager.OnPlayerDead.Subscribe(_ =>
+        {
+            ResetSettings();
+        })
+        .AddTo(this);
     }
 
     private void OnEnable()
     {
         HPBarHandler.onPlayerDamage += ResetSettings;
-        HPBarHandler.onPlayerDeath += ResetSettings;
         AllShellManager.onShootChargedShell += ResetSettings;
         PlayerWeapon_KeyController.onTooShortCharge += ResetSettings;
     }
@@ -46,7 +62,6 @@ public class ChargeShot_Handler : MonoBehaviour
     private void OnDisable()
     {
         HPBarHandler.onPlayerDamage -= ResetSettings;
-        HPBarHandler.onPlayerDeath -= ResetSettings;
         AllShellManager.onShootChargedShell -= ResetSettings;
         PlayerWeapon_KeyController.onTooShortCharge -= ResetSettings;
     }

@@ -1,9 +1,11 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UniRx;
 
 public class DeathGlitchSparkFactory : MonoBehaviour
 {
+    [SerializeField] private PlayerAnimStateHandler playerAnimStateHandler;
     [SerializeField] private float intervalTime = 0.01f, addYpos = 0.5f;
     [SerializeField] private Transform playerTransform;
     DeathGlitchSparkPoolHandler sparkPoolHandler;
@@ -19,6 +21,12 @@ public class DeathGlitchSparkFactory : MonoBehaviour
         isEndAnimDeath = false;
         sparkPoolHandler = gameObject.MyGetComponent_NullChker<DeathGlitchSparkPoolHandler>();
         PushThisBool_WillMakeEffects = false;
+
+        playerAnimStateHandler.OnPlayerDeathAnimEnd.Subscribe(_ =>
+        {
+            MakeDeathEffects().Forget();
+        })
+        .AddTo(this);
     }
 
     private async void Update()

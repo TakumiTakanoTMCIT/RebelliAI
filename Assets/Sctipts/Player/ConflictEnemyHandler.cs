@@ -8,16 +8,15 @@ public interface IConflictEnemy
 
 public class ConflictEnemyHandler : MonoBehaviour, IConflictEnemy
 {
-    HPBar.IPlayerHP playerHP;
+    HPBar.IHealth health;
     DamageTimeHandler damageTimeHandler;
 
     bool isInvincible = false;
 
     [Inject]
-    public void Construct(HPBar.IPlayerHP playerHP)
+    public void Construct(HPBar.IHealth health)
     {
-        Debug.Log("ConflictEnemyHandler Construct");
-        this.playerHP = playerHP;
+        this.health = health;
     }
 
     public void ChildComponentGetter(DamageTimeHandler damageTimeHandler)
@@ -28,6 +27,10 @@ public class ConflictEnemyHandler : MonoBehaviour, IConflictEnemy
     private void Awake()
     {
         isInvincible = false;
+        if (health == null)
+        {
+            Debug.Log("HPBarHandlerがアタッチされていないので、HPシステムは機能しません");
+        }
     }
 
     private void OnEnable()
@@ -57,8 +60,10 @@ public class ConflictEnemyHandler : MonoBehaviour, IConflictEnemy
     //敵に接触した時に敵から呼び出されます
     public void OnConflictEnemy(int damage)
     {
+        if (health == null) return;
         if (isInvincible) return;
         if (damageTimeHandler.IsDamaging) return;
-        playerHP.Damage(damage);
+
+        health.Damage(damage);
     }
 }

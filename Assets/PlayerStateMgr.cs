@@ -21,6 +21,9 @@ namespace PlayerState
         [SerializeField]
         private bool isDebugCurrentState = false;
 
+        //Inject
+        LifeManager lifeManager;
+
         private IState currentState;
         private bool isExecutable;
         private WallKickDelayManager wallKickDelayManager;
@@ -29,7 +32,7 @@ namespace PlayerState
         dashState, damageState, deathState;
 
         [Inject]
-        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death)
+        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death, LifeManager lifeManager)
         {
             dashState = dash;
             idleState = idle;
@@ -40,6 +43,7 @@ namespace PlayerState
             this.wallKick = wallKick;
             damageState = damage;
             deathState = death;
+            this.lifeManager = lifeManager;
             Debug.Log("Inject完了");
         }
 
@@ -61,12 +65,17 @@ namespace PlayerState
             .AddTo(this);
 
             isExecutable = false;
+
+            lifeManager.OnPlayerDead.Subscribe(_ =>
+            {
+                OnDeath();
+            })
+            .AddTo(this);
         }
 
         //イベントの登録
         private void OnEnable()
         {
-            HPBarHandler.onPlayerDeath += OnDeath;
             HPBarHandler.onPlayerDamage += OnDamage;
             wallKickDelayManager.OnWallKickRequest += () => ChangeState(wallKick);
         }
@@ -74,7 +83,6 @@ namespace PlayerState
         //イベントの登録解除
         private void OnDisable()
         {
-            HPBarHandler.onPlayerDeath -= OnDeath;
             HPBarHandler.onPlayerDamage -= OnDamage;
 
             //責務に反してるのかな...?でもどこかでDisposeしないといけないのでここでやるしかない。検討の余地あり！UniRxを使えばこんなのいらないかもしれない!!

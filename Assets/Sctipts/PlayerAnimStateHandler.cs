@@ -1,5 +1,5 @@
 using System;
-using PlayerState;
+using Zenject;
 using UnityEngine;
 using HPBar;
 using UniRx;
@@ -12,8 +12,10 @@ public class PlayerAnimStateHandler : MonoBehaviour
     ActionStatusChecker actionStatusChecker;
 
     private GameFlowManager gameFlowManager;
-    private DeathGlitchSparkFactory deathGlitchSparkFactory;
     [SerializeField] public bool isDebugMode = false;
+
+    //Inject
+    LifeManager lifeManager;
 
     public IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState, damageState, deathState, warpState, warpEscapeState, neutralIdleState;
 
@@ -25,13 +27,20 @@ public class PlayerAnimStateHandler : MonoBehaviour
     SpriteRenderer spriteRenderer;
     bool isChangeableAnim = false;
 
-    public static event Action onPlayerDeathAnimEnd;
-
     private Subject<Unit> onEnterDoor = new Subject<Unit>();
     public IObserver<Unit> OnEnterDoor => onEnterDoor;
 
     private Subject<Unit> onExitDoor = new Subject<Unit>();
     public IObserver<Unit> OnExitDoor => onExitDoor;
+
+    private Subject<Unit> onPlayerDeathAnimEnd = new Subject<Unit>();
+    public IObservable<Unit> OnPlayerDeathAnimEnd => onPlayerDeathAnimEnd;
+
+    [Inject]
+    public void Construct(LifeManager lifeManager)
+    {
+        this.lifeManager = lifeManager;
+    }
 
     private void Awake()
     {
@@ -77,24 +86,27 @@ public class PlayerAnimStateHandler : MonoBehaviour
         currentState = idleState;
 
         isChangeableAnim = true;
+
+        lifeManager.OnPlayerDead.Subscribe(_ =>
+        {
+            OnDeath();
+        })
+        .AddTo(this);
     }
 
-    public void OtherComponentGetter(DeathGlitchSparkFactory deathGlitchSparkFactory, GameFlowManager gameFlowManager)
+    public void OtherComponentGetter(GameFlowManager gameFlowManager)
     {
-        this.deathGlitchSparkFactory = deathGlitchSparkFactory;
         this.gameFlowManager = gameFlowManager;
     }
 
     private void OnEnable()
     {
         HPBarHandler.onPlayerDamage += OnDamage;
-        HPBarHandler.onPlayerDeath += OnDeath;
     }
 
     private void OnDisable()
     {
         HPBarHandler.onPlayerDamage -= OnDamage;
-        HPBarHandler.onPlayerDeath -= OnDeath;
     }
 
     private void Update()
@@ -140,10 +152,9 @@ public class PlayerAnimStateHandler : MonoBehaviour
     }
 
     // アニメーションイベント
-    public async void EndAnimDeath()
+    public void EndAnimDeath()
     {
-        onPlayerDeathAnimEnd?.Invoke();
-        await deathGlitchSparkFactory.MakeDeathEffects();
+        onPlayerDeathAnimEnd.OnNext(Unit.Default);
     }
 
     public void GetAnimator()
