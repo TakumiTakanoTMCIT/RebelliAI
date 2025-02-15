@@ -131,7 +131,7 @@ namespace ObjectPoolFactory
                 return null;
             }
 
-            Debug.Log("CreateDanboru");
+            //Debug.Log("CreateDanboru");
 
             var obj = enmeyBodyFactory.Create();
 

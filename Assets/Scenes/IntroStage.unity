@@ -8541,6 +8541,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42ba8916ae91d4106bd379308af6f8b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gamePlayerManager: {fileID: 1264633628}
   playerOnVoidChecker: {fileID: 906999107}
   hpBarHandler: {fileID: 585496183}
 --- !u!1 &924561357
@@ -18211,7 +18212,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Path: {fileID: 1807062460}
-  m_PathPosition: 1
+  m_PathPosition: 0
   m_PositionUnits: 0
   m_PathOffset: {x: 0, y: 0, z: 0}
   m_XDamping: 0
@@ -19091,7 +19092,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Path: {fileID: 763531505}
-  m_PathPosition: 1
+  m_PathPosition: 0
   m_PositionUnits: 0
   m_PathOffset: {x: 0, y: 0, z: 0}
   m_XDamping: 0

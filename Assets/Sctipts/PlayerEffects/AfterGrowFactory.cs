@@ -66,7 +66,6 @@ public class AfterGrowFactory : MonoBehaviour
     private void Update()
     {
         if (!isInstantiable) return;
-
         if (isPlayerDamage_Death) return;
 
         if (playerDashTimeCtrl.IsDashNow || playerDashKeepManager.IsKeepDashSpeed)

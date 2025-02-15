@@ -1,6 +1,7 @@
 using UnityEngine;
 using UniRx;
 using System;
+using Zenject;
 
 /// <summary>
 /// 奈落に落ちたかどうかを判定するクラス
@@ -16,7 +17,6 @@ public class PlayerOnVoidChecker : MonoBehaviour
     private void OnBecameInvisible()
     {
         if (!gamePlayerManager.isInGameArea) return;
-
         onPlayerInVoid.OnNext(Unit.Default);
     }
 }

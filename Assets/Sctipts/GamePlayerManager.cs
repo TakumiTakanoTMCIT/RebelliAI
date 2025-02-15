@@ -3,10 +3,13 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Cysharp.Threading.Tasks;
 using UniRx;
-using Door;
+using Zenject;
 
 public class GamePlayerManager : MonoBehaviour
 {
+    //Inject
+    LifeManager lifeManager;
+
     [SerializeField] PlayerAnimStateHandler playerAnimStateHandler;
     [SerializeField] GameObject playerObj, playerPanelObj;
 
@@ -23,6 +26,13 @@ public class GamePlayerManager : MonoBehaviour
 
     public Subject<Unit> EnableTime = new Subject<Unit>();
     public Subject<Unit> PauseTime = new Subject<Unit>();
+
+    [Inject]
+    public void Construct(LifeManager lifeManager)
+    {
+        this.lifeManager = lifeManager;
+        Debug.Log("GamePlayerManager Constructed.");
+    }
 
     private void Awake()
     {
@@ -66,6 +76,12 @@ public class GamePlayerManager : MonoBehaviour
             InvisiblePlayer();
         })
         .AddTo(this);
+
+        lifeManager.OnPlayerDead.Subscribe(_ =>
+        {
+            PlayerDeath();
+        })
+        .AddTo(this);
     }
 
     private void OnEnable()
@@ -86,6 +102,11 @@ public class GamePlayerManager : MonoBehaviour
         BossCutSceneHandler.onExplode -= StartTime;
 
         IntroBossHPBarHandler.onDead -= OnBossDead;
+    }
+
+    private void PlayerDeath()
+    {
+        isInGameArea = false;
     }
 
     void OnBossDead()

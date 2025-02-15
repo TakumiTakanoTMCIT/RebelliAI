@@ -5,19 +5,17 @@ using HPBar;
 
 public class LifeManager : MonoBehaviour
 {
+    [SerializeField] GamePlayerManager gamePlayerManager;
     [SerializeField] private PlayerOnVoidChecker playerOnVoidChecker;
     [SerializeField] private HPBarHandler hpBarHandler;
 
     private Subject<Unit> onPlayerDead = new Subject<Unit>();
     public IObservable<Unit> OnPlayerDead => onPlayerDead;
 
-    private Subject<Unit> onPlayerDeadInstantly = new Subject<Unit>();
-    public IObservable<Unit> OnPlayerDeadInstantly => onPlayerDeadInstantly;
-
     private void OnEnable()
     {
         playerOnVoidChecker.OnPlayerInVoid.Subscribe(_ =>
-            SuddenDeath()
+            Death()
             ).AddTo(this);
 
         hpBarHandler.OnHPZero.Subscribe(_ =>
@@ -27,14 +25,8 @@ public class LifeManager : MonoBehaviour
 
     private void Death()
     {
-        Debug.Log("Player is dead.");
+        if(!gamePlayerManager.isInGameArea) return;
+        Debug.LogAssertion("Player is dead.");
         onPlayerDead?.OnNext(Unit.Default);
-    }
-
-    private void SuddenDeath()
-    {
-        Death();
-        Debug.Log("Player is dead instantly.");
-        onPlayerDeadInstantly?.OnNext(Unit.Default);
     }
 }

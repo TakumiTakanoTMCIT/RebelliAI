@@ -11,9 +11,6 @@ public class AfterGrowMain : MonoBehaviour
     {
     }
 
-    //Inject
-    LifeManager lifeManager;
-
     [SerializeField]
     private float AddPosY = 0.5f;
 
@@ -21,21 +18,6 @@ public class AfterGrowMain : MonoBehaviour
     ObjectPool<GameObject> pool;
     Transform playerTransform;
     SpriteRenderer spriteRenderer;
-
-    [Inject]
-    public void Construct(LifeManager lifeManager)
-    {
-        this.lifeManager = lifeManager;
-    }
-
-    private void Awake()
-    {
-        lifeManager.OnPlayerDead.Subscribe(_ =>
-        {
-            OnPlayerDeathAndEndAnim();
-        })
-        .AddTo(this);
-    }
 
     private void OnEnable()
     {
@@ -70,14 +52,13 @@ public class AfterGrowMain : MonoBehaviour
 
     public void EndAnim()
     {
-        //if (!gameObject.activeSelf) return;
+        if (!gameObject.activeSelf) return;
         pool.Release(this.gameObject);
     }
 
     //イベントハンドラー
     void OnPlayerDeathAndEndAnim()
     {
-        Debug.Log("OnPlayerDeathAndEndAnim");
         EndAnim();
     }
 }

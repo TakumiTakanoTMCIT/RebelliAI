@@ -133,7 +133,7 @@ namespace HPBar
 
         private void Awake()
         {
-            lifeManager?.OnPlayerDeadInstantly.Subscribe(_ =>
+            lifeManager?.OnPlayerDead.Subscribe(_ =>
             {
                     playerHP.Damage(playerHP.MaxLife);
                     playerHPVisual.ChangeCurrentLife(-playerHP.MaxLife);
