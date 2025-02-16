@@ -193,13 +193,16 @@ namespace PlayerState
 
     public class Idle : IState
     {
+        //Inject
         private readonly PlayerStateData stateData;
         private readonly MuzzulePositionManager muzzleManager;
+        private readonly IPlayerDirection playerDirection;
 
-        public Idle(PlayerStateData playerStateData, MuzzulePositionManager muzzulePositionManager)
+        public Idle(PlayerStateData playerStateData, MuzzulePositionManager muzzulePositionManager, IPlayerDirection playerDirection)
         {
             this.stateData = playerStateData;
             this.muzzleManager = muzzulePositionManager;
+            this.playerDirection = playerDirection;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
@@ -261,7 +264,7 @@ namespace PlayerState
 
             if (stateData.InputHandler.IsDashKeyDown())
             {
-                if (stateData.ActionStatusChecker.Direction)
+                if (playerDirection.Direction.Value)
                 {
                     (stateMgr.dashState as Dash)?.DirectionSetter(true);
                     stateMgr.ChangeState(stateMgr.dashState);
