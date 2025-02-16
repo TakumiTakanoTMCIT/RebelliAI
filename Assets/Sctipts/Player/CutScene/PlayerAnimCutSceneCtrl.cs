@@ -10,7 +10,6 @@ public class PlayerAnimCutSceneCtrl : MonoBehaviour
     {
         PlayerWarpInDirection.Subscribe(_ =>
         {
-            Debug.Log("PlayerWarpInDirectionが呼ばれました");
             animStateHandler.ChangeAnimState(animStateHandler.warpState);
         })
         .AddTo(this);

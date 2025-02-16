@@ -16,9 +16,10 @@ namespace LowChargeShot
         InitPositioner initPositioner;
         HitBoxCtrl hitBoxCtrl;
         StateCtrl stateCtrl;
+        IPlayerDirection playerDirection;
 
         [Inject]
-        public void Construct(MoveCtrl moveCtrl, VisualCtrl visualCtrl, InitPositioner initPositioner, HitBoxCtrl hitBoxCtrl, StateCtrl stateCtrl, [Inject(Id = "LowCharge")] IAnimatable animCtrl)
+        public void Construct(MoveCtrl moveCtrl, VisualCtrl visualCtrl, InitPositioner initPositioner, HitBoxCtrl hitBoxCtrl, StateCtrl stateCtrl, [Inject(Id = "LowCharge")] IAnimatable animCtrl,IPlayerDirection playerDirection)
         {
             this.moveCtrl = moveCtrl;
             this.visualCtrl = visualCtrl;
@@ -26,12 +27,13 @@ namespace LowChargeShot
             this.hitBoxCtrl = hitBoxCtrl;
             this.stateCtrl = stateCtrl;
             this.animatorCtrl = animCtrl;
+            this.playerDirection = playerDirection;
         }
 
         protected override void CustomAwake()
         {
             moveCtrl.GetShellStats(rb, speed);
-            visualCtrl.GetPlayerStats(gameObject.MyGetComponent_NullChker<SpriteRenderer>(), actionStatusChecker);
+            visualCtrl.GetPlayerStats(gameObject.MyGetComponent_NullChker<SpriteRenderer>(), playerDirection);
             initPositioner.GetShellStats(muzzleObj, transform);
             hitBoxCtrl.GetBoxCollider2D(gameObject.MyGetComponent_NullChker<BoxCollider2D>());
             animatorCtrl.Construct(gameObject.MyGetComponent_NullChker<Animator>());
@@ -94,12 +96,11 @@ namespace LowChargeShot
         //Inject
         private float speed;
         private Rigidbody2D rb;
-        private ActionStatusChecker actionStatusChecker;
+        private readonly IPlayerDirection playerDirection;
 
-        [Inject]
-        public MoveCtrl(ActionStatusChecker actionStatusChecker)
+        public MoveCtrl(IPlayerDirection playerDirection)
         {
-            this.actionStatusChecker = actionStatusChecker;
+            this.playerDirection = playerDirection;
         }
 
         public void GetShellStats(Rigidbody2D rb, float speed)
@@ -115,7 +116,7 @@ namespace LowChargeShot
 
         public void Move()
         {
-            if (actionStatusChecker.Direction)
+            if (playerDirection.Direction.Value)
                 rb.velocity = new Vector2(speed, 0);
             else
                 rb.velocity = new Vector2(-speed, 0);
@@ -130,17 +131,17 @@ namespace LowChargeShot
     public class VisualCtrl
     {
         private SpriteRenderer spriteRenderer;
-        private ActionStatusChecker actionStatusChecker;
+        private IPlayerDirection playerDirection;
 
-        public void GetPlayerStats(SpriteRenderer spriteRenderer, ActionStatusChecker actionStatusChecker)
+        public void GetPlayerStats(SpriteRenderer spriteRenderer, IPlayerDirection playerDirection)
         {
             this.spriteRenderer = spriteRenderer;
-            this.actionStatusChecker = actionStatusChecker;
+            this.playerDirection = playerDirection;
         }
 
         public void SetFlip()
         {
-            spriteRenderer.flipX = !actionStatusChecker.Direction;
+            spriteRenderer.flipX = !playerDirection.Direction.Value;
         }
     }
 
@@ -198,13 +199,9 @@ namespace LowChargeShot
         public void Construct(Animator animator)
         {
             this.animator = animator;
-            Debug.LogWarning("AnimCtrl Construct");
         }
 
-        public void StartAnim()
-        {
-            //animator.SetTrigger("Start");
-        }
+        public void StartAnim() { }
 
         //普通に呼ばれる
         public void MoveAnim()

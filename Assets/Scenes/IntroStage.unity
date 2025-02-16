@@ -2144,7 +2144,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 105.77, y: 1.5847316, z: -15.032515}
+  m_LocalPosition: {x: 68.18, y: 3.8099968, z: -6.011218}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -8568,6 +8568,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f1c7ee6bf34e499784e7708413c5010, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &906999145 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5606695291144184130, guid: 4b018a05dfe064f3b848fabdacf22d3c, type: 3}
+  m_PrefabInstance: {fileID: 5606695290977293429}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &924561357
 GameObject:
   m_ObjectHideFlags: 0
@@ -14931,6 +14936,7 @@ GameObject:
   - component: {fileID: 1110060458}
   - component: {fileID: 1110060459}
   - component: {fileID: 1110060460}
+  - component: {fileID: 1110060461}
   m_Layer: 0
   m_Name: SceneContext
   m_TagString: Untagged
@@ -14984,6 +14990,7 @@ MonoBehaviour:
   - {fileID: 1110060458}
   - {fileID: 1110060459}
   - {fileID: 1110060460}
+  - {fileID: 1110060461}
   _installerPrefabs: []
   _autoRun: 1
   OnPreInstall:
@@ -15167,6 +15174,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 906999093}
+--- !u!114 &1110060461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110060446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc2b3a321593d4ea38c20b05de42933c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerAnimStateHandler: {fileID: 906999096}
+  playerAnimator: {fileID: 906999145}
 --- !u!1001 &1134130826
 PrefabInstance:
   m_ObjectHideFlags: 0

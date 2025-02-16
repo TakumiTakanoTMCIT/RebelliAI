@@ -52,13 +52,15 @@ public class PlayerFlipXHandler : MonoBehaviour
     IPlayerFlipXLogic playerFlipXLogic;
     IActionHandlerSubject actionHandler;
     IWallFallSubject wallFallSubject;
+    IDamageStateSubject damageStateSubject;
 
     [Inject]
-    public void Construct(IPlayerFlipXLogic playerFlipXLogic, IActionHandlerSubject actionHandler, IWallFallSubject wallFallSubject)
+    public void Construct(IPlayerFlipXLogic playerFlipXLogic, IActionHandlerSubject actionHandler, IWallFallSubject wallFallSubject, IDamageStateSubject damageStateSubject)
     {
         this.playerFlipXLogic = playerFlipXLogic;
         this.actionHandler = actionHandler;
         this.wallFallSubject = wallFallSubject;
+        this.damageStateSubject = damageStateSubject;
     }
 
     private void Awake()

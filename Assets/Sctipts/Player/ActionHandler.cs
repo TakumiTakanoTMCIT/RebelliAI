@@ -14,12 +14,12 @@ namespace PlayerAction
 
     public class ActionHandler : IDisposable , IActionHandlerSubject
     {
+        //Inject
         Rigidbody2D rb;
         ActionStatusChecker actionStatusChecker;
-
-        [Inject]
-        PlayerStats playerStatus;
-        PlayerDashKeepManager dashKeepManager;
+        private readonly IPlayerDirection playerDirection;
+        private readonly PlayerDashKeepManager dashKeepManager;
+        private readonly PlayerStats playerStatus;
 
         private Subject<bool> walkSubject = new Subject<bool>();
         public IObservable<bool> OnWalk => walkSubject;
@@ -27,11 +27,13 @@ namespace PlayerAction
         private Subject<bool> dashSubject = new Subject<bool>();
         public IObservable<bool> OnDash => dashSubject;
 
-        public ActionHandler(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerDashKeepManager dashKeepManager, LifeManager lifeManager)
+        public ActionHandler(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerDashKeepManager dashKeepManager, LifeManager lifeManager, IPlayerDirection playerDirection, PlayerStats playerStatus)
         {
             this.rb = rb;
             this.actionStatusChecker = actionStatusChecker;
             this.dashKeepManager = dashKeepManager;
+            this.playerDirection = playerDirection;
+            this.playerStatus = playerStatus;
 
             lifeManager.OnPlayerDead.Subscribe(_ =>
             {
@@ -135,13 +137,14 @@ namespace PlayerAction
 
         public void Damage()
         {
-            if (actionStatusChecker.Direction)
+            //プレイヤーの向いている向きの逆側に吹っ飛ばす
+            if (!playerDirection.Direction.Value)
             {
-                rb.AddForce(new Vector2(-playerStatus.damageForce.x, playerStatus.damageForce.y), ForceMode2D.Impulse);
+                rb.AddForce(new Vector2(playerStatus.damageForce.x, playerStatus.damageForce.y), ForceMode2D.Impulse);
             }
             else
             {
-                rb.AddForce(new Vector2(playerStatus.damageForce.x, playerStatus.damageForce.y), ForceMode2D.Impulse);
+                rb.AddForce(new Vector2(-playerStatus.damageForce.x, playerStatus.damageForce.y), ForceMode2D.Impulse);
             }
         }
     }

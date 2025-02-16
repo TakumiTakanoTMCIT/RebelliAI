@@ -8,23 +8,19 @@ using PlayerAnimCtrl;
 
 public class PlayerAnimStateHandler : MonoBehaviour
 {
-    //向きに合わせて、スプライトを反転させるためのフィールド
-    ActionStatusChecker actionStatusChecker;
-
     private GameFlowManager gameFlowManager;
     [SerializeField] public bool isDebugMode = false;
 
     //Inject
-    LifeManager lifeManager;
+    private LifeManager lifeManager;
+    private IPlayerAnimState damageState;
+    private AnimatorCtrl animatorCtrl;
 
-    public IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState, damageState, deathState, warpState, warpEscapeState, neutralIdleState;
+    public IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState, deathState, warpState, warpEscapeState, neutralIdleState;
 
     PlayerShotAnimCtrl shotAnimCtrl;
 
     IPlayerAnimState currentState;
-    Animator animator;
-    AnimatorCtrl animatorCtrl;
-    SpriteRenderer spriteRenderer;
     bool isChangeableAnim = false;
 
     private Subject<Unit> onEnterDoor = new Subject<Unit>();
@@ -37,16 +33,15 @@ public class PlayerAnimStateHandler : MonoBehaviour
     public IObservable<Unit> OnPlayerDeathAnimEnd => onPlayerDeathAnimEnd;
 
     [Inject]
-    public void Construct(LifeManager lifeManager)
+    public void Construct(LifeManager lifeManager, AnimatorCtrl animatorCtrl, [Inject(Id = "Damage")]IPlayerAnimState damageState)
     {
         this.lifeManager = lifeManager;
+        this.animatorCtrl = animatorCtrl;
+        this.damageState = damageState;
     }
 
     private void Awake()
     {
-        actionStatusChecker = gameObject.MyGetComponent_NullChker<ActionStatusChecker>();
-        animator = gameObject.MyGetComponent_NullChker<Animator>();
-        spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
         shotAnimCtrl = gameObject.MyGetComponent_NullChker<PlayerShotAnimCtrl>();
 
         GameFlowManager.StartBattleAction.Subscribe(_ =>
@@ -68,8 +63,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
         })
         .AddTo(this);
 
-        animatorCtrl = new AnimatorCtrl(this, animator);
-
+        //TODO : ZenjectでInjectする
         idleState = new IdleState(animatorCtrl, "isIdle");
         walkState = new WalkState(animatorCtrl, "isRun");
         jumpState = new JumpState(animatorCtrl, "isJump");
@@ -77,7 +71,6 @@ public class PlayerAnimStateHandler : MonoBehaviour
         dashState = new DashState(animatorCtrl, "isDash");
         wallFallState = new WallFallState(animatorCtrl, "isWallFall");
         wallKickState = new WallKickState(animatorCtrl, "isWallKick");
-        damageState = new DamageState(animatorCtrl, spriteRenderer, actionStatusChecker, "isDamaging");
         deathState = new DeathState(animatorCtrl, "isDeath");
         warpState = new WarpState(animatorCtrl, "isWarp");
         neutralIdleState = new NeutralIdle(animatorCtrl, "isNeutralIdle");
@@ -109,16 +102,6 @@ public class PlayerAnimStateHandler : MonoBehaviour
         HPBarHandler.onPlayerDamage -= OnDamage;
     }
 
-    /*private void Update()
-    {
-        if (currentState == damageState) return;
-
-        if (actionStatusChecker.Direction)
-            spriteRenderer.flipX = false;
-        else
-            spriteRenderer.flipX = true;
-    }*/
-
     public void ChangeAnimState(IPlayerAnimState newState)
     {
         if (!isChangeableAnim) return;
@@ -141,7 +124,6 @@ public class PlayerAnimStateHandler : MonoBehaviour
     //アニメーションイベント
     public void OnFinishWarpIn()
     {
-        Debug.Log("ワープあにめ終了");
         GameFlowManager.onCompletedPlayerWarpIn.OnNext(Unit.Default);
     }
 
@@ -275,21 +257,25 @@ public class WallKickState : PlayerAnimStateBase
     public WallKickState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
 }
 
-public class DamageState : PlayerAnimStateBase
+public interface IDamageStateSubject
 {
-    SpriteRenderer spriteRenderer;
-    ActionStatusChecker actionStatusChecker;
-    public DamageState(AnimatorCtrl animatorCtrl, SpriteRenderer spriteRenderer, ActionStatusChecker actionStatusChecker, string animBoolName) : base(animatorCtrl, animBoolName)
+    IObservable<Unit> OnEnterDamageAnim { get; }
+}
+
+public class DamageState : PlayerAnimStateBase, IDamageStateSubject
+{
+    private Subject<Unit> onEnterDamageAnim = new Subject<Unit>();
+    public IObservable<Unit> OnEnterDamageAnim => onEnterDamageAnim;
+
+    public DamageState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName)
     {
         this.animatorCtrl = animatorCtrl;
-        this.spriteRenderer = spriteRenderer;
-        this.actionStatusChecker = actionStatusChecker;
     }
 
     public override void Enter()
     {
         animatorCtrl.StartAnim(animBoolName);
-        spriteRenderer.flipX = actionStatusChecker.Direction;
+        onEnterDamageAnim.OnNext(Unit.Default);
     }
 }
 

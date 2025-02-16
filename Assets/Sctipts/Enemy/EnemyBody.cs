@@ -125,11 +125,6 @@ namespace Enemy
     {
         Action<GameObject> releaseObj;
 
-        public PoolReleaser()
-        {
-            Debug.Log("PoolReleaser");
-        }
-
         public void SetReleaseObjCallBack(Action<GameObject> releaseObj)
         {
             this.releaseObj = releaseObj;

@@ -90,8 +90,6 @@ namespace ObjectPoolFactory
 
         public WarpPool(GameObject prefab, int maxCapacity, WarpEffectBody.Factory factory, PoolHandler poolHandler) : base(prefab, maxCapacity)
         {
-            //Debug.Log($"poolHandler : {poolHandler}");
-            Debug.Log("WarpPool");
             poolHandler.SetReleaseObjCallBack((obj) => ReturnObject(obj));
             this.poolHandler = poolHandler;
             _factory = factory;

@@ -35,8 +35,6 @@ public class AllShellManager : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log(gameObject.name + "が生成されました");
-
         isMameShootable = true;
         player = transform.parent.gameObject;
         playerStateMgr = player.MyGetComponent_NullChker<PlayerStateMgr>();

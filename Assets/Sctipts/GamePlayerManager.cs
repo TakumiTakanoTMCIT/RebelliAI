@@ -31,7 +31,6 @@ public class GamePlayerManager : MonoBehaviour
     public void Construct(LifeManager lifeManager)
     {
         this.lifeManager = lifeManager;
-        Debug.Log("GamePlayerManager Constructed.");
     }
 
     private void Awake()
