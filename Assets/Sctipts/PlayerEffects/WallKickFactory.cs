@@ -1,9 +1,13 @@
 using ActionStatusChk;
 using UnityEngine;
 using UnityEngine.Pool;
+using Zenject;
 
 public class WallKickFactory : MonoBehaviour
 {
+    //Inject
+    private IPlayerDirection playerDirection;
+
     [SerializeField] int maxCapacity = 10;
 
     [SerializeField] private GameObject player;
@@ -13,6 +17,13 @@ public class WallKickFactory : MonoBehaviour
     GameObject preafab;
 
     private ObjectPool<GameObject> pool;
+
+    [Inject]
+    public void Construct(IPlayerDirection playerDirection)
+    {
+        this.playerDirection = playerDirection;
+    }
+
     private void Awake()
     {
         preafab = Resources.Load<GameObject>("WallKickSparkBody");
@@ -67,6 +78,6 @@ public class WallKickFactory : MonoBehaviour
 
     public void MakeEffect(Transform playertransform)
     {
-        pool.Get().GetComponent<WallKickSparkBody>().StartMove(actionStatusChk.Direction);
+        pool.Get().GetComponent<WallKickSparkBody>().StartMove(playerDirection.Direction.Value);
     }
 }

@@ -21,7 +21,7 @@ public class WallKickSparkBody : MonoBehaviour
         pos.y += YPosAdd;
         transform.position = pos;
 
-        spriteRenderer.flipX = direction;
+        spriteRenderer.flipX = !direction;
     }
 
     //アニメーションイベントです
