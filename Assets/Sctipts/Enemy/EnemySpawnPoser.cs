@@ -126,7 +126,7 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
         //もしインスタンスが存在するなら、何もしない
         if (instance != null) return;
 
-        Debug.Log("MakeInstance");
+        //Debug.Log("MakeInstance");
         instance = danboruPool.GetObject().GetComponent<EnemyBody>();
         instance.MyAwake(transform.position, transform, explosionSpawner);
     }

@@ -114,13 +114,13 @@ namespace ObjectPoolFactory
         {
             poolReleaser.SetReleaseObjCallBack((obj) =>
             {
-                Debug.Log("ReturnObject");
+                //Debug.Log("ReturnObject");
                 ReturnObject(obj);
             });
 
             enmeyBodyFactory = enemyFactory;
             InitPool();
-            Debug.Log("DanboruPoolInitted");
+            //Debug.Log("DanboruPoolInitted");
         }
 
         protected override GameObject CreateObj()

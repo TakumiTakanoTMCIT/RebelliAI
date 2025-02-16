@@ -44,7 +44,6 @@ namespace PlayerState
             damageState = damage;
             deathState = death;
             this.lifeManager = lifeManager;
-            Debug.Log("Inject完了");
         }
 
         private void Awake()
@@ -93,6 +92,18 @@ namespace PlayerState
 
         private void Update()
         {
+            if(Input.GetKeyDown(KeyCode.U))
+            {
+                Time.timeScale = 1f;
+            }
+            else if(Input.GetKeyDown(KeyCode.I))
+            {
+                Time.timeScale = 0.1f;
+            }
+
+            //現在のステートを言う
+            Debug.Log($"CurrentState: {currentState}");
+
             if (!isExecutable) return;
             currentState.Execute(this);
         }
@@ -743,11 +754,11 @@ namespace PlayerState
             /// <summary>
             /// 壁にぶつかっている方向を判定
             /// </summary>
-            if (stateData.ActionStatusChecker.IsWall(true))
+            if (stateData.ActionStatusChecker.IsWall(true) || stateData.ActionStatusChecker.IsFarWall(true))
             {
                 wall_facing_which = true;
             }
-            else if (stateData.ActionStatusChecker.IsWall(false))
+            else if (stateData.ActionStatusChecker.IsWall(false) || stateData.ActionStatusChecker.IsFarWall(false))
             {
                 wall_facing_which = false;
             }
@@ -766,7 +777,7 @@ namespace PlayerState
             if (wall_facing_which)
             {
                 //もし壁にぶつからなくなったらFallに遷移
-                if (!stateData.ActionStatusChecker.IsWall(true))
+                if (!stateData.ActionStatusChecker.IsWall(true) && !stateData.ActionStatusChecker.IsFarWall(true))
                 {
                     ChangeFallState(stateMgr);
                     stateData.ActionHandler.StopY();
@@ -784,7 +795,7 @@ namespace PlayerState
             else
             {
                 //もし壁にぶつからなくなったらFallに遷移
-                if (!stateData.ActionStatusChecker.IsWall(false))
+                if (!stateData.ActionStatusChecker.IsWall(false) && !stateData.ActionStatusChecker.IsFarWall(false))
                 {
                     ChangeFallState(stateMgr);
                     stateData.ActionHandler.StopY();

@@ -106,7 +106,7 @@ namespace Enemy
 
             hp = 0;
             IsAlivingNow = false;
-            Debug.Log("Dead");
+            //Debug.Log("Dead");
             //TODO: これでいいんじゃないの？↓この書き方でも問題ない気がする。おそらくZenjectの関係でこうなっています
             //spawnPoser.ResetInstance();
             releaseObject?.Invoke(gameObject);
