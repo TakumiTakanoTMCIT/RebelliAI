@@ -15,9 +15,6 @@ namespace ActionStatusChk
         GroundChk groundChecker;
         SideChecker leftSideChecker, rightSideChecker, wallLeftChecker, wallRightChecker;
 
-        private bool _direction;
-        public bool Direction => _direction;
-
         private bool _isWallFallState;
 
         //Inject
@@ -128,37 +125,6 @@ namespace ActionStatusChk
         {
             if (wallRightChecker.IsEnteredWall) return true;
             else return false;
-        }
-
-        //DashStateの開始時にプレイヤーの向きを設定する
-        public void SetPlayerDirectionFromDashStart(bool direction)
-        {
-            _direction = direction;
-        }
-
-        private void Update()
-        {
-            //ダッシュステート時には、向きを変更しない
-            if (playerStateMgr.WhatCurrentState(playerStateMgr.dashState)) return;
-
-            //動くボタンを押していない場合と、同時押しの場合は、は向きを変更しない
-            if (!inputHandler.IsMoveKey()) return;
-
-            //左移動ボタンを押している場合
-            if (inputHandler.IsMoveLeftKey()) _direction = false;
-
-            //右移動ボタンを押している場合
-            if (inputHandler.IsMoveRightKey()) _direction = true;
-
-            //壁キック中には下の処理をしない
-            //if (animStateHandler.WhatCurrentAnimState(animStateHandler.wallKickState)) return;
-
-            //WallFall中の場合は向きを逆にする
-            if (_isWallFallState)//これに一旦変えてみた
-            //if (playerStateMgr.WhatCurrentState(playerStateMgr.wallFallState))
-            {
-                _direction = !_direction;
-            }
         }
     }
 }
