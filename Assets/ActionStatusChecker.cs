@@ -2,6 +2,7 @@ using PlayerState;
 using UnityEngine;
 using KeyHandler;
 using Zenject;
+using UniRx;
 
 namespace ActionStatusChk
 {
@@ -9,24 +10,44 @@ namespace ActionStatusChk
     {
         PlayerStateMgr playerStateMgr;
         InputHandler inputHandler;
-        PlayerAnimStateHandler animStateHandler;
         Rigidbody2D rb;
 
         GroundChk groundChecker;
         SideChecker leftSideChecker, rightSideChecker, wallLeftChecker, wallRightChecker;
 
-        [Inject]
-        PlayerStats playerStatus;
-
         private bool _direction;
         public bool Direction => _direction;
 
+        private bool _isWallFallState;
+
+        //Inject
+        private IWallFallSubject wallfall;
+        private PlayerStats playerStatus;
+
+        [Inject]
+        public void Construct(IWallFallSubject wallfall, PlayerStats playerStatus)
+        {
+            this.wallfall = wallfall;
+            this.playerStatus = playerStatus;
+        }
+
         private void Awake()
         {
-            animStateHandler = this.gameObject.MyGetComponent_NullChker<PlayerAnimStateHandler>();
             inputHandler = this.gameObject.MyGetComponent_NullChker<InputHandler>();
             playerStateMgr = this.gameObject.MyGetComponent_NullChker<PlayerStateMgr>();
             rb = this.gameObject.MyGetComponent_NullChker<Rigidbody2D>();
+
+            wallfall.OnEnteredWallFall.Subscribe(_ =>
+            {
+                _isWallFallState = true;
+            })
+            .AddTo(this);
+
+            wallfall.OnExitWallFall.Subscribe(_ =>
+            {
+                _isWallFallState = false;
+            })
+            .AddTo(this);
         }
 
         public void ChildComponentGetter(GroundChk groundChk, SideChecker left, SideChecker right, SideChecker wallleft, SideChecker wallright)
@@ -117,18 +138,24 @@ namespace ActionStatusChk
 
         private void Update()
         {
+            //ダッシュステート時には、向きを変更しない
             if (playerStateMgr.WhatCurrentState(playerStateMgr.dashState)) return;
 
+            //動くボタンを押していない場合と、同時押しの場合は、は向きを変更しない
             if (!inputHandler.IsMoveKey()) return;
 
+            //左移動ボタンを押している場合
             if (inputHandler.IsMoveLeftKey()) _direction = false;
 
+            //右移動ボタンを押している場合
             if (inputHandler.IsMoveRightKey()) _direction = true;
 
-            if (animStateHandler.WhatCurrentAnimState(animStateHandler.wallKickState)) return;
+            //壁キック中には下の処理をしない
+            //if (animStateHandler.WhatCurrentAnimState(animStateHandler.wallKickState)) return;
 
-            //WallFall中の場合
-            if (playerStateMgr.WhatCurrentState(playerStateMgr.wallFallState))
+            //WallFall中の場合は向きを逆にする
+            if (_isWallFallState)//これに一旦変えてみた
+            //if (playerStateMgr.WhatCurrentState(playerStateMgr.wallFallState))
             {
                 _direction = !_direction;
             }

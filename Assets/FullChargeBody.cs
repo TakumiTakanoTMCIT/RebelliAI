@@ -81,31 +81,31 @@ namespace FullCharge
     {
         [SerializeField] private int myLevel = 1;
 
-        MoveCtrl moveCtrl;
         HitBoxCtrl hitBoxCtrl;
-        InitPositioner initPositioner;
+        SetInitialPositionLogic initPositioner;
         StateCtrl stateCtrl;
         VisualCtrl visualCtrl;
+        MoveLogic moveCtrl;
 
         [Inject]
-        public void Construct([Inject(Id = "FullCharge")] IAnimatable animCtrl, MoveCtrl moveCtrl, HitBoxCtrl hitBoxCtrl, InitPositioner initPositioner, StateCtrl stateCtrl, VisualCtrl visualCtrl)
+        public void Construct([Inject(Id = "FullCharge")] IAnimatable animCtrl, HitBoxCtrl hitBoxCtrl, SetInitialPositionLogic initPositioner, StateCtrl stateCtrl, VisualCtrl visualCtrl, MoveLogic.Factory factory)
         {
             animatorCtrl = animCtrl;
-            this.moveCtrl = moveCtrl;
             this.hitBoxCtrl = hitBoxCtrl;
             this.initPositioner = initPositioner;
             this.stateCtrl = stateCtrl;
             this.visualCtrl = visualCtrl;
+            moveCtrl = factory.Create();
         }
 
         protected override void CustomAwake()
         {
             animatorCtrl.Construct(gameObject.MyGetComponent_NullChker<Animator>());
             gameObject.MyGetComponent_NullChker<ChargedShellDamageAbleFinder>().Construct(animatorCtrl);
+            moveCtrl.GetBodyStats(rb, speed);
 
-            moveCtrl.GetBodyStats(rb, actionStatusChecker, speed);
             hitBoxCtrl.GetHitBox(gameObject.MyGetComponent_NullChker<BoxCollider2D>());
-            initPositioner.GetShellStats(muzzleObj.transform, transform);
+            initPositioner.Init(muzzleObj.transform, transform);
             visualCtrl.GetPlayerStats(gameObject.MyGetComponent_NullChker<SpriteRenderer>(), actionStatusChecker);
         }
 
@@ -115,15 +115,15 @@ namespace FullCharge
             hitBoxCtrl.HitBoxStats(false);
             stateCtrl.SetStartedMove(false);
 
+            //TODO : このコードはstateCtrlからサブスクライブするように変更しよう！それがUniRxの本領だと思う！
             //スタートアニメーション中はプレイヤーの銃口に追従する
             Observable.EveryUpdate()
                 .Where(_ => !stateCtrl.IsStartedMove)
                 .Subscribe(_ =>
                 {
-                    initPositioner.SetMuzzlePositoin();
+                    initPositioner.SetShellPositionToMuzzle();
                     visualCtrl.SetFlip();
-                })
-                .AddTo(this);
+                }).AddTo(this);
         }
 
         /// <summary>
@@ -171,23 +171,32 @@ namespace FullCharge
         }
     }
 
-    public class MoveCtrl
+    public class MoveLogic
     {
+        public class Factory : PlaceholderFactory<MoveLogic> { }
+
         private Rigidbody2D rb;
-        private ActionStatusChecker actionStatusChecker;
         private float speed;
 
-        public void GetBodyStats(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, float speed)
+        //Inject
+        private IPlayerDirection playerDirection;
+
+        //Inject
+        public MoveLogic(IPlayerDirection playerDirection)
+        {
+            this.playerDirection = playerDirection;
+        }
+
+        public void GetBodyStats(Rigidbody2D rb, float speed)
         {
             this.rb = rb;
-            this.actionStatusChecker = actionStatusChecker;
             this.speed = speed;
         }
 
         public void MoveShell()
         {
             //プレイヤーの向きに合わせて速度を決める
-            if (actionStatusChecker.Direction)
+            if (playerDirection.Direction.Value)
             {
                 rb.velocity = new Vector2(speed, 0);
             }
@@ -218,18 +227,18 @@ namespace FullCharge
         }
     }
 
-    public class InitPositioner
+    public class SetInitialPositionLogic
     {
         private Transform muzzleTrans;
         private Transform shellTrans;
 
-        public void GetShellStats(Transform muzzleTrans, Transform shellTrans)
+        public void Init(Transform muzzleTrans, Transform shellTrans)
         {
             this.muzzleTrans = muzzleTrans;
             this.shellTrans = shellTrans;
         }
 
-        public void SetMuzzlePositoin()
+        public void SetShellPositionToMuzzle()
         {
             shellTrans.position = muzzleTrans.position;
         }

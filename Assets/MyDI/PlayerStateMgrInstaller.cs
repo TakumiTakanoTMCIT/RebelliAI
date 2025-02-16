@@ -42,10 +42,16 @@ public class PlayerStateMgrInstaller : MonoInstaller
             .To<PlayerState.Fall>()
             .AsSingle();
 
+        Container.Bind<PlayerState.WallFall>().AsSingle();//WallFallを明示的にBindすることで、FromResolveで取得できるようにしています。
+
         Container.Bind<IState>()
             .WithId("WallFall")
             .To<PlayerState.WallFall>()
-            .AsSingle();
+            .FromResolve();
+
+        Container.Bind<IWallFallSubject>()
+            .To<PlayerState.WallFall>()
+            .FromResolve();
 
         Container.Bind<IState>()
             .WithId("WallKick")

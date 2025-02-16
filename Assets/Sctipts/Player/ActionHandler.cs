@@ -1,13 +1,18 @@
 using System;
 using ActionStatusChk;
-using HPBar;
 using UnityEngine;
 using Zenject;
 using UniRx;
 
 namespace PlayerAction
 {
-    public class ActionHandler : IDisposable
+    public interface IActionHandlerSubject
+    {
+        IObservable<bool> OnWalk { get; }
+        IObservable<bool> OnDash { get; }
+    }
+
+    public class ActionHandler : IDisposable , IActionHandlerSubject
     {
         Rigidbody2D rb;
         ActionStatusChecker actionStatusChecker;
@@ -15,14 +20,18 @@ namespace PlayerAction
         [Inject]
         PlayerStats playerStatus;
         PlayerDashKeepManager dashKeepManager;
-        LifeManager lifeManager;
+
+        private Subject<bool> walkSubject = new Subject<bool>();
+        public IObservable<bool> OnWalk => walkSubject;
+
+        private Subject<bool> dashSubject = new Subject<bool>();
+        public IObservable<bool> OnDash => dashSubject;
 
         public ActionHandler(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerDashKeepManager dashKeepManager, LifeManager lifeManager)
         {
             this.rb = rb;
             this.actionStatusChecker = actionStatusChecker;
             this.dashKeepManager = dashKeepManager;
-            this.lifeManager = lifeManager;
 
             lifeManager.OnPlayerDead.Subscribe(_ =>
             {
@@ -43,17 +52,18 @@ namespace PlayerAction
             DisableGravity();
         }
 
+        //TODO : Gravityの処理は、GravityHandlerに移動したほうが良いと思う！できたらやろう！！
         public void EnableGravity()
         {
             if (rb == null) return;
             rb.gravityScale = playerStatus.DefaultGravity;
         }
-
         public void DisableGravity()
         {
             if (rb == null) return;
             rb.gravityScale = 0;
         }
+        //--------------------------------------------------------------------------------
 
         public void StopX()
         {
@@ -88,6 +98,8 @@ namespace PlayerAction
                     rb.velocity = new Vector2(playerStatus.DashSpeed, rb.velocity.y);
                 else
                     rb.velocity = new Vector2(playerStatus.MoveSpeed, rb.velocity.y);
+
+                walkSubject?.OnNext(true);
             }
             else
             {
@@ -95,6 +107,8 @@ namespace PlayerAction
                     rb.velocity = new Vector2(-playerStatus.DashSpeed, rb.velocity.y);
                 else
                     rb.velocity = new Vector2(-playerStatus.MoveSpeed, rb.velocity.y);
+
+                walkSubject?.OnNext(false);
             }
             return true;
         }
@@ -115,6 +129,8 @@ namespace PlayerAction
                 rb.velocity = new Vector2(playerStatus.DashSpeed, rb.velocity.y);
             else
                 rb.velocity = new Vector2(-playerStatus.DashSpeed, rb.velocity.y);
+
+            dashSubject?.OnNext(direction);
         }
 
         public void Damage()

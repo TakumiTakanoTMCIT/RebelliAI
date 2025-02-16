@@ -23,20 +23,21 @@ namespace Muzzle
         //Inject
         private GameObject muzzleObj;
         private MuzzlePositions muzzlePositions;
-        private ActionStatusChk.ActionStatusChecker actionStatusChecker;
+        private IPlayerDirection playerDirection;
 
         [Inject]
-        public void Construct(ActionStatusChk.ActionStatusChecker actionStatusChecker, [Inject(Id = "Muzzle")] GameObject muzzleObj, MuzzlePositions muzzlePositions)
+        public void Construct(IPlayerDirection playerDirection, [Inject(Id = "Muzzle")] GameObject muzzleObj, MuzzlePositions muzzlePositions)
         {
+            this.playerDirection = playerDirection;
             this.muzzlePositions = muzzlePositions;
-            this.actionStatusChecker = actionStatusChecker;
             this.muzzleObj = muzzleObj;
         }
 
         private void Start()
         {
+            // TODO : このEveryUpdateの書き方、UniRxの本領を発揮できてない。もっといい書き方があるはず。
             Observable.EveryUpdate()
-                .Where(_ => actionStatusChecker.Direction)
+                .Where(_ => playerDirection.Direction.Value == true)
                 .Subscribe(_ =>
                 {
                     foreach (var muzzlePosition in muzzlePositions.muzzlePositions)
@@ -47,7 +48,7 @@ namespace Muzzle
                 .AddTo(this);
 
             Observable.EveryUpdate()
-                .Where(_ => actionStatusChecker.Direction == false)
+                .Where(_ => playerDirection.Direction.Value == false)
                 .Subscribe(_ =>
                 {
                     foreach (var muzzlePosition in muzzlePositions.muzzlePositions)

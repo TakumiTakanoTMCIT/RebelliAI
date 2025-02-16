@@ -32,13 +32,16 @@ public class ShellInstaller : MonoInstaller
             .To<FullChargeShotAnimCtrl>()
             .AsTransient();
 
-        Container.Bind<FullCharge.MoveCtrl>()
+        Container.Bind<FullCharge.MoveLogic>()
             .AsTransient();
+
+        Container.BindFactory<FullCharge.MoveLogic, FullCharge.MoveLogic.Factory>()
+            .AsSingle();
 
         Container.Bind<FullCharge.HitBoxCtrl>()
             .AsTransient();
 
-        Container.Bind<FullCharge.InitPositioner>()
+        Container.Bind<FullCharge.SetInitialPositionLogic>()
             .AsTransient();
 
         Container.Bind<FullCharge.StateCtrl>()

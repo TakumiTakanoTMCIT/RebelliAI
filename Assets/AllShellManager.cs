@@ -3,7 +3,7 @@ using ActionStatusChk;
 using Cysharp.Threading.Tasks;
 using PlayerState;
 using UnityEngine;
-using UnityEngine.InputSystem.Utilities;
+using UniRx;
 using UnityEngine.Pool;
 using Zenject;
 
@@ -12,11 +12,12 @@ public class AllShellManager : MonoBehaviour
     [SerializeField] private Transform mameParentTransform, muzzleTransform;
     [SerializeField] private int defaultCapacity = 3;
     [SerializeField] private float shootMameInterval = 0.5f;
-    [SerializeField] private ActionStatusChecker actionStatusChecker;
     [SerializeField]GameObject shellPrefab;
 
     [Inject]
     DiContainer container;
+    //Inject
+    IPlayerDirection playerDirection;
 
     private ObjectPool<GameObject> pool;
     PlayerStateMgr playerStateMgr;
@@ -25,6 +26,12 @@ public class AllShellManager : MonoBehaviour
     bool isMameShootable;
 
     public static event Action onShootChargedShell, onShotNow;
+
+    [Inject]
+    public void Construct(IPlayerDirection playerDirection)
+    {
+        this.playerDirection = playerDirection;
+    }
 
     private void Awake()
     {
@@ -74,7 +81,7 @@ public class AllShellManager : MonoBehaviour
     private void GetShell(GameObject shell)
     {
         shell.SetActive(true);
-        shell.MyGetComponent_NullChker<ShellMainBodyCrtl>().GetShellAndSetDirection(actionStatusChecker.Direction, playerStateMgr.WhatCurrentState(playerStateMgr.dashState));
+        shell.MyGetComponent_NullChker<ShellMainBodyCrtl>().GetShellAndSetDirection(playerDirection.Direction.Value, playerStateMgr.WhatCurrentState(playerStateMgr.dashState));
         shell.transform.position = muzzleTransform.position;
     }
 

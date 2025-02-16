@@ -8544,6 +8544,30 @@ MonoBehaviour:
   gamePlayerManager: {fileID: 1264633628}
   playerOnVoidChecker: {fileID: 906999107}
   hpBarHandler: {fileID: 585496183}
+--- !u!114 &906999127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 906999080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a50d6e2a4ccf47a0bb00089d1b5450e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &906999137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 906999080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f1c7ee6bf34e499784e7708413c5010, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &924561357
 GameObject:
   m_ObjectHideFlags: 0
@@ -14906,6 +14930,7 @@ GameObject:
   - component: {fileID: 1110060457}
   - component: {fileID: 1110060458}
   - component: {fileID: 1110060459}
+  - component: {fileID: 1110060460}
   m_Layer: 0
   m_Name: SceneContext
   m_TagString: Untagged
@@ -14958,6 +14983,7 @@ MonoBehaviour:
   - {fileID: 1110060457}
   - {fileID: 1110060458}
   - {fileID: 1110060459}
+  - {fileID: 1110060460}
   _installerPrefabs: []
   _autoRun: 1
   OnPreInstall:
@@ -15128,6 +15154,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   afterGrowPrefab: {fileID: 8891468780439341789, guid: 12bcbff658c4c4ad68be64c3a2bd145a, type: 3}
+--- !u!114 &1110060460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110060446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6e8e9783a63c43aab47b3e81e2ef1f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderer: {fileID: 906999093}
 --- !u!1001 &1134130826
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20016,6 +20055,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5606695291144184131, guid: 4b018a05dfe064f3b848fabdacf22d3c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5606695291144184132, guid: 4b018a05dfe064f3b848fabdacf22d3c, type: 3}
+      propertyPath: isDebugCurrentState
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5606695291144184157, guid: 4b018a05dfe064f3b848fabdacf22d3c, type: 3}

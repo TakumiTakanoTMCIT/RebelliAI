@@ -109,7 +109,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
         HPBarHandler.onPlayerDamage -= OnDamage;
     }
 
-    private void Update()
+    /*private void Update()
     {
         if (currentState == damageState) return;
 
@@ -117,7 +117,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
             spriteRenderer.flipX = false;
         else
             spriteRenderer.flipX = true;
-    }
+    }*/
 
     public void ChangeAnimState(IPlayerAnimState newState)
     {

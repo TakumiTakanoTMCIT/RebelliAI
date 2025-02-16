@@ -51,6 +51,7 @@ namespace PlayerState
             //コンポーネントを取得
             wallKickDelayManager = gameObject.MyGetComponent_NullChker<WallKickDelayManager>();
 
+            //TODO : このInject書く意味なくね？
             //Injectしています
             container.Inject(dashState);
             container.Inject(wallKick);
@@ -92,17 +93,15 @@ namespace PlayerState
 
         private void Update()
         {
-            if(Input.GetKeyDown(KeyCode.U))
+            //TODO: この処理は後で消す
+            if (Input.GetKeyDown(KeyCode.U))
             {
                 Time.timeScale = 1f;
             }
-            else if(Input.GetKeyDown(KeyCode.I))
+            else if (Input.GetKeyDown(KeyCode.I))
             {
-                Time.timeScale = 0.1f;
+                Time.timeScale = 0.05f;
             }
-
-            //現在のステートを言う
-            Debug.Log($"CurrentState: {currentState}");
 
             if (!isExecutable) return;
             currentState.Execute(this);
@@ -716,7 +715,13 @@ namespace PlayerState
         public void Exit(PlayerStateMgr stateMgr) { }
     }
 
-    public class WallFall : IState
+    public interface IWallFallSubject
+    {
+        IObservable<Unit> OnEnteredWallFall { get; }
+        IObservable<Unit> OnExitWallFall { get; }
+    }
+
+    public class WallFall : IState , IWallFallSubject
     {
         private readonly PlayerStateData stateData;
         private readonly MuzzulePositionManager muzzulePositionManager;
@@ -733,6 +738,12 @@ namespace PlayerState
 
         [Inject]
         WallKickDelayManager wallKickManger;
+
+        private Subject<Unit> enteredWallFall = new Subject<Unit>();
+        public IObservable<Unit> OnEnteredWallFall => enteredWallFall;
+
+        private Subject<Unit> exitWallFall = new Subject<Unit>();
+        public IObservable<Unit> OnExitWallFall => exitWallFall;
 
         public WallFall(PlayerStateData stateData, MuzzulePositionManager muzzulePositionManager)
         {
@@ -762,6 +773,8 @@ namespace PlayerState
             {
                 wall_facing_which = false;
             }
+
+            enteredWallFall?.OnNext(Unit.Default);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -780,7 +793,6 @@ namespace PlayerState
                 if (!stateData.ActionStatusChecker.IsWall(true) && !stateData.ActionStatusChecker.IsFarWall(true))
                 {
                     ChangeFallState(stateMgr);
-                    stateData.ActionHandler.StopY();
                     return;
                 }
 
@@ -788,7 +800,6 @@ namespace PlayerState
                 if (!stateData.InputHandler.IsMoveRightKey())
                 {
                     ChangeFallState(stateMgr);
-                    stateData.ActionHandler.StopY();
                     return;
                 }
             }
@@ -798,7 +809,6 @@ namespace PlayerState
                 if (!stateData.ActionStatusChecker.IsWall(false) && !stateData.ActionStatusChecker.IsFarWall(false))
                 {
                     ChangeFallState(stateMgr);
-                    stateData.ActionHandler.StopY();
                     return;
                 }
 
@@ -806,7 +816,6 @@ namespace PlayerState
                 if (!stateData.InputHandler.IsMoveLeftKey())
                 {
                     ChangeFallState(stateMgr);
-                    stateData.ActionHandler.StopY();
                     return;
                 }
             }
@@ -815,6 +824,7 @@ namespace PlayerState
             if (stateData.InputHandler.IsJumpKeyDown())
             {
                 stateMgr.ChangeState(stateMgr.wallKick);
+                return;
             }
 
             //どちらの移動キーも押されていない場合はFallに遷移
@@ -825,25 +835,22 @@ namespace PlayerState
             }
 
             //↑をすべて回避したら壁ずりをする
-            WallFalling(stateMgr);
-        }
-
-        private void WallFalling(PlayerStateMgr stateMgr)
-        {
-            if (!IsWallFallExecutable)
-                return;
-
-            stateData.ActionHandler.WallFall();
+            if (IsWallFallExecutable)
+            {
+                stateData.ActionHandler.WallFall();
+            }
         }
 
         public void Exit(PlayerStateMgr stateMgr)
         {
             //ExitしたらfalseにしてWallFallの処理をできないようにする
             IsWallFallExecutable = false;
+            exitWallFall?.OnNext(Unit.Default);
         }
 
         private void ChangeFallState(PlayerStateMgr stateMgr)
         {
+            stateData.ActionHandler.StopY();
             wallKickManger.Start_JumpKey_AcceptingTime();
             stateMgr.ChangeState(stateMgr.fallState);
         }
@@ -861,7 +868,7 @@ namespace PlayerState
 
         private bool isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
 
-        public WallKick(WallKickFactory wallKickFactory,PlayerStateData stateData, MuzzulePositionManager muzzulePositionManager)
+        public WallKick(WallKickFactory wallKickFactory, PlayerStateData stateData, MuzzulePositionManager muzzulePositionManager)
         {
             this.wallKickFactory = wallKickFactory;
             this.stateData = stateData;
@@ -903,18 +910,15 @@ namespace PlayerState
             {
                 if (stateData.InputHandler.IsMoveLeftKey() && stateData.ActionStatusChecker.IsWall(false))
                 {
-                    stateData.AnimHandler.ChangeAnimState(stateData.AnimHandler.wallFallState);
                     stateMgr.ChangeState(stateMgr.wallFallState);
                     return;
                 }
 
                 if (stateData.InputHandler.IsMoveRightKey() && stateData.ActionStatusChecker.IsWall(true))
                 {
-                    stateData.AnimHandler.ChangeAnimState(stateData.AnimHandler.wallFallState);
                     stateMgr.ChangeState(stateMgr.wallFallState);
                     return;
                 }
-
 
                 stateMgr.ChangeState(stateMgr.fallState);
                 return;

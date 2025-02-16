@@ -33,6 +33,10 @@ public class PlayerStateInstaller : MonoInstaller
             .AsSingle()
             .WithArguments(playerRb, actionStatusChecker, playerDashKeepManager);
 
+        Container.Bind<IActionHandlerSubject>()
+            .To<ActionHandler>()
+            .FromResolve();
+
         Container.Bind<ActionStatusChecker>()
             .FromInstance(actionStatusChecker)
             .AsSingle();
