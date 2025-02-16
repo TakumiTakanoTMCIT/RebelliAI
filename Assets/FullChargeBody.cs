@@ -86,15 +86,17 @@ namespace FullCharge
         StateCtrl stateCtrl;
         VisualCtrl visualCtrl;
         MoveLogic moveCtrl;
+        IPlayerDirection playerDirection;
 
         [Inject]
-        public void Construct([Inject(Id = "FullCharge")] IAnimatable animCtrl, HitBoxCtrl hitBoxCtrl, SetInitialPositionLogic initPositioner, StateCtrl stateCtrl, VisualCtrl visualCtrl, MoveLogic.Factory factory)
+        public void Construct([Inject(Id = "FullCharge")] IAnimatable animCtrl, HitBoxCtrl hitBoxCtrl, SetInitialPositionLogic initPositioner, StateCtrl stateCtrl, VisualCtrl visualCtrl, MoveLogic.Factory factory, IPlayerDirection playerDirection)
         {
             animatorCtrl = animCtrl;
             this.hitBoxCtrl = hitBoxCtrl;
             this.initPositioner = initPositioner;
             this.stateCtrl = stateCtrl;
             this.visualCtrl = visualCtrl;
+            this.playerDirection = playerDirection;
             moveCtrl = factory.Create();
         }
 
@@ -106,7 +108,7 @@ namespace FullCharge
 
             hitBoxCtrl.GetHitBox(gameObject.MyGetComponent_NullChker<BoxCollider2D>());
             initPositioner.Init(muzzleObj.transform, transform);
-            visualCtrl.GetPlayerStats(gameObject.MyGetComponent_NullChker<SpriteRenderer>(), actionStatusChecker);
+            visualCtrl.GetPlayerStats(gameObject.MyGetComponent_NullChker<SpriteRenderer>(), playerDirection);
         }
 
         private void Start()
@@ -257,17 +259,17 @@ namespace FullCharge
     public class VisualCtrl
     {
         private SpriteRenderer spriteRenderer;
-        private ActionStatusChecker actionStatusChecker;
+        private IPlayerDirection playerDirection;
 
-        public void GetPlayerStats(SpriteRenderer spriteRenderer, ActionStatusChecker actionStatusChecker)
+        public void GetPlayerStats(SpriteRenderer spriteRenderer, IPlayerDirection playerDirection)
         {
             this.spriteRenderer = spriteRenderer;
-            this.actionStatusChecker = actionStatusChecker;
+            this.playerDirection = playerDirection;
         }
 
         public void SetFlip()
         {
-            spriteRenderer.flipX = !actionStatusChecker.Direction;
+            spriteRenderer.flipX = !playerDirection.Direction.Value;
         }
     }
 }
