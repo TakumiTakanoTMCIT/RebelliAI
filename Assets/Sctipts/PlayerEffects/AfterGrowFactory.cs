@@ -120,8 +120,7 @@ public class AfterGrowFactory : MonoBehaviour
     private GameObject CreateEffect()
     {
         var instance = afterGrowMainFactory.Create();
-        instance.Init(pool, player.transform, actionStatusChecker);
-        instance.gameObject.MyGetComponent_NullChker<AfterGrowMain>().Init(pool, player.transform, actionStatusChecker);
+        instance.Init(pool, player.transform);
         instance.gameObject.SetActive(false);
         return instance.gameObject;
     }

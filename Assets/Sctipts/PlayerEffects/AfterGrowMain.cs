@@ -14,10 +14,18 @@ public class AfterGrowMain : MonoBehaviour
     [SerializeField]
     private float AddPosY = 0.5f;
 
-    ActionStatusChecker actionStatusChecker;
     ObjectPool<GameObject> pool;
     Transform playerTransform;
     SpriteRenderer spriteRenderer;
+
+    //Inject
+    IPlayerDirection playerDirection;
+
+    [Inject]
+    public void Construct(IPlayerDirection direction1)
+    {
+        this.playerDirection = direction1;
+    }
 
     private void OnEnable()
     {
@@ -31,17 +39,16 @@ public class AfterGrowMain : MonoBehaviour
         HPBarHandler.onPlayerDamage -= OnPlayerDeathAndEndAnim;
     }
 
-    public void Init(ObjectPool<GameObject> pool, Transform transform, ActionStatusChecker actionStatusChecker)
+    public void Init(ObjectPool<GameObject> pool, Transform transform)
     {
         this.pool = pool;
         this.playerTransform = transform;
-        this.actionStatusChecker = actionStatusChecker;
     }
 
     public void StartAnim_Movement()
     {
         spriteRenderer = this.gameObject.MyGetComponent_NullChker<SpriteRenderer>();
-        spriteRenderer.flipX = !actionStatusChecker.Direction;
+        spriteRenderer.flipX = !playerDirection.Direction.Value;
         spriteRenderer.flipY = Random.Range(0, 2) == 0;
 
         Vector2 pos;
