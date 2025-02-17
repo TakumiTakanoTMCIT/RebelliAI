@@ -266,12 +266,18 @@ namespace PlayerState
             {
                 if (playerDirection.Direction.Value)
                 {
+                    //右向きの時に右に壁があったらダッシュできなくさせます
+                    if(stateData.ActionStatusChecker.IsWall(true)) return;
+
                     (stateMgr.dashState as Dash)?.DirectionSetter(true);
                     stateMgr.ChangeState(stateMgr.dashState);
                     return;
                 }
                 else
                 {
+                    //左向きの時に左に壁があったらダッシュできなくさせます
+                    if(stateData.ActionStatusChecker.IsWall(false)) return;
+
                     (stateMgr.dashState as Dash)?.DirectionSetter(false);
                     stateMgr.ChangeState(stateMgr.dashState);
                     return;
