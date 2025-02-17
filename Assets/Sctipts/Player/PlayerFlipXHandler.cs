@@ -27,7 +27,7 @@ public interface IPlayerDirection
 /// </summary>
 public class PlayerDirectionLogic : IPlayerDirection, IPlayerFlipXLogic
 {
-    private ReactiveProperty<bool> _direction = new ReactiveProperty<bool>(false);
+    private ReactiveProperty<bool> _direction = new ReactiveProperty<bool>(true);
 
     //インターフェースを介して使用してください
     public IReadOnlyReactiveProperty<bool> Direction => _direction;
@@ -52,15 +52,13 @@ public class PlayerFlipXHandler : MonoBehaviour
     IPlayerFlipXLogic playerFlipXLogic;
     IActionHandlerSubject actionHandler;
     IWallFallSubject wallFallSubject;
-    IDamageStateSubject damageStateSubject;
 
     [Inject]
-    public void Construct(IPlayerFlipXLogic playerFlipXLogic, IActionHandlerSubject actionHandler, IWallFallSubject wallFallSubject, IDamageStateSubject damageStateSubject)
+    public void Construct(IPlayerFlipXLogic playerFlipXLogic, IActionHandlerSubject actionHandler, IWallFallSubject wallFallSubject)
     {
         this.playerFlipXLogic = playerFlipXLogic;
         this.actionHandler = actionHandler;
         this.wallFallSubject = wallFallSubject;
-        this.damageStateSubject = damageStateSubject;
     }
 
     private void Awake()
