@@ -416,8 +416,6 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            stateData.ActionStatusChecker.SetPlayerDirectionFromDashStart(direction);
-
             sparkFactory.MakeEffect();
 
             stateData.ActionHandler.Dash(direction);
