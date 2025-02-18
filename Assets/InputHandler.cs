@@ -42,10 +42,23 @@ namespace KeyHandler
         public Subject<Unit> EnableInput = new Subject<Unit>();
         public Subject<Unit> DisableInput = new Subject<Unit>();
 
+        EventStreamer eventStreamer;
+
+        [Inject]
+        public void Construct(EventStreamer eventStreamer)
+        {
+            this.eventStreamer = eventStreamer;
+        }
+
         private void Awake()
         {
             DisableInput.Subscribe(_ => DontAcceptInputCtrl()).AddTo(this);
             EnableInput.Subscribe(_ => AcceptInputCtrl()).AddTo(this);
+
+            eventStreamer.startBossDoorCutScene.Subscribe(_ =>
+                DisableInput.OnNext(Unit.Default)
+            )
+            .AddTo(this);
         }
 
         public void OnEnteredDoor()

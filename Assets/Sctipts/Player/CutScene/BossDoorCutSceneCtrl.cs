@@ -7,6 +7,7 @@ using Door;
 using PlayerAction;
 using DG.Tweening;
 using Zenject;
+using IntroBossExperimenter;
 
 namespace Door
 {
@@ -21,8 +22,6 @@ namespace Door
         ActionHandler actionHandler;
         EventStreamer eventStreamer;
 
-        public IObserver<Unit> OnStartBossDoorCutScene => onStartBossDoorCutScene;
-        private Subject<Unit> onStartBossDoorCutScene = new Subject<Unit>();
         public Subject<Unit> onFinishMoveCamera = new Subject<Unit>();
 
         Door.PlayerCtrl playerCtrl;
@@ -37,15 +36,9 @@ namespace Door
 
         private void Awake()
         {
-            onStartBossDoorCutScene.Subscribe(doorAnimHandler =>
-            {
-                BossDoorAutoScroll(this.doorAnimHandler).Forget();
-            })
-            .AddTo(this);
-
             eventStreamer.startBossDoorCutScene.Subscribe(_ =>
             {
-                onStartBossDoorCutScene.OnNext(Unit.Default);
+                BossDoorAutoScroll(this.doorAnimHandler).Forget();
             })
             .AddTo(this);
         }
@@ -67,20 +60,18 @@ namespace Door
             BossDoorBody bossDoorBody = doorAnimHandler.GetComponent<BossDoorBody>();
 
             //時間を止める
-            gamePlayerManager.PauseTime.OnNext(Unit.Default);
             //操作を受け付けない
-            inputHandler.DisableInput.OnNext(Unit.Default);
             //アニメーションを変更不可能にする
-            playerAnimStateHandler.OnEnterDoor.OnNext(Unit.Default);
-
             //ドアの開けるアニメーションを再生
-            Debug.Log("ドアの開けるアニメーションを再生");
+
+            //なぜイベントで行わないのかというと、”どのドア”のアニメーションを再生するかを明確にしたいためです。
             doorAnimHandler.OnOpenDoorStart();
 
             //ドアが開くまで待つ
             Debug.Log("ドアが開くまで待つ");
             try
             {
+                //　イベントを受け取るまで待機します
                 await doorAnimHandler.onDoorOpenedSubject
                     .First()
                     .ToUniTask();
@@ -123,15 +114,13 @@ namespace Door
                 return;
             }
 
-            bossDoorBody.OnDoorFlowComplete();
-
+            eventStreamer.finishBossDoorCutScene.OnNext(Unit.Default);
             //時間を再開する
-            gamePlayerManager.EnableTime.OnNext(Unit.Default);
             //プレイヤーの速度を停止させる
-            actionHandler.StopX();
-            actionHandler.StopY();
             //アニメーションを変更可能にする
-            playerAnimStateHandler.OnExitDoor.OnNext(Unit.Default);
+
+            //なんでこれだけ直接イベントを使っているのかというと、”この””bossDoorBodyのイベントを実行することを明確にしたいからです。
+            bossDoorBody.onFinishBossDoorCutScene.OnNext(Unit.Default);
 
             //ボス部屋のドアでないなら
             if (!bossDoorBody.isBossDoor)

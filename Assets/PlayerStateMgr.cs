@@ -23,16 +23,19 @@ namespace PlayerState
 
         //Inject
         LifeManager lifeManager;
+        EventStreamer eventStreamer;
 
-        private IState currentState;
+        private bool isChangeableState = true;
         private bool isExecutable;
         private WallKickDelayManager wallKickDelayManager;
 
         public IState idleState, walkState, jumpState, fallState, wallFallState, wallKick,
         dashState, damageState, deathState;
 
+        public ReactiveProperty<IState> currentState = new ReactiveProperty<IState>();
+
         [Inject]
-        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death, LifeManager lifeManager)
+        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death, LifeManager lifeManager, EventStreamer eventStreamer)
         {
             dashState = dash;
             idleState = idle;
@@ -44,6 +47,7 @@ namespace PlayerState
             damageState = damage;
             deathState = death;
             this.lifeManager = lifeManager;
+            this.eventStreamer = eventStreamer;
         }
 
         private void Awake()
@@ -71,6 +75,27 @@ namespace PlayerState
                 OnDeath();
             })
             .AddTo(this);
+
+            eventStreamer.startBossDoorCutScene.Subscribe(_ =>
+            {
+                isChangeableState = false;
+            })
+            .AddTo(this);
+
+            eventStreamer.finishBossDoorCutScene.Subscribe(_ =>
+            {
+                isChangeableState = true;
+            })
+            .AddTo(this);
+
+            currentState
+                .Where(_ => isDebugCurrentState)
+                .Where(_ => currentState.Value != null)
+                .Subscribe(state =>
+                {
+                    Debug.Log("C: " + state);
+                })
+                .AddTo(this);
         }
 
         //イベントの登録
@@ -104,28 +129,28 @@ namespace PlayerState
             }
 
             if (!isExecutable) return;
-            currentState.Execute(this);
+            currentState.Value.Execute(this);
         }
 
         public void ChangeState(IState nextState)
         {
-            if (currentState == null)
+            if (!isChangeableState) return;
+
+            //currentStateの値がnullなら...
+            if (currentState.Value == null)
             {
-                currentState = nextState;
+                currentState.Value = nextState;
                 nextState.Enter(this);
                 isExecutable = true;
                 return;
             }
 
             isExecutable = false;
-            currentState.Exit(this);
-            currentState = nextState;
+            currentState.Value.Exit(this);
+            currentState.Value = nextState;
 
             isExecutable = true;
-            currentState.Enter(this);
-
-            if (isDebugCurrentState)
-                Debug.Log("C: " + currentState);
+            currentState.Value.Enter(this);
         }
 
         void OnDamage()
@@ -140,19 +165,12 @@ namespace PlayerState
 
         public bool IsCurrentState_DashState()
         {
-            if (currentState == dashState)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return currentState.Value == dashState;
         }
 
         public bool WhatCurrentState(IState checkeState)
         {
-            return currentState == checkeState;
+            return currentState.Value == checkeState;
         }
     }
 
@@ -267,7 +285,7 @@ namespace PlayerState
                 if (playerDirection.Direction.Value)
                 {
                     //右向きの時に右に壁があったらダッシュできなくさせます
-                    if(stateData.ActionStatusChecker.IsWall(true)) return;
+                    if (stateData.ActionStatusChecker.IsWall(true)) return;
 
                     (stateMgr.dashState as Dash)?.DirectionSetter(true);
                     stateMgr.ChangeState(stateMgr.dashState);
@@ -276,7 +294,7 @@ namespace PlayerState
                 else
                 {
                     //左向きの時に左に壁があったらダッシュできなくさせます
-                    if(stateData.ActionStatusChecker.IsWall(false)) return;
+                    if (stateData.ActionStatusChecker.IsWall(false)) return;
 
                     (stateMgr.dashState as Dash)?.DirectionSetter(false);
                     stateMgr.ChangeState(stateMgr.dashState);
@@ -728,7 +746,7 @@ namespace PlayerState
         IObservable<Unit> OnExitWallFall { get; }
     }
 
-    public class WallFall : IState , IWallFallSubject
+    public class WallFall : IState, IWallFallSubject
     {
         private readonly PlayerStateData stateData;
         private readonly MuzzulePositionManager muzzulePositionManager;

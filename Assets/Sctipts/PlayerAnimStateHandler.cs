@@ -32,12 +32,15 @@ public class PlayerAnimStateHandler : MonoBehaviour
     private Subject<Unit> onPlayerDeathAnimEnd = new Subject<Unit>();
     public IObservable<Unit> OnPlayerDeathAnimEnd => onPlayerDeathAnimEnd;
 
+    EventStreamer eventStreamer;
+
     [Inject]
-    public void Construct(LifeManager lifeManager, AnimatorCtrl animatorCtrl, [Inject(Id = "Damage")]IPlayerAnimState damageState)
+    public void Construct(LifeManager lifeManager, AnimatorCtrl animatorCtrl, [Inject(Id = "Damage")]IPlayerAnimState damageState, EventStreamer eventStreamer)
     {
         this.lifeManager = lifeManager;
         this.animatorCtrl = animatorCtrl;
         this.damageState = damageState;
+        this.eventStreamer = eventStreamer;
     }
 
     private void Awake()
@@ -60,6 +63,18 @@ public class PlayerAnimStateHandler : MonoBehaviour
         onExitDoor.Subscribe(_ =>
         {
             isChangeableAnim = true;
+        })
+        .AddTo(this);
+
+        eventStreamer.startBossDoorCutScene.Subscribe(_ =>
+        {
+            onEnterDoor.OnNext(Unit.Default);
+        })
+        .AddTo(this);
+
+        eventStreamer.finishBossDoorCutScene.Subscribe(_ =>
+        {
+            onExitDoor.OnNext(Unit.Default);
         })
         .AddTo(this);
 
@@ -119,6 +134,8 @@ public class PlayerAnimStateHandler : MonoBehaviour
             //ショットアニメーションを終了する
             shotAnimCtrl.EndShotAnim();
         }
+
+        if(isDebugMode) Debug.Log($"Anim : {currentState}");
     }
 
     //アニメーションイベント

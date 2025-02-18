@@ -27,7 +27,7 @@ namespace PlayerAction
         private Subject<bool> dashSubject = new Subject<bool>();
         public IObservable<bool> OnDash => dashSubject;
 
-        public ActionHandler(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerDashKeepManager dashKeepManager, LifeManager lifeManager, IPlayerDirection playerDirection, PlayerStats playerStatus)
+        public ActionHandler(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerDashKeepManager dashKeepManager, LifeManager lifeManager, IPlayerDirection playerDirection, PlayerStats playerStatus, EventStreamer eventStreamer)
         {
             this.rb = rb;
             this.actionStatusChecker = actionStatusChecker;
@@ -38,6 +38,13 @@ namespace PlayerAction
             lifeManager.OnPlayerDead.Subscribe(_ =>
             {
                 OnPlayerDeath();
+            })
+            .AddTo(lifeManager);
+
+            eventStreamer.finishBossDoorCutScene.Subscribe(_ =>
+            {
+                StopX();
+                StopY();
             })
             .AddTo(lifeManager);
         }

@@ -27,10 +27,13 @@ public class GamePlayerManager : MonoBehaviour
     public Subject<Unit> EnableTime = new Subject<Unit>();
     public Subject<Unit> PauseTime = new Subject<Unit>();
 
+    EventStreamer eventStreamer;
+
     [Inject]
-    public void Construct(LifeManager lifeManager)
+    public void Construct(LifeManager lifeManager, EventStreamer eventStreamer)
     {
         this.lifeManager = lifeManager;
+        this.eventStreamer = eventStreamer;
     }
 
     private void Awake()
@@ -79,6 +82,18 @@ public class GamePlayerManager : MonoBehaviour
         lifeManager.OnPlayerDead.Subscribe(_ =>
         {
             PlayerDeath();
+        })
+        .AddTo(this);
+
+        eventStreamer.startBossDoorCutScene.Subscribe(_ =>
+        {
+            StopTime();
+        })
+        .AddTo(this);
+
+        eventStreamer.finishBossDoorCutScene.Subscribe(_ =>
+        {
+            StartTime();
         })
         .AddTo(this);
     }

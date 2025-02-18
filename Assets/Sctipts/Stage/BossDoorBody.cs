@@ -34,6 +34,8 @@ namespace Door
         private Subject<Unit> onEnteredDoor = new Subject<Unit>();
         private Subject<Unit> onExitedDoor = new Subject<Unit>();
 
+        public Subject<Unit> onFinishBossDoorCutScene = new Subject<Unit>();
+
         [Inject]
         public void Construct(DoorManager doorManager, ColliderLogic colliderLogic, TagLogic tagLogic, ParentSetter parentSetter, EventStreamer eventStreamer)
         {
@@ -83,6 +85,12 @@ namespace Door
                 parentSetter.SetParent(null);
             })
             .AddTo(this);
+
+            onFinishBossDoorCutScene.Subscribe(_ =>
+            {
+                onEnteredDoor.OnNext(Unit.Default);
+            })
+            .AddTo(this);
         }
 
         private void Start()
@@ -95,11 +103,6 @@ namespace Door
             {
                 onExitedDoor.OnNext(Unit.Default);
             }
-        }
-
-        public void OnDoorFlowComplete()
-        {
-            onEnteredDoor.OnNext(Unit.Default);
         }
 
         //デバッグです
@@ -137,7 +140,6 @@ namespace Door
                 bossDoorCutSceneCtrl.GetDoorAnimHandler(doorAnimHandler);
 
                 //カットシーンを再生
-                bossDoorCutSceneCtrl.OnStartBossDoorCutScene.OnNext(Unit.Default);
                 eventStreamer.startBossDoorCutScene.OnNext(Unit.Default);
             }
         }

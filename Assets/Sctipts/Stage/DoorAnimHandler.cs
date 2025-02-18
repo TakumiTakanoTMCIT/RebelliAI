@@ -1,5 +1,6 @@
 using UnityEngine;
 using UniRx;
+using Zenject;
 
 public class DoorAnimHandler : MonoBehaviour
 {
@@ -7,6 +8,14 @@ public class DoorAnimHandler : MonoBehaviour
     public Subject<Unit> onDoorClosedSubject = new Subject<Unit>();
 
     Animator animator;
+
+    EventStreamer eventStreamer;
+
+    [Inject]
+    public void Construct(EventStreamer eventStreamer)
+    {
+        this.eventStreamer = eventStreamer;
+    }
 
     private void Awake()
     {
