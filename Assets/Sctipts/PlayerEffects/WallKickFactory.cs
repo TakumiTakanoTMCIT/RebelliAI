@@ -2,11 +2,12 @@ using ActionStatusChk;
 using UnityEngine;
 using UnityEngine.Pool;
 using Zenject;
+using PlayerFlip;
 
 public class WallKickFactory : MonoBehaviour
 {
     //Inject
-    private IPlayerDirection playerDirection;
+    private IDirection playerDirection;
 
     [SerializeField] int maxCapacity = 10;
 
@@ -14,19 +15,19 @@ public class WallKickFactory : MonoBehaviour
     [SerializeField] float YPosAdd = 0.5f;
     [SerializeField] private Transform parentTransform;
     [SerializeField] private ActionStatusChecker actionStatusChk;
-    GameObject preafab;
+    GameObject prefab;
 
     private ObjectPool<GameObject> pool;
 
     [Inject]
-    public void Construct(IPlayerDirection playerDirection)
+    public void Construct(IDirection playerDirection)
     {
         this.playerDirection = playerDirection;
     }
 
     private void Awake()
     {
-        preafab = Resources.Load<GameObject>("WallKickSparkBody");
+        prefab = Resources.Load<GameObject>("WallKickSparkBody");
 
         pool = new ObjectPool<GameObject>(
             createFunc: CreateEffect,
@@ -48,7 +49,7 @@ public class WallKickFactory : MonoBehaviour
 
     private GameObject CreateEffect()
     {
-        var effect = Instantiate(preafab);
+        var effect = Instantiate(prefab);
         effect.gameObject.MyGetComponent_NullChker<WallKickSparkBody>().Init(this, player.transform, YPosAdd);
 
         //Falseにするのは初期化が終わったあとでやれよ！！！きょうくんだ！

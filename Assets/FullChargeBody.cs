@@ -4,6 +4,7 @@ using PlayerState;
 using Zenject;
 using UniRx;
 using PlayerShot;
+using PlayerFlip;
 
 namespace PlayerShot
 {
@@ -86,10 +87,10 @@ namespace FullCharge
         StateCtrl stateCtrl;
         VisualCtrl visualCtrl;
         MoveLogic moveCtrl;
-        IPlayerDirection playerDirection;
+        IDirection playerDirection;
 
         [Inject]
-        public void Construct([Inject(Id = "FullCharge")] IAnimatable animCtrl, HitBoxCtrl hitBoxCtrl, SetInitialPositionLogic initPositioner, StateCtrl stateCtrl, VisualCtrl visualCtrl, MoveLogic.Factory factory, IPlayerDirection playerDirection)
+        public void Construct([Inject(Id = "FullCharge")] IAnimatable animCtrl, HitBoxCtrl hitBoxCtrl, SetInitialPositionLogic initPositioner, StateCtrl stateCtrl, VisualCtrl visualCtrl, MoveLogic.Factory factory, IDirection playerDirection)
         {
             animatorCtrl = animCtrl;
             this.hitBoxCtrl = hitBoxCtrl;
@@ -181,10 +182,10 @@ namespace FullCharge
         private float speed;
 
         //Inject
-        private IPlayerDirection playerDirection;
+        private IDirection playerDirection;
 
         //Inject
-        public MoveLogic(IPlayerDirection playerDirection)
+        public MoveLogic(IDirection playerDirection)
         {
             this.playerDirection = playerDirection;
         }
@@ -259,9 +260,9 @@ namespace FullCharge
     public class VisualCtrl
     {
         private SpriteRenderer spriteRenderer;
-        private IPlayerDirection playerDirection;
+        private IDirection playerDirection;
 
-        public void GetPlayerStats(SpriteRenderer spriteRenderer, IPlayerDirection playerDirection)
+        public void GetPlayerStats(SpriteRenderer spriteRenderer, IDirection playerDirection)
         {
             this.spriteRenderer = spriteRenderer;
             this.playerDirection = playerDirection;

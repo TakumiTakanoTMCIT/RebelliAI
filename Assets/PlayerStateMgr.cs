@@ -8,6 +8,7 @@ using Cysharp.Threading.Tasks;
 using UniRx;
 using Zenject;
 using Muzzle;
+using PlayerFlip;
 
 namespace PlayerState
 {
@@ -215,9 +216,9 @@ namespace PlayerState
         //Inject
         private readonly PlayerStateData stateData;
         private readonly MuzzulePositionManager muzzleManager;
-        private readonly IPlayerDirection playerDirection;
+        private readonly IDirection playerDirection;
 
-        public Idle(PlayerStateData playerStateData, MuzzulePositionManager muzzulePositionManager, IPlayerDirection playerDirection)
+        public Idle(PlayerStateData playerStateData, MuzzulePositionManager muzzulePositionManager, IDirection playerDirection)
         {
             this.stateData = playerStateData;
             this.muzzleManager = muzzulePositionManager;

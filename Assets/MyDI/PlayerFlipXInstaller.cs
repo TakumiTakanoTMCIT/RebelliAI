@@ -1,5 +1,6 @@
 using UnityEngine;
 using Zenject;
+using PlayerFlip;
 
 public class PlayerFlipXInstaller : MonoInstaller
 {
@@ -12,18 +13,18 @@ public class PlayerFlipXInstaller : MonoInstaller
             .FromInstance(spriteRenderer)
             .AsSingle();
 
-        Container.Bind<PlayerDirectionLogic>()
+        Container.Bind<Logic>()
             .AsSingle();
 
-        Container.Bind<IPlayerDirection>()
-            .To<PlayerDirectionLogic>()
+        Container.Bind<IDirection>()
+            .To<Logic>()
             .FromResolve();
 
-        Container.Bind<IPlayerFlipXLogic>()
-            .To<PlayerDirectionLogic>()
+        Container.Bind<ILogic>()
+            .To<Logic>()
             .FromResolve();
 
-        Container.Bind<PlayerFlipXHandler>()
+        Container.Bind<Handler>()
             .AsSingle()
             .NonLazy();
     }

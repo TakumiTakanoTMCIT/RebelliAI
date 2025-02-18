@@ -1,6 +1,7 @@
 using UnityEngine;
 using UniRx;
 using Zenject;
+using PlayerFlip;
 
 namespace Muzzle
 {
@@ -23,10 +24,10 @@ namespace Muzzle
         //Inject
         private GameObject muzzleObj;
         private MuzzlePositions muzzlePositions;
-        private IPlayerDirection playerDirection;
+        private IDirection playerDirection;
 
         [Inject]
-        public void Construct(IPlayerDirection playerDirection, [Inject(Id = "Muzzle")] GameObject muzzleObj, MuzzlePositions muzzlePositions)
+        public void Construct(IDirection playerDirection, [Inject(Id = "Muzzle")] GameObject muzzleObj, MuzzlePositions muzzlePositions)
         {
             this.playerDirection = playerDirection;
             this.muzzlePositions = muzzlePositions;

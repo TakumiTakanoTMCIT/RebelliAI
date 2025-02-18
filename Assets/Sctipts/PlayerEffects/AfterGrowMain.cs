@@ -4,6 +4,7 @@ using HPBar;
 using ActionStatusChk;
 using UniRx;
 using Zenject;
+using PlayerFlip;
 
 public class AfterGrowMain : MonoBehaviour
 {
@@ -19,10 +20,10 @@ public class AfterGrowMain : MonoBehaviour
     SpriteRenderer spriteRenderer;
 
     //Inject
-    IPlayerDirection playerDirection;
+    IDirection playerDirection;
 
     [Inject]
-    public void Construct(IPlayerDirection direction1)
+    public void Construct(IDirection direction1)
     {
         this.playerDirection = direction1;
     }

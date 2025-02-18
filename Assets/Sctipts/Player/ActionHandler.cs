@@ -3,6 +3,7 @@ using ActionStatusChk;
 using UnityEngine;
 using Zenject;
 using UniRx;
+using PlayerFlip;
 
 namespace PlayerAction
 {
@@ -17,7 +18,7 @@ namespace PlayerAction
         //Inject
         Rigidbody2D rb;
         ActionStatusChecker actionStatusChecker;
-        private readonly IPlayerDirection playerDirection;
+        private readonly IDirection playerDirection;
         private readonly PlayerDashKeepManager dashKeepManager;
         private readonly PlayerStats playerStatus;
 
@@ -27,7 +28,7 @@ namespace PlayerAction
         private Subject<bool> dashSubject = new Subject<bool>();
         public IObservable<bool> OnDash => dashSubject;
 
-        public ActionHandler(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerDashKeepManager dashKeepManager, LifeManager lifeManager, IPlayerDirection playerDirection, PlayerStats playerStatus, EventStreamer eventStreamer)
+        public ActionHandler(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerDashKeepManager dashKeepManager, LifeManager lifeManager, IDirection playerDirection, PlayerStats playerStatus, EventStreamer eventStreamer)
         {
             this.rb = rb;
             this.actionStatusChecker = actionStatusChecker;

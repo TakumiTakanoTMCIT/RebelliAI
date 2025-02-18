@@ -1,9 +1,8 @@
 using System;
-using ActionStatusChk;
 using Cysharp.Threading.Tasks;
 using PlayerState;
 using UnityEngine;
-using UniRx;
+using PlayerFlip;
 using UnityEngine.Pool;
 using Zenject;
 
@@ -12,12 +11,12 @@ public class AllShellManager : MonoBehaviour
     [SerializeField] private Transform mameParentTransform, muzzleTransform;
     [SerializeField] private int defaultCapacity = 3;
     [SerializeField] private float shootMameInterval = 0.5f;
-    [SerializeField]GameObject shellPrefab;
+    [SerializeField] GameObject shellPrefab;
 
     [Inject]
     DiContainer container;
     //Inject
-    IPlayerDirection playerDirection;
+    IDirection playerDirection;
 
     private ObjectPool<GameObject> pool;
     PlayerStateMgr playerStateMgr;
@@ -28,7 +27,7 @@ public class AllShellManager : MonoBehaviour
     public static event Action onShootChargedShell, onShotNow;
 
     [Inject]
-    public void Construct(IPlayerDirection playerDirection)
+    public void Construct(IDirection playerDirection)
     {
         this.playerDirection = playerDirection;
     }

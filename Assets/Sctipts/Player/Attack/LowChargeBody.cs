@@ -1,7 +1,7 @@
 using UnityEngine;
 using PlayerShot;
 using Zenject;
-using ActionStatusChk;
+using PlayerFlip;
 using UniRx;
 
 namespace LowChargeShot
@@ -16,10 +16,10 @@ namespace LowChargeShot
         InitPositioner initPositioner;
         HitBoxCtrl hitBoxCtrl;
         StateCtrl stateCtrl;
-        IPlayerDirection playerDirection;
+        IDirection playerDirection;
 
         [Inject]
-        public void Construct(MoveCtrl moveCtrl, VisualCtrl visualCtrl, InitPositioner initPositioner, HitBoxCtrl hitBoxCtrl, StateCtrl stateCtrl, [Inject(Id = "LowCharge")] IAnimatable animCtrl,IPlayerDirection playerDirection)
+        public void Construct(MoveCtrl moveCtrl, VisualCtrl visualCtrl, InitPositioner initPositioner, HitBoxCtrl hitBoxCtrl, StateCtrl stateCtrl, [Inject(Id = "LowCharge")] IAnimatable animCtrl, IDirection playerDirection)
         {
             this.moveCtrl = moveCtrl;
             this.visualCtrl = visualCtrl;
@@ -96,9 +96,9 @@ namespace LowChargeShot
         //Inject
         private float speed;
         private Rigidbody2D rb;
-        private readonly IPlayerDirection playerDirection;
+        private readonly IDirection playerDirection;
 
-        public MoveCtrl(IPlayerDirection playerDirection)
+        public MoveCtrl(IDirection playerDirection)
         {
             this.playerDirection = playerDirection;
         }
@@ -131,9 +131,9 @@ namespace LowChargeShot
     public class VisualCtrl
     {
         private SpriteRenderer spriteRenderer;
-        private IPlayerDirection playerDirection;
+        private IDirection playerDirection;
 
-        public void GetPlayerStats(SpriteRenderer spriteRenderer, IPlayerDirection playerDirection)
+        public void GetPlayerStats(SpriteRenderer spriteRenderer, IDirection playerDirection)
         {
             this.spriteRenderer = spriteRenderer;
             this.playerDirection = playerDirection;

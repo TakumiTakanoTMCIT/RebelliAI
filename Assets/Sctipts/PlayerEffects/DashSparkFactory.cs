@@ -1,12 +1,12 @@
 using UnityEngine;
 using UnityEngine.Pool;
-using ActionStatusChk;
+using PlayerFlip;
 using Zenject;
 
 public class DashSparkFactory : MonoBehaviour
 {
     //Inject
-    private IPlayerDirection playerDirection;
+    private IDirection playerDirection;
 
     GameObject dashSparkPrefab;
     [SerializeField] private GameObject player;
@@ -15,7 +15,7 @@ public class DashSparkFactory : MonoBehaviour
     private ObjectPool<GameObject> pool;
 
     [Inject]
-    public void Construct(IPlayerDirection playerDirection)
+    public void Construct(IDirection playerDirection)
     {
         this.playerDirection = playerDirection;
     }
