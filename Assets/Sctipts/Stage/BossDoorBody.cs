@@ -132,6 +132,11 @@ namespace Door
                 {
                     doorManager.RegisterDoor(idLogic.DoorID);
                 }
+                else
+                {
+                    //ボス部屋のセーブポイントを設定
+                    eventStreamer.saveBossRoomSavePoint.OnNext(Unit.Default);
+                }
 
                 //TODO : Zenjectでインスタンスの生成を行ったほうがいいかもしれない
                 //カットシーンコントローラーにプレイヤーの情報を渡す

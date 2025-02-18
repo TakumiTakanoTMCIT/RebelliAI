@@ -32,6 +32,7 @@ namespace PlayerState
         public IState idleState, walkState, jumpState, fallState, wallFallState, wallKick,
         dashState, damageState, deathState;
 
+        [HideInInspector]
         public ReactiveProperty<IState> currentState = new ReactiveProperty<IState>();
 
         [Inject]
