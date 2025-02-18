@@ -59,25 +59,25 @@ namespace PlayerFlip
             {
                 playerFlipXLogic.FlipX(direction);
             })
-            .AddTo(_disposableMgr);
+            .AddTo(_disposableMgr.disposables);
 
             wallFallSubject.OnEnteredWallFall.Subscribe(_ =>
             {
                 playerFlipXLogic.Reverse();
             })
-            .AddTo(_disposableMgr);
+            .AddTo(_disposableMgr.disposables);
 
             wallFallSubject.OnExitWallFall.Subscribe(_ =>
             {
                 playerFlipXLogic.Reverse();
             })
-            .AddTo(_disposableMgr);
+            .AddTo(_disposableMgr.disposables);
 
             actionHandler.OnDash.Subscribe(direction =>
             {
                 playerFlipXLogic.FlipX(direction);
             })
-            .AddTo(_disposableMgr);
+            .AddTo(_disposableMgr.disposables);
         }
     }
 }
