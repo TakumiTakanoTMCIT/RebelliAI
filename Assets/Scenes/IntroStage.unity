@@ -2144,7 +2144,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 53.916317, y: 1.1748589, z: -5.097694}
+  m_LocalPosition: {x: 68.18, y: 3.8099968, z: -6.011218}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -8544,18 +8544,6 @@ MonoBehaviour:
   gamePlayerManager: {fileID: 1264633628}
   playerOnVoidChecker: {fileID: 906999107}
   hpBarHandler: {fileID: 585496183}
---- !u!114 &906999127
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 906999080}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a50d6e2a4ccf47a0bb00089d1b5450e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &906999137
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15063,6 +15051,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d26764e3c71514716834f016189d78f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _disposableMgr: {fileID: 1264633646}
   _playerStats: {fileID: 11400000, guid: 359e95883259e43e4b01593cb9e9a3ef, type: 2}
 --- !u!114 &1110060451
 MonoBehaviour:
@@ -15919,6 +15908,7 @@ GameObject:
   - component: {fileID: 1264633641}
   - component: {fileID: 1264633643}
   - component: {fileID: 1264633644}
+  - component: {fileID: 1264633646}
   - component: {fileID: 1264633645}
   m_Layer: 0
   m_Name: GameMgr
@@ -16159,7 +16149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   savePointBase:
-  - respawnPosition: {x: 1.38, y: 3.54}
+  - respawnPosition: {x: -1.7, y: 3.54}
     isBossSaveRoom: 0
   - respawnPosition: {x: 36.65, y: -0.42}
     isBossSaveRoom: 0
@@ -16353,6 +16343,18 @@ MonoBehaviour:
   fontStyle: 0
   alignment: 0
   textDropShadow: 0
+--- !u!114 &1264633646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1264633627}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 053e5e1acbdaf4575a283ce6cddd0155, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1315716167
 GameObject:
   m_ObjectHideFlags: 0
@@ -18425,7 +18427,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Path: {fileID: 1807062460}
-  m_PathPosition: 0
+  m_PathPosition: 0.2662861
   m_PositionUnits: 0
   m_PathOffset: {x: 0, y: 0, z: 0}
   m_XDamping: 0

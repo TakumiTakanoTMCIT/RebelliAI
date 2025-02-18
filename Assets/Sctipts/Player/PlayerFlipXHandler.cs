@@ -32,6 +32,8 @@ public class PlayerDirectionLogic : IPlayerDirection, IPlayerFlipXLogic
     //インターフェースを介して使用してください
     public IReadOnlyReactiveProperty<bool> Direction => _direction;
 
+    //[Inject] Examplerr examplerr;
+
     public void FlipX(bool direction)
     {
         _direction.Value = direction;
@@ -45,46 +47,34 @@ public class PlayerDirectionLogic : IPlayerDirection, IPlayerFlipXLogic
 
 /// <summary>
 /// logicのハンドラーを提供するクラスです。
+/// ZenjectでAsSingleとして動かします。
 /// </summary>
-public class PlayerFlipXHandler : MonoBehaviour
+public class PlayerFlipXHandler
 {
-    //Inject
-    IPlayerFlipXLogic playerFlipXLogic;
-    IActionHandlerSubject actionHandler;
-    IWallFallSubject wallFallSubject;
-
-    [Inject]
-    public void Construct(IPlayerFlipXLogic playerFlipXLogic, IActionHandlerSubject actionHandler, IWallFallSubject wallFallSubject)
-    {
-        this.playerFlipXLogic = playerFlipXLogic;
-        this.actionHandler = actionHandler;
-        this.wallFallSubject = wallFallSubject;
-    }
-
-    private void Awake()
+    public PlayerFlipXHandler(IPlayerFlipXLogic playerFlipXLogic, IActionHandlerSubject actionHandler, IWallFallSubject wallFallSubject, DisposableMgr _disposableMgr)
     {
         actionHandler.OnWalk.Subscribe(direction =>
         {
             playerFlipXLogic.FlipX(direction);
         })
-        .AddTo(this);
+        .AddTo(_disposableMgr);
 
         wallFallSubject.OnEnteredWallFall.Subscribe(_ =>
         {
             playerFlipXLogic.Reverse();
         })
-        .AddTo(this);
+        .AddTo(_disposableMgr);
 
         wallFallSubject.OnExitWallFall.Subscribe(_ =>
         {
             playerFlipXLogic.Reverse();
         })
-        .AddTo(this);
+        .AddTo(_disposableMgr);
 
         actionHandler.OnDash.Subscribe(direction =>
         {
             playerFlipXLogic.FlipX(direction);
         })
-        .AddTo(this);
+        .AddTo(_disposableMgr);
     }
 }

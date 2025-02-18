@@ -22,5 +22,9 @@ public class PlayerFlipXInstaller : MonoInstaller
         Container.Bind<IPlayerFlipXLogic>()
             .To<PlayerDirectionLogic>()
             .FromResolve();
+
+        Container.Bind<PlayerFlipXHandler>()
+            .AsSingle()
+            .NonLazy();
     }
 }

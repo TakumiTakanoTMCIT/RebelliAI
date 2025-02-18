@@ -71,18 +71,6 @@ public class SavePointHandler : MonoBehaviour
             //セーブポイントを更新
             pointSaver.SaveNextPoint();
         }
-
-        /*else
-        {
-            //プレイヤーのポジションが次のセーブポイントを超えたらセーブ
-            if (playerTransform.position.x > savePointBase[pointSaver.NextSavePoint].savePosition.x)
-            {
-                Debug.Log($"セーブポイント{pointSaver.NextSavePoint}に到達しました。次のステートは{pointSaver.NextSavePoint + 1}です。");
-
-                //セーブポイントを更新
-                pointSaver.SaveNextPoint();
-            }
-        }*/
     }
 
     //現在のセーブポイントがボス部屋ならtrueを返す
