@@ -16,20 +16,36 @@ namespace Door
         [SerializeField] GamePlayerManager gamePlayerManager;
         [SerializeField] BossCutSceneHandler bossCutSceneHandler;
         [SerializeField] PlayerAnimStateHandler playerAnimStateHandler;
-        [Inject]
-        ActionHandler actionHandler;
 
-        public IObserver<DoorAnimHandler> OnStartBossDoorCutScene => onStartBossDoorCutScene;
-        private Subject<DoorAnimHandler> onStartBossDoorCutScene = new Subject<DoorAnimHandler>();
+        //Inject
+        ActionHandler actionHandler;
+        EventStreamer eventStreamer;
+
+        public IObserver<Unit> OnStartBossDoorCutScene => onStartBossDoorCutScene;
+        private Subject<Unit> onStartBossDoorCutScene = new Subject<Unit>();
         public Subject<Unit> onFinishMoveCamera = new Subject<Unit>();
 
         Door.PlayerCtrl playerCtrl;
+        DoorAnimHandler doorAnimHandler;
+
+        [Inject]
+        public void Construct(EventStreamer eventStreamer, ActionHandler actionHandler)
+        {
+            this.actionHandler = actionHandler;
+            this.eventStreamer = eventStreamer;
+        }
 
         private void Awake()
         {
             onStartBossDoorCutScene.Subscribe(doorAnimHandler =>
             {
-                BossDoorAutoScroll(doorAnimHandler).Forget();
+                BossDoorAutoScroll(this.doorAnimHandler).Forget();
+            })
+            .AddTo(this);
+
+            eventStreamer.startBossDoorCutScene.Subscribe(_ =>
+            {
+                onStartBossDoorCutScene.OnNext(Unit.Default);
             })
             .AddTo(this);
         }
@@ -40,9 +56,9 @@ namespace Door
             this.playerCtrl = playerCtrl;
         }
 
-        private void Update()
+        public void GetDoorAnimHandler(DoorAnimHandler doorAnimHandler)
         {
-            //Debug.Log($"Time.timeScale: {Time.timeScale}");
+            this.doorAnimHandler = doorAnimHandler;
         }
 
         private async UniTask BossDoorAutoScroll(DoorAnimHandler doorAnimHandler)

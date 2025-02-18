@@ -1,11 +1,12 @@
+using UniRx;
 using UnityEngine;
+using Zenject;
+using System;
 
 namespace Door
 {
     public class BossDoorBody : MonoBehaviour
     {
-        [SerializeField] private DoorManager doorManager;
-        [SerializeField] public string doorID;
         DoorAnimHandler doorAnimHandler;
         [SerializeField] internal GameObject playerObj, stageObj, cameraObj;
         [SerializeField] internal Vector2 playerTeleportationPos, cameraPos;
@@ -20,8 +21,28 @@ namespace Door
         PlayerCtrl playerCtrl;
 
         BoxCollider2D boxCollider2D;
+        StateHandler stateHandler;
+        DoorIDAssignerHandler idLogic;
 
-        private bool isOpened = false;
+        //Inject
+        ColliderLogic colliderLogic;
+        TagLogic tagLogic;
+        ParentSetter parentSetter;
+        DoorManager doorManager;
+        EventStreamer eventStreamer;
+
+        private Subject<Unit> onEnteredDoor = new Subject<Unit>();
+        private Subject<Unit> onExitedDoor = new Subject<Unit>();
+
+        [Inject]
+        public void Construct(DoorManager doorManager, ColliderLogic colliderLogic, TagLogic tagLogic, ParentSetter parentSetter, EventStreamer eventStreamer)
+        {
+            this.doorManager = doorManager;
+            this.colliderLogic = colliderLogic;
+            this.tagLogic = tagLogic;
+            this.parentSetter = parentSetter;
+            this.eventStreamer = eventStreamer;
+        }
 
         private void Awake()
         {
@@ -29,36 +50,56 @@ namespace Door
             cameraGoBossStageController = GameObject.Find("GameMgr").MyGetComponent_NullChker<CameraGoBossStageController>();
             doorAnimHandler = gameObject.MyGetComponent_NullChker<DoorAnimHandler>();
             boxCollider2D = gameObject.MyGetComponent_NullChker<BoxCollider2D>();
+            stateHandler = gameObject.MyGetComponent_NullChker<StateHandler>();
+            idLogic = gameObject.MyGetComponent_NullChker<DoorIDAssignerHandler>();
 
             //nullチェック
-            if (doorManager == null) { Debug.LogError("DoorManagerが設定されていません"); }
+            if (doorManager == null) Debug.LogError("DoorManagerが設定されていません");
+            if (stateHandler == null) Debug.LogError("StateHandlerが設定されていません");
+            if (idLogic == null) Debug.LogError("DoorIDAssignerHandlerが設定されていません");
 
-            //自分のドアが開いていたかどうかを確認
-            isOpened = doorManager.GetDoorState(doorID);
+            colliderLogic.Init(boxCollider2D);
+            tagLogic.Init(gameObject);
+            parentSetter.Init(gameObject);
 
-            if (isOpened)
+            /// <summary>
+            /// ドアに入った時の処理
+            /// </summary>
+            onEnteredDoor.Subscribe(_ =>
             {
-                boxCollider2D.isTrigger = false;
-                gameObject.tag = "Ground";
-                transform.SetParent(stageObj.transform);
+                colliderLogic.DisableCollider();
+                tagLogic.SetTag("Ground");
+                parentSetter.SetParent(stageObj);
+            })
+            .AddTo(this);
+
+            /// <summary>
+            /// ドアの外にいるときの処理
+            /// </summary>
+            onExitedDoor.Subscribe(_ =>
+            {
+                colliderLogic.EnableCollider();
+                tagLogic.SetTag("Door");
+                parentSetter.SetParent(null);
+            })
+            .AddTo(this);
+        }
+
+        private void Start()
+        {
+            if (stateHandler.IsEntered)
+            {
+                onEnteredDoor.OnNext(Unit.Default);
             }
             else
             {
-                boxCollider2D.isTrigger = true;
-                gameObject.tag = "Door";
-                transform.SetParent(null);
+                onExitedDoor.OnNext(Unit.Default);
             }
         }
 
         public void OnDoorFlowComplete()
         {
-            //ドアが開いたことを記録
-            //もしボス部屋のドアなら記録しない
-            if (!isBossDoor) doorManager.RegisterDoor(doorID);
-
-            boxCollider2D.isTrigger = false;
-            gameObject.tag = "Ground";
-            transform.SetParent(stageObj.transform);
+            onEnteredDoor.OnNext(Unit.Default);
         }
 
         //デバッグです
@@ -73,7 +114,7 @@ namespace Door
         private void OnTriggerAction(Collider2D other)
         {
             //このドアがすでに開いている場合は処理を行わない
-            if (isOpened) return;
+            if (stateHandler.IsEntered) return;
 
             //プレイヤーがドアに触れた場合
             if (other.gameObject.name == playerObj.name)
@@ -82,17 +123,79 @@ namespace Door
                 //演出のためです
                 if (Vector2.Distance(playerObj.transform.position, transform.position) > canEnterDistance) return;
 
+                //ドアが開いたことを記録
+                //もしボス部屋のドアなら記録しない
+                if (!isBossDoor)
+                {
+                    doorManager.RegisterDoor(idLogic.DoorID);
+                }
+
+                //TODO : Zenjectでインスタンスの生成を行ったほうがいいかもしれない
                 //カットシーンコントローラーにプレイヤーの情報を渡す
                 playerCtrl = new PlayerCtrl(playerObj, playerTeleportationPos, isDebugMode);
                 bossDoorCutSceneCtrl.GetPlayerCtrlInfo(playerCtrl);
+                bossDoorCutSceneCtrl.GetDoorAnimHandler(doorAnimHandler);
 
                 //カットシーンを再生
-                bossDoorCutSceneCtrl.OnStartBossDoorCutScene.OnNext(doorAnimHandler);
-
-                boxCollider2D.isTrigger = false;
-                gameObject.tag = "Ground";
-                transform.SetParent(stageObj.transform);
+                bossDoorCutSceneCtrl.OnStartBossDoorCutScene.OnNext(Unit.Default);
+                eventStreamer.startBossDoorCutScene.OnNext(Unit.Default);
             }
+        }
+    }
+
+    public class ColliderLogic
+    {
+        BoxCollider2D boxCollider2D;
+
+        public void Init(BoxCollider2D boxCollider)
+        {
+            boxCollider2D = boxCollider;
+        }
+
+        public void EnableCollider()
+        {
+            boxCollider2D.isTrigger = true;
+        }
+
+        public void DisableCollider()
+        {
+            boxCollider2D.isTrigger = false;
+        }
+    }
+
+    public class TagLogic
+    {
+        GameObject gameObject;
+
+        public void Init(GameObject gameObject)
+        {
+            this.gameObject = gameObject;
+        }
+
+        public void SetTag(string tag)
+        {
+            gameObject.tag = tag;
+        }
+    }
+
+    public class ParentSetter
+    {
+        GameObject gameObject;
+
+        public void Init(GameObject gameObject)
+        {
+            this.gameObject = gameObject;
+        }
+
+        public void SetParent(GameObject parent)
+        {
+            if (parent == null)
+            {
+                gameObject.transform.SetParent(null);
+                return;
+            }
+
+            gameObject.transform.SetParent(parent.transform);
         }
     }
 }

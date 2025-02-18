@@ -14946,6 +14946,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1110060449}
+  - component: {fileID: 1110060462}
   - component: {fileID: 1110060448}
   - component: {fileID: 1110060447}
   - component: {fileID: 1110060450}
@@ -14960,7 +14961,8 @@ GameObject:
   - component: {fileID: 1110060459}
   - component: {fileID: 1110060460}
   - component: {fileID: 1110060461}
-  - component: {fileID: 1110060462}
+  - component: {fileID: 1110060463}
+  - component: {fileID: 1110060464}
   m_Layer: 0
   m_Name: SceneContext
   m_TagString: Untagged
@@ -15015,6 +15017,8 @@ MonoBehaviour:
   - {fileID: 1110060459}
   - {fileID: 1110060460}
   - {fileID: 1110060461}
+  - {fileID: 1110060463}
+  - {fileID: 1110060464}
   _installerPrefabs: []
   _autoRun: 1
   OnPreInstall:
@@ -15235,6 +15239,31 @@ MonoBehaviour:
   fontStyle: 0
   alignment: 0
   textDropShadow: 0
+--- !u!114 &1110060463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110060446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ecf14f7a4ef24277a9a1e1496e35997, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  doorManager: {fileID: 11400000, guid: 7be0e4f43f6d2406287a7ff66642f05b, type: 2}
+--- !u!114 &1110060464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110060446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 733d9520a8ce24c4aab14e33ffe99b1a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1134130826
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17677,6 +17706,36 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 26
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1692176576 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2315021898221821592, guid: e8b3436b1c6d14a389e83d173d398ffb, type: 3}
+  m_PrefabInstance: {fileID: 2315021898883147355}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1692176583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1692176576}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f52a68dc1a5c4cebbb98a44adfcb7a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1692176590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1692176576}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a33a6917722cc4dccad615d2dc2dc919, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DoorID: "\u6CE1\u6CAB\u306E\u5618\u304C\u3001\u6025\u306B\u8003\u3048\u308B\u3002"
 --- !u!1 &1692595759
 GameObject:
   m_ObjectHideFlags: 0
@@ -18740,6 +18799,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1976685423}
   m_CullTransparentMesh: 1
+--- !u!1 &1980389574 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2315021898221821592, guid: e8b3436b1c6d14a389e83d173d398ffb, type: 3}
+  m_PrefabInstance: {fileID: 2081607874}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1980389581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980389574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f52a68dc1a5c4cebbb98a44adfcb7a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1980389588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1980389574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a33a6917722cc4dccad615d2dc2dc919, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DoorID: "\u72E1\u733E\u306A\u7D42\u7109\u304C\u3001\u6025\u306B\u6B4C\u3046\u3002"
 --- !u!1 &1985425333
 GameObject:
   m_ObjectHideFlags: 0

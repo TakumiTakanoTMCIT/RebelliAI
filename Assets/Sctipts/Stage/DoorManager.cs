@@ -18,27 +18,26 @@ public class DoorManager : ScriptableObject
     [SerializeField]
     private List<DoorState> doorStates = new List<DoorState>();
 
-    // ドアを登録する（新しいドアの場合）
-    public void RegisterDoor(string doorID)
+    // ドアが登録されているかどうか
+    public bool IsResisteredDoor(string doorID)
     {
-        if (!doorStates.Exists(door => door.doorID == doorID))
-        {
-            doorStates.Add(new DoorState(doorID));
-        }
-    }
-
-    // ドアの状態を取得する
-    public bool GetDoorState(string doorID)
-    {
-        DoorState door = doorStates.Find(d => d.doorID == doorID);
-        if (door != null)
+        if (doorStates.Exists(door => door.doorID == doorID))
         {
             return true;
         }
         else
+        {
             return false;
+        }
     }
 
+    // ドアを登録する
+    public void RegisterDoor(string doorID)
+    {
+        doorStates.Add(new DoorState(doorID));
+    }
+
+    // ドアを削除する
     public void ResetDoorStates()
     {
         doorStates.Clear();
