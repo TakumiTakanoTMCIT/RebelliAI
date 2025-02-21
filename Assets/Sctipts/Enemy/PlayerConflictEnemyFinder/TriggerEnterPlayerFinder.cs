@@ -18,4 +18,13 @@ public class TriggerEnterPlayerFinder : MonoBehaviour
         Destroy(gameObject);
         conflictEnemy.OnConflictEnemy(damage);
     }
+
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (!missileBody.IsAlivingNow) return;
+        var conflictEnemy = other.gameObject.GetComponent<IConflictEnemy>();
+        if (conflictEnemy == null) return;
+        Destroy(gameObject);
+        conflictEnemy.OnConflictEnemy(damage);
+    }
 }
