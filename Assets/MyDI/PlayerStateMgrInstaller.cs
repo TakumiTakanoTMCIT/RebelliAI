@@ -10,9 +10,14 @@ public class PlayerStateMgrInstaller : MonoInstaller
     [SerializeField] private ActionStatusChk.ActionStatusChecker actionStatusChecker;
     [SerializeField] private PlayerAnimStateHandler animStateHandler;
     [SerializeField] private PlayerDashKeepManager dashKeepManager;
+    [SerializeField] private PlayerStateMgr playerStateMgr;
 
     public override void InstallBindings()
     {
+        Container.Bind<PlayerStateMgr>()
+            .FromInstance(playerStateMgr)
+            .AsSingle();
+
         Container.Bind<PlayerStateData>()
             .AsSingle()
             .WithArguments(inputHandler, actionStatusChecker, animStateHandler, dashKeepManager);
