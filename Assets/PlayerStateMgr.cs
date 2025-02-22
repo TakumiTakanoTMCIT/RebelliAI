@@ -30,14 +30,14 @@ namespace PlayerState
         private bool isExecutable;
         private WallKickDelayManager wallKickDelayManager;
 
-        public IState idleState, walkState, jumpState, fallState, wallFallState, wallKick,
+        public IState idleState, walkState, jumpState, jumpToFallState, fallState, wallFallState, wallKick,
         dashState, damageState, deathState;
 
         [HideInInspector]
         public ReactiveProperty<IState> currentState = new ReactiveProperty<IState>();
 
         [Inject]
-        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death, LifeManager lifeManager, EventStreamer eventStreamer)
+        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death, LifeManager lifeManager, [Inject(Id ="JumpToFall")]IState jumpToFall,EventStreamer eventStreamer)
         {
             dashState = dash;
             idleState = idle;
@@ -48,6 +48,8 @@ namespace PlayerState
             this.wallKick = wallKick;
             damageState = damage;
             deathState = death;
+            jumpToFallState = jumpToFall;
+
             this.lifeManager = lifeManager;
             this.eventStreamer = eventStreamer;
         }
@@ -580,22 +582,16 @@ namespace PlayerState
                     stateMgr.ChangeState(stateMgr.walkState);
             }
 
-            /// <summary>
-            /// 落下を始めたらFallに遷移
-            /// </summary>
-            if (stateData.ActionStatusChecker.IsFallingNow())
-            {
-                stateMgr.ChangeState(stateMgr.fallState);
-                return;
-            }
-
             if (stateData.InputHandler.IsJumpKeyDown())
             {
-                if (
-                    stateData.ActionStatusChecker.IsFarWall(false)
-                    || stateData.ActionStatusChecker.IsFarWall(true)
-                )
+                if (stateData.ActionStatusChecker.IsFarWall(false) || stateData.ActionStatusChecker.IsFarWall(true))
                     stateMgr.ChangeState(stateMgr.wallKick);
+            }
+
+            if (!stateData.ActionStatusChecker.isJumpingNow() && stateData.ActionStatusChecker.IsFallingNow())
+            {
+                stateMgr.ChangeState(stateMgr.jumpToFallState);
+                return;
             }
 
             /// <summary>
@@ -646,6 +642,98 @@ namespace PlayerState
         {
             stateData.ActionHandler.StopY();
         }
+    }
+
+    public class JumpToFall : IState, IWalker
+    {
+        //Inject
+        private readonly PlayerStateData stateData;
+
+        public JumpToFall(PlayerStateData stateData, EventMediator eventMediator, DisposableMgr disposableMgr, PlayerStateMgr stateMgr)
+        {
+            this.stateData = stateData;
+
+            //Mediatorを介して、JumpToFallアニメが終了したら遷移する購読です。
+            eventMediator.OnEndJumpToFallAnim.Subscribe(_ =>
+            {
+                stateMgr.ChangeState(stateMgr.fallState);
+                return;
+            })
+            .AddTo(disposableMgr.disposables);
+        }
+
+        public void Enter(PlayerStateMgr stateMgr)
+        {
+            stateData.AnimHandler.ChangeAnimState(stateData.AnimHandler.onAirState);
+        }
+
+        public void Execute(PlayerStateMgr stateMgr)
+        {
+            if(stateData.ActionStatusChecker.IsGround())
+            {
+                stateMgr.ChangeState(stateMgr.idleState);
+                return;
+            }
+
+            if (stateData.InputHandler.IsMoveKey())
+            {
+                if (stateData.InputHandler.IsMoveLeftKey())
+                {
+                    if (stateData.ActionStatusChecker.IsFarWall(false) || stateData.ActionStatusChecker.IsWall(false))
+                    {
+                        stateMgr.ChangeState(stateMgr.wallFallState);
+                        return;
+                    }
+                }
+                else if (stateData.InputHandler.IsMoveRightKey())
+                {
+                    if (stateData.ActionStatusChecker.IsFarWall(true) || stateData.ActionStatusChecker.IsWall(true))
+                    {
+                        stateMgr.ChangeState(stateMgr.wallFallState);
+                        return;
+                    }
+                }
+            }
+
+            ExecuteWalk(stateMgr);
+        }
+
+        public void ExecuteWalk(PlayerStateMgr stateMgr)
+        {
+            if (!stateData.InputHandler.IsMoveKey())
+            {
+                /// <summary>
+                /// 一度しか停止は実行できないようにする
+                /// </summary>
+                if (isWalkNow)
+                {
+                    stateData.ActionHandler.StopX();
+                    isWalkNow = false;
+                }
+                return;
+            }
+
+            /// <summary>
+            /// 上の条件を回避したら、移動ができるようにする
+            /// </summary>
+            isWalkNow = true;
+
+            if (stateData.InputHandler.IsMoveLeftKey())
+            {
+                stateData.ActionHandler.Walk(false);
+                return;
+            }
+
+            if (stateData.InputHandler.IsMoveRightKey())
+            {
+                stateData.ActionHandler.Walk(true);
+                return;
+            }
+        }
+
+        public void Exit(PlayerStateMgr stateMgr) { }
+
+        public bool isWalkNow { get; set; }
     }
 
     public class Fall : IState, IWalker
@@ -1108,5 +1196,12 @@ namespace PlayerState
         {
             return;
         }
+    }
+
+    public class EventMediator
+    {
+        private Subject<Unit> onEndJumpToFallAnim = new Subject<Unit>();
+        public IObservable<Unit> OnEndJumpToFallAnim => onEndJumpToFallAnim;
+        public IObserver<Unit> EndJumpToFallAnim => onEndJumpToFallAnim;
     }
 }

@@ -3,7 +3,6 @@ using Zenject;
 using UnityEngine;
 using HPBar;
 using UniRx;
-using ActionStatusChk;
 using PlayerAnimCtrl;
 
 public class PlayerAnimStateHandler : MonoBehaviour
@@ -16,7 +15,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
     private IPlayerAnimState damageState;
     private AnimatorCtrl animatorCtrl;
 
-    public IPlayerAnimState idleState, walkState, jumpState, fallState, dashState, wallFallState, wallKickState, deathState, warpState, warpEscapeState, neutralIdleState;
+    public IPlayerAnimState idleState, walkState, jumpState, onAirState, fallState, dashState, wallFallState, wallKickState, deathState, warpState, warpEscapeState, neutralIdleState;
 
     PlayerShotAnimCtrl shotAnimCtrl;
 
@@ -33,14 +32,16 @@ public class PlayerAnimStateHandler : MonoBehaviour
     public IObservable<Unit> OnPlayerDeathAnimEnd => onPlayerDeathAnimEnd;
 
     EventStreamer eventStreamer;
+    PlayerState.EventMediator eventMediator;
 
     [Inject]
-    public void Construct(LifeManager lifeManager, AnimatorCtrl animatorCtrl, [Inject(Id = "Damage")]IPlayerAnimState damageState, EventStreamer eventStreamer)
+    public void Construct(LifeManager lifeManager, AnimatorCtrl animatorCtrl, [Inject(Id = "Damage")] IPlayerAnimState damageState, EventStreamer eventStreamer, PlayerState.EventMediator eventMediator)
     {
         this.lifeManager = lifeManager;
         this.animatorCtrl = animatorCtrl;
         this.damageState = damageState;
         this.eventStreamer = eventStreamer;
+        this.eventMediator = eventMediator;
     }
 
     private void Awake()
@@ -82,6 +83,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
         idleState = new IdleState(animatorCtrl, "isIdle");
         walkState = new WalkState(animatorCtrl, "isRun");
         jumpState = new JumpState(animatorCtrl, "isJump");
+        onAirState = new OnAirState(animatorCtrl, "isJumpToFall");
         fallState = new FallState(animatorCtrl, "isFall");
         dashState = new DashState(animatorCtrl, "isDash");
         wallFallState = new WallFallState(animatorCtrl, "isWallFall");
@@ -135,7 +137,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
             shotAnimCtrl.EndShotAnim();
         }
 
-        if(isDebugMode) Debug.Log($"Anim : {currentState}");
+        if (isDebugMode) Debug.Log($"Anim : {currentState}");
     }
 
     //アニメーションイベント
@@ -154,6 +156,12 @@ public class PlayerAnimStateHandler : MonoBehaviour
     public void EndAnimDeath()
     {
         onPlayerDeathAnimEnd.OnNext(Unit.Default);
+    }
+
+    //アニメーションイベント
+    public void EndJumpToFall()
+    {
+        eventMediator.EndJumpToFallAnim.OnNext(Unit.Default);
     }
 
     public void GetAnimator()
@@ -225,7 +233,12 @@ public abstract class PlayerAnimStateBase : IPlayerAnimState
     public PlayerAnimStateBase(AnimatorCtrl animatorCtrl, string animBoolName)
     {
         this.animatorCtrl = animatorCtrl;
-        this.animBoolName = animBoolName;
+
+
+        if (animBoolName != null)
+            this.animBoolName = animBoolName;
+        else
+            this.animBoolName = null;
     }
 
     public virtual void Enter()
@@ -252,6 +265,11 @@ public class WalkState : PlayerAnimStateBase
 public class JumpState : PlayerAnimStateBase
 {
     public JumpState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
+}
+
+public class OnAirState : PlayerAnimStateBase
+{
+    public OnAirState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
 }
 
 public class FallState : PlayerAnimStateBase

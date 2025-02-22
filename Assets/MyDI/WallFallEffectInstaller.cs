@@ -29,7 +29,7 @@ public class WallFallEffectInstaller : MonoInstaller
             .AsSingle()
             .NonLazy();
 
-        Container.Bind<EventMediator>()
+        Container.Bind<WallFallEffect.EventMediator>()
             .AsSingle()
             .NonLazy();
     }

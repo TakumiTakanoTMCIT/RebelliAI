@@ -22,6 +22,9 @@ public class PlayerStateMgrInstaller : MonoInstaller
             .AsSingle()
             .WithArguments(inputHandler, actionStatusChecker, animStateHandler, dashKeepManager);
 
+        Container.Bind<PlayerState.EventMediator>()
+            .AsSingle();
+
         Container.Bind<IState>()
             .WithId("Idle")
             .To<PlayerState.Idle>()
@@ -40,6 +43,11 @@ public class PlayerStateMgrInstaller : MonoInstaller
         Container.Bind<IState>()
             .WithId("Jump")
             .To<PlayerState.Jump>()
+            .AsSingle();
+
+        Container.Bind<IState>()
+            .WithId("JumpToFall")
+            .To<PlayerState.JumpToFall>()
             .AsSingle();
 
         Container.Bind<IState>()
