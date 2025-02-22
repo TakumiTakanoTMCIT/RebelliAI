@@ -1,12 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
-using ActionStatusChk;
-using PlayerState;
+using System;
+using UniRx;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
 public class GroundChk : MonoBehaviour
 {
+    private Subject<Unit> onGround = new Subject<Unit>();
+    public IObservable<Unit> OnGround => onGround;
+
     BoxCollider2D boxCollider;
     private void Awake()
     {
@@ -25,6 +26,8 @@ public class GroundChk : MonoBehaviour
         if (other.gameObject.CompareTag("Ground"))
         {
             isGround = true;
+
+            onGround.OnNext(Unit.Default);
         }
     }
 

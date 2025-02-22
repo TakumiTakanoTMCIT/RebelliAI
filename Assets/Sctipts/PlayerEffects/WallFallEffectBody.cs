@@ -150,7 +150,6 @@ namespace WallFallEffect
 
         private GameObject CreateObj()
         {
-            Debug.Log("CreateObj");
             return factory.Create().gameObject;
         }
 

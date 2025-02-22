@@ -3,6 +3,7 @@ using UnityEngine;
 using KeyHandler;
 using Zenject;
 using UniRx;
+using System;
 
 namespace ActionStatusChk
 {
