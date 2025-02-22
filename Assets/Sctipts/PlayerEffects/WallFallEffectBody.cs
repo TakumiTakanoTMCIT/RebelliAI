@@ -23,6 +23,7 @@ namespace WallFallEffect
         IDirection direction;
 
         Vector2 displacement = new Vector2(0.405f, -0.2f);
+        AnimLogic.BoolName myColor;
 
         [Inject]
         public void Construct(RandomColorLogic randomColor, AnimLogic animLogic, EventMediator eventMediator, PlayerStateMgr playerStateMgr, IDirection direction)
@@ -41,7 +42,9 @@ namespace WallFallEffect
 
         private void OnEnable()
         {
-            animLogic.EnableBool(randomColor.GetRandomColor());
+            myColor = randomColor.GetRandomColor();
+
+            animLogic.EnableBool(myColor);
 
             if (direction.Direction.Value)//右向きの時
             {
@@ -57,7 +60,7 @@ namespace WallFallEffect
         //Animation Eventです。
         public void LastFrame()
         {
-            animLogic.DisableBool(randomColor.GetRandomColor());
+            animLogic.DisableBool();
             eventMediator.disableObjObserver.OnNext(gameObject);
         }
     }
@@ -83,9 +86,11 @@ namespace WallFallEffect
             animator.SetBool(animName.ToString(), true);
         }
 
-        public void DisableBool(BoolName animName)
+        public void DisableBool()
         {
-            animator.SetBool(animName.ToString(), false);
+            animator.SetBool(BoolName.isBlue.ToString(), false);
+            animator.SetBool(BoolName.isDarkBlue.ToString(), false);
+            animator.SetBool(BoolName.isPink.ToString(), false);
         }
     }
 
@@ -125,7 +130,7 @@ namespace WallFallEffect
             this.factory = factory;
 
             //TODO : マジックナンバーを消す
-            int PoolSize = 10;
+            int PoolSize = 50;
 
             pool = new UnityEngine.Pool.ObjectPool<GameObject>(
                 createFunc: CreateObj,
@@ -145,6 +150,7 @@ namespace WallFallEffect
 
         private GameObject CreateObj()
         {
+            Debug.Log("CreateObj");
             return factory.Create().gameObject;
         }
 
@@ -177,7 +183,7 @@ namespace WallFallEffect
         {
             this.poolLogic = poolLogic;
 
-            TimeSpan timeSpan = TimeSpan.FromSeconds(0.1);
+            TimeSpan timeSpan = TimeSpan.FromSeconds(0.08f);
             Observable.Interval(timeSpan)
                 .Where(_ => playerStateMgr.WhatCurrentState(playerStateMgr.wallFallState))//WallFallStateならば〜
                 .Subscribe(_ => CreateWallFallEffect())
