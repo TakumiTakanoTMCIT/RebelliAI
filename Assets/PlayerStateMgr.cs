@@ -30,14 +30,14 @@ namespace PlayerState
         private bool isExecutable;
         private WallKickDelayManager wallKickDelayManager;
 
-        public IState idleState, walkState, jumpState, jumpToFallState, fallState, wallFallState, wallKick,
+        public IState idleState, walkState, jumpState, jumpToFallState, fallState, wallFallState, wallKick, wallKickToFallState,
         dashState, damageState, deathState;
 
         [HideInInspector]
         public ReactiveProperty<IState> currentState = new ReactiveProperty<IState>();
 
         [Inject]
-        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death, LifeManager lifeManager, [Inject(Id ="JumpToFall")]IState jumpToFall,EventStreamer eventStreamer)
+        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death, LifeManager lifeManager, [Inject(Id = "JumpToFall")] IState jumpToFall, [Inject(Id = "WallKickToFall")] IState wallKickToFall, EventStreamer eventStreamer)
         {
             dashState = dash;
             idleState = idle;
@@ -49,6 +49,7 @@ namespace PlayerState
             damageState = damage;
             deathState = death;
             jumpToFallState = jumpToFall;
+            wallKickToFallState = wallKickToFall;
 
             this.lifeManager = lifeManager;
             this.eventStreamer = eventStreamer;
@@ -669,7 +670,7 @@ namespace PlayerState
 
         public void Execute(PlayerStateMgr stateMgr)
         {
-            if(stateData.ActionStatusChecker.IsGround())
+            if (stateData.ActionStatusChecker.IsGround())
             {
                 stateMgr.ChangeState(stateMgr.idleState);
                 return;
@@ -1021,6 +1022,12 @@ namespace PlayerState
 
         public void Execute(PlayerStateMgr stateMgr)
         {
+            //空中で止まった時
+            if (!stateData.ActionStatusChecker.IsFallingNow() && !stateData.ActionStatusChecker.isJumpingNow())
+            {
+                stateMgr.ChangeState(stateMgr.wallKickToFallState);
+            }
+
             if (stateData.ActionStatusChecker.IsFallingNow())
             {
                 if (stateData.InputHandler.IsMoveLeftKey() && stateData.ActionStatusChecker.IsWall(false))
@@ -1125,6 +1132,76 @@ namespace PlayerState
         public void Exit(PlayerStateMgr stateMgr) { }
     }
 
+    public class WallKickToFall : IState, IWalker
+    {
+        public bool isWalkNow { get; set; }
+
+        public readonly PlayerStateData stateData;
+
+        public WallKickToFall(PlayerStateData playerStateData, EventMediator eventMediator, DisposableMgr disposableMgr, PlayerStateMgr playerStateMgr)
+        {
+            stateData = playerStateData;
+
+            eventMediator.OnEndWallKickToFallAnim.Subscribe(_ =>
+            {
+                playerStateMgr.ChangeState(playerStateMgr.fallState);
+            })
+            .AddTo(disposableMgr.disposables);
+        }
+
+        public void Enter(PlayerStateMgr stateMgr)
+        {
+            stateData.AnimHandler.ChangeAnimState(stateData.AnimHandler.wallKickToFallState);
+        }
+
+        public void Execute(PlayerStateMgr stateMgr)
+        {
+            if (stateData.ActionStatusChecker.IsGround())
+            {
+                if (!isWalkNow)
+                {
+                    stateMgr.ChangeState(stateMgr.idleState);
+                    return;
+                }
+                else
+                {
+                    stateMgr.ChangeState(stateMgr.walkState);
+                    return;
+                }
+            }
+
+            ExecuteWalk(stateMgr);
+        }
+        public void Exit(PlayerStateMgr stateMgr) { }
+
+        public void ExecuteWalk(PlayerStateMgr stateMgr)
+        {
+            if (!stateData.InputHandler.IsMoveKey())
+            {
+                /// <summary>
+                /// 同時押しの判定を行っています。
+                /// </summary>
+                isWalkNow = false;
+                stateData.ActionHandler.StopX();
+                return;
+            }
+
+            if (stateData.InputHandler.IsMoveLeftKey())
+            {
+                stateData.ActionHandler.Walk(false);
+                isWalkNow = true;
+                return;
+            }
+
+            if (stateData.InputHandler.IsMoveRightKey())
+            {
+                stateData.ActionHandler.Walk(true);
+                isWalkNow = true;
+                return;
+            }
+        }
+    }
+
     public class DamageState : IState
     {
         private readonly PlayerStateData stateData;
@@ -1203,5 +1280,9 @@ namespace PlayerState
         private Subject<Unit> onEndJumpToFallAnim = new Subject<Unit>();
         public IObservable<Unit> OnEndJumpToFallAnim => onEndJumpToFallAnim;
         public IObserver<Unit> EndJumpToFallAnim => onEndJumpToFallAnim;
+
+        private Subject<Unit> onEndWallKickToFallAnim = new Subject<Unit>();
+        public IObservable<Unit> OnEndWallKickToFallAnim => onEndWallKickToFallAnim;
+        public IObserver<Unit> EndWallKickToFallAnim => onEndWallKickToFallAnim;
     }
 }

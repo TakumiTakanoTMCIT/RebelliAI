@@ -15,7 +15,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
     private IPlayerAnimState damageState;
     private AnimatorCtrl animatorCtrl;
 
-    public IPlayerAnimState idleState, walkState, jumpState, onAirState, fallState, dashState, wallFallState, wallKickState, deathState, warpState, warpEscapeState, neutralIdleState;
+    public IPlayerAnimState idleState, walkState, jumpState, onAirState, fallState, dashState, wallFallState, wallKickState, wallKickToFallState, deathState, warpState, warpEscapeState, neutralIdleState;
 
     PlayerShotAnimCtrl shotAnimCtrl;
 
@@ -88,6 +88,7 @@ public class PlayerAnimStateHandler : MonoBehaviour
         dashState = new DashState(animatorCtrl, "isDash");
         wallFallState = new WallFallState(animatorCtrl, "isWallFall");
         wallKickState = new WallKickState(animatorCtrl, "isWallKick");
+        wallKickToFallState = new WallKickToFallState(animatorCtrl, "isWallJumpToFall");
         deathState = new DeathState(animatorCtrl, "isDeath");
         warpState = new WarpState(animatorCtrl, "isWarp");
         neutralIdleState = new NeutralIdle(animatorCtrl, "isNeutralIdle");
@@ -162,6 +163,12 @@ public class PlayerAnimStateHandler : MonoBehaviour
     public void EndJumpToFall()
     {
         eventMediator.EndJumpToFallAnim.OnNext(Unit.Default);
+    }
+
+    //アニメーションイベント
+    public void EndWallJumpToFall()
+    {
+        eventMediator.EndWallKickToFallAnim.OnNext(Unit.Default);
     }
 
     public void GetAnimator()
@@ -290,6 +297,11 @@ public class WallFallState : PlayerAnimStateBase
 public class WallKickState : PlayerAnimStateBase
 {
     public WallKickState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
+}
+
+public class WallKickToFallState : PlayerAnimStateBase
+{
+    public WallKickToFallState(AnimatorCtrl animatorCtrl, string animBoolName) : base(animatorCtrl, animBoolName) { }
 }
 
 public interface IDamageStateSubject

@@ -51,6 +51,11 @@ public class PlayerStateMgrInstaller : MonoInstaller
             .AsSingle();
 
         Container.Bind<IState>()
+            .WithId("WallKickToFall")
+            .To<PlayerState.WallKickToFall>()
+            .AsSingle();
+
+        Container.Bind<IState>()
             .WithId("Fall")
             .To<PlayerState.Fall>()
             .AsSingle();
