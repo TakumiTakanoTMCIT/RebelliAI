@@ -7,7 +7,6 @@ using UniRx;
 using Zenject;
 using System.Threading;
 using UnityEngine.UI;
-using UnityEditor.Compilation;
 
 namespace HPBar
 {
@@ -278,16 +277,20 @@ namespace HPBar
             private RandomDividePoint randomDividePoint;
             private PlayerState.EventMediator playerStatsEventMediator;
             private HPBarInfo hPBarInfo;
+            private GrouopRandMoveSetter grouopRandMoveSetter;
+            private RandomInVisibleLogic randomInVisibleLogic;
 
             private CancellationTokenSource cts;
 
-            public DivideLogic(Mids mids, GroupSpriteSetter groupSpriteSetter, RandomDividePoint randomDividePoint, HPBar.EventMediator hpbarEventMediator, DisposableMgr disposableMgr, PlayerState.EventMediator playerStatsEventMediator, HPBarInfo hPBarInfo)
+            public DivideLogic(Mids mids, GroupSpriteSetter groupSpriteSetter, RandomDividePoint randomDividePoint, HPBar.EventMediator hpbarEventMediator, DisposableMgr disposableMgr, PlayerState.EventMediator playerStatsEventMediator, HPBarInfo hPBarInfo, GrouopRandMoveSetter grouopRandMoveSetter, RandomInVisibleLogic randomInVisibleLogic)
             {
                 this.randomDividePoint = randomDividePoint;
                 this.groupSpriteSetter = groupSpriteSetter;
                 this.midBarList = mids.midBarList;
                 this.playerStatsEventMediator = playerStatsEventMediator;
                 this.hPBarInfo = hPBarInfo;
+                this.grouopRandMoveSetter = grouopRandMoveSetter;
+                this.randomInVisibleLogic = randomInVisibleLogic;
 
                 hpbarEventMediator.OnPlayerDamage.Subscribe(_ =>
                 {
@@ -321,6 +324,17 @@ namespace HPBar
                     {
                         cts.Cancel();
                         cts.Dispose();
+
+
+                        //元に戻す
+                        //この処理は重要です！
+                        for (int i = 0; i < midBarList.Count; i++)
+                        {
+                            groupSpriteSetter.SetDefaultSprite(midBarList[i].GetComponent<Image>());
+                        }
+
+                        grouopRandMoveSetter.SetDefaultPosition(midBarList);
+                        randomInVisibleLogic.RecoverAll(midBarList);
                     }
                 });
 
@@ -342,12 +356,14 @@ namespace HPBar
                         for (int j = 0; j < devidePoint[i]; j++)
                         {
                             group.Add(midBarList[count]);
+                            randomInVisibleLogic.RandomInVisible(midBarList[count].GetComponent<Image>());
                             count++;
                         }
                         grounpList.Add(group);
 
-                        Debug.Log($"{i}番目のグループの要素は、{grounpList[i].Count}個です");
+                        //Debug.Log($"{i}番目のグループの要素は、{grounpList[i].Count}個です");
                         SetSprite(i);
+                        grouopRandMoveSetter.MoveGroup(grounpList[i]);
                     }
 
                     try
@@ -362,15 +378,6 @@ namespace HPBar
                     {
                         Debug.LogError($"エラー発生しました : {e.Message}");
                         return;
-                    }
-                    finally
-                    {
-                        //元に戻す
-                        //この処理は重要です！
-                        for (int i = 0; i < midBarList.Count; i++)
-                        {
-                            groupSpriteSetter.SetDefaultSprite(midBarList[i].GetComponent<Image>());
-                        }
                     }
                 }
             }
@@ -470,6 +477,98 @@ namespace HPBar
                 }
 
                 return hPBarInfo.devidePoints[random].devidePoint;
+            }
+        }
+
+        public class GrouopRandMoveSetter
+        {
+            private readonly RandomMovePosition randomMovePosition;
+            private readonly MoveLogic moveLogic;
+
+            public GrouopRandMoveSetter(RandomMovePosition randomMovePosition, MoveLogic moveLogic)
+            {
+                this.randomMovePosition = randomMovePosition;
+                this.moveLogic = moveLogic;
+            }
+
+            public void MoveGroup(List<GameObject> group)
+            {
+                Debug.Log("MoveGroup");
+                for (int i = 0; i < group.Count; i++)
+                {
+                    //50%の確率で移動する
+                    var random = UnityEngine.Random.Range(0, 2);
+                    if (random == 0)
+                    {
+                        return;
+                    }
+
+                    var rectTrans = group[i].GetComponent<RectTransform>();
+                    moveLogic.Move(rectTrans, randomMovePosition.GetRandomMovePosition(rectTrans));
+                }
+            }
+
+            public void SetDefaultPosition(List<GameObject> group)
+            {
+                for (int i = 0; i < group.Count; i++)
+                {
+                    var rectTrans = group[i].GetComponent<RectTransform>();
+
+                    var pos = new Vector3(0, rectTrans.anchoredPosition.y);
+
+                    rectTrans.anchoredPosition = pos;
+                }
+            }
+        }
+
+        public class MoveLogic
+        {
+            public void Move(RectTransform target, Vector3 pos)
+            {
+                target.anchoredPosition = pos;
+            }
+        }
+
+        public class RandomMovePosition
+        {
+            private readonly HPBarInfo hPBarInfo;
+
+            public RandomMovePosition(HPBarInfo hPBarInfo)
+            {
+                this.hPBarInfo = hPBarInfo;
+            }
+
+            public Vector2 GetRandomMovePosition(RectTransform caller)
+            {
+                float x = caller.anchoredPosition.x + UnityEngine.Random.Range(-hPBarInfo.unitMoveThereshold, hPBarInfo.unitMoveThereshold);
+
+                //25％の確率で移動量が倍になる
+                if (UnityEngine.Random.Range(0, 4) == 0)
+                {
+                    x *= 5;
+                }
+
+                return new Vector2(x, caller.anchoredPosition.y);
+            }
+        }
+
+        public class RandomInVisibleLogic
+        {
+            public void RandomInVisible(Image img)
+            {
+                //10%の確率で非表示にする
+                if (UnityEngine.Random.Range(0, 10) == 0)
+                {
+                    img.enabled = false;
+                }
+            }
+
+            public void RecoverAll(List<GameObject> midBarList)
+            {
+                for (int i = 0; i < midBarList.Count; i++)
+                {
+                    midBarList[i].GetComponent<Image>().enabled = true;
+                }
             }
         }
     }

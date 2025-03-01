@@ -107,5 +107,20 @@ public class HPBarInstaller : MonoInstaller
 
         Container.Bind<HPBar.Mid.RandomDividePoint>()
             .AsSingle();
+
+        //RandMoveSetterに関する処理
+
+        Container.Bind<HPBar.Mid.RandomMovePosition>()
+            .AsSingle();
+
+        Container.Bind<HPBar.Mid.MoveLogic>()
+            .AsSingle();
+
+        Container.Bind<HPBar.Mid.GrouopRandMoveSetter>()
+            .AsSingle();
+
+        //RandInvisibleに関する処理
+        Container.Bind<HPBar.Mid.RandomInVisibleLogic>()
+            .AsSingle();
     }
 }

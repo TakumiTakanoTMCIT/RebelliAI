@@ -57,4 +57,7 @@ public class HPBarInfo : ScriptableObject
             return UnityEngine.Random.Range(unitRandomWaitTime.x, unitRandomWaitTime.y);
         }
     }
+
+    [SerializeField]
+    public float unitMoveThereshold = 0.1f;
 }
