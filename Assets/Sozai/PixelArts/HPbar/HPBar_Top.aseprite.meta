@@ -75,7 +75,7 @@ ScriptedImporter:
     defaultPivotSpace: 0
     defaultPivotAlignment: 7
     customPivotPosition: {x: 0.5, y: 0.5}
-    mosaicPadding: 4
+    mosaicPadding: 0
     spritePadding: 0
     generateModelPrefab: 1
     generateAnimationClips: 1
@@ -88,14 +88,14 @@ ScriptedImporter:
     defaultPivotSpace: 0
     defaultPivotAlignment: 7
     customPivotPosition: {x: 0.5, y: 0.5}
-    mosaicPadding: 4
+    mosaicPadding: 0
     spritePadding: 0
     generateModelPrefab: 1
     generateAnimationClips: 1
     addSortingGroup: 1
     addShadowCasters: 0
   importFileNodeState: 1
-  platformSettingsDirtyTick: 638758580857923610
+  platformSettingsDirtyTick: 638764765457478650
   textureAssetName: 
   singleSpriteImportData:
   - name: 
@@ -126,10 +126,10 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 4
-      y: 4
-      width: 80
-      height: 6
+      x: 0
+      y: 0
+      width: 16
+      height: 4
     spriteID: 9bc58a7fa24984b87954837368dc8928
     spriteBone: []
     spriteOutline: []
@@ -138,7 +138,147 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 4, y: 4}
+    uvTransform: {x: 0, y: 0}
+  - name: HPBar_Top_Frame_1
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 4
+      width: 16
+      height: 4
+    spriteID: 54f0f4559977345d18988a8da5f08b73
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 4}
+  - name: HPBar_Top_Frame_2
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 8
+      width: 16
+      height: 4
+    spriteID: d160382f549ee47c99f61a2bf2dc9932
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 8}
+  - name: HPBar_Top_Frame_3
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 12
+      width: 16
+      height: 4
+    spriteID: aa3e7fe707fd248db90a71a9fdedbd05
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 12}
+  - name: HPBar_Top_Frame_4
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 16
+      width: 16
+      height: 4
+    spriteID: 0421ca41d027140fd89569a3af7ef599
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 16}
+  - name: HPBar_Top_Frame_5
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 20
+      width: 16
+      height: 4
+    spriteID: 841f1db0db5ec4b25b6a8f90711ecf3b
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 20}
+  - name: HPBar_Top_Frame_6
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 24
+      width: 16
+      height: 4
+    spriteID: 75dc6f24b9c8e4d6d8f30eb3821bc93d
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 24}
+  - name: HPBar_Top_Frame_7
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 28
+      width: 16
+      height: 4
+    spriteID: 1b2ed419a9bd74091ada5654259a68ad
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 28}
   spriteSheetImportData: []
   asepriteLayers:
   - layerIndex: 0
@@ -148,14 +288,70 @@ ScriptedImporter:
     layerType: 0
     blendMode: 0
     cells:
-    - name: HPBar_Top
+    - name: HPBar_Top_Frame_0
       frameIndex: 0
       cellRect:
         x: 0
         y: 0
-        width: 80
-        height: 6
+        width: 16
+        height: 4
       spriteId: 9bc58a7fa24984b87954837368dc8928
+    - name: HPBar_Top_Frame_1
+      frameIndex: 1
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 4
+      spriteId: 54f0f4559977345d18988a8da5f08b73
+    - name: HPBar_Top_Frame_2
+      frameIndex: 2
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 4
+      spriteId: d160382f549ee47c99f61a2bf2dc9932
+    - name: HPBar_Top_Frame_3
+      frameIndex: 3
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 4
+      spriteId: aa3e7fe707fd248db90a71a9fdedbd05
+    - name: HPBar_Top_Frame_4
+      frameIndex: 4
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 4
+      spriteId: 0421ca41d027140fd89569a3af7ef599
+    - name: HPBar_Top_Frame_5
+      frameIndex: 5
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 4
+      spriteId: 841f1db0db5ec4b25b6a8f90711ecf3b
+    - name: HPBar_Top_Frame_6
+      frameIndex: 6
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 4
+      spriteId: 75dc6f24b9c8e4d6d8f30eb3821bc93d
+    - name: HPBar_Top_Frame_7
+      frameIndex: 7
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 4
+      spriteId: 1b2ed419a9bd74091ada5654259a68ad
     linkedCells: []
     parentIndex: -1
   platformSettings:
@@ -228,4 +424,4 @@ ScriptedImporter:
   generatePhysicsShape: 0
   secondarySpriteTextures: []
   spritePackingTag: 
-  canvasSize: {x: 80, y: 16}
+  canvasSize: {x: 16, y: 16}

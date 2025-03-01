@@ -20,7 +20,6 @@ namespace ComponentProvider
         [SerializeField] private ChargeShot_Handler chargeShotHandler;
         [SerializeField] private AllShellManager allShellManager;
         [SerializeField] private DamageTimeHandler damageTimeHandler;
-        [SerializeField] private HPBar.HPBarHandler hPBarHandler;
 
         private void Awake()
         {
@@ -29,14 +28,14 @@ namespace ComponentProvider
             actionStatusChecker = this.gameObject.MyGetComponent_NullChker<ActionStatusChecker>();
             conflictEnemyHandler = this.gameObject.MyGetComponent_NullChker<ConflictEnemyHandler>();
 
-            new OtherObjectComponentProvider(deathGlitchSparkFactory, playerAnimStateHandler, gameFlowManager, playerWeapon_KeyController,chargeShotHandler, allShellManager,conflictEnemyHandler, hPBarHandler);
+            new OtherObjectComponentProvider(deathGlitchSparkFactory, playerAnimStateHandler, gameFlowManager, playerWeapon_KeyController, chargeShotHandler, allShellManager);
             new ChildComponentProvider(actionStatusChecker, groundChk, leftside, rightside, wallLeft, wallRight, conflictEnemyHandler, damageTimeHandler);
         }
     }
 
     class ChildComponentProvider
     {
-        public ChildComponentProvider(ActionStatusChecker actionStatusChecker, GroundChk groundChk, SideChecker left, SideChecker right, SideChecker wallleft, SideChecker wallright,ConflictEnemyHandler conflictEnemyHandler, DamageTimeHandler damageTimeHandler)
+        public ChildComponentProvider(ActionStatusChecker actionStatusChecker, GroundChk groundChk, SideChecker left, SideChecker right, SideChecker wallleft, SideChecker wallright, ConflictEnemyHandler conflictEnemyHandler, DamageTimeHandler damageTimeHandler)
         {
             actionStatusChecker.ChildComponentGetter(groundChk, left, right, wallleft, wallright);
             conflictEnemyHandler.ChildComponentGetter(damageTimeHandler);
@@ -45,7 +44,7 @@ namespace ComponentProvider
 
     class OtherObjectComponentProvider
     {
-        public OtherObjectComponentProvider(DeathGlitchSparkFactory deathGlitchSparkFactory, PlayerAnimStateHandler playerAnimStateHandler, GameFlowManager gameFlowManager, PlayerWeapon_KeyController playerWeapon_KeyController,ChargeShot_Handler chargeShot_Handler, AllShellManager allShellManager, ConflictEnemyHandler conflictEnemyHandler, HPBar.HPBarHandler hPBarHandler)
+        public OtherObjectComponentProvider(DeathGlitchSparkFactory deathGlitchSparkFactory, PlayerAnimStateHandler playerAnimStateHandler, GameFlowManager gameFlowManager, PlayerWeapon_KeyController playerWeapon_KeyController, ChargeShot_Handler chargeShot_Handler, AllShellManager allShellManager)
         {
             playerWeapon_KeyController.OtherComponentGetter(chargeShot_Handler, allShellManager);
         }

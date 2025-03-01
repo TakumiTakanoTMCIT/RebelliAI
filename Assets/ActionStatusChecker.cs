@@ -16,16 +16,12 @@ namespace ActionStatusChk
         GroundChk groundChecker;
         SideChecker leftSideChecker, rightSideChecker, wallLeftChecker, wallRightChecker;
 
-        private bool _isWallFallState;
-
         //Inject
-        private IWallFallSubject wallfall;
         private PlayerStats playerStatus;
 
         [Inject]
-        public void Construct(IWallFallSubject wallfall, PlayerStats playerStatus)
+        public void Construct(PlayerStats playerStatus)
         {
-            this.wallfall = wallfall;
             this.playerStatus = playerStatus;
         }
 
@@ -34,18 +30,6 @@ namespace ActionStatusChk
             inputHandler = this.gameObject.MyGetComponent_NullChker<InputHandler>();
             playerStateMgr = this.gameObject.MyGetComponent_NullChker<PlayerStateMgr>();
             rb = this.gameObject.MyGetComponent_NullChker<Rigidbody2D>();
-
-            wallfall.OnEnteredWallFall.Subscribe(_ =>
-            {
-                _isWallFallState = true;
-            })
-            .AddTo(this);
-
-            wallfall.OnExitWallFall.Subscribe(_ =>
-            {
-                _isWallFallState = false;
-            })
-            .AddTo(this);
         }
 
         public void ChildComponentGetter(GroundChk groundChk, SideChecker left, SideChecker right, SideChecker wallleft, SideChecker wallright)

@@ -18,6 +18,8 @@ public class AfterGrowFactory : MonoBehaviour
     //Inject
     LifeManager lifeManager;
     AfterGrowMain.Factory afterGrowMainFactory;
+    HPBar.EventMediator hpbarEventMediator;
+    PlayerState.EventMediator stateEventMediator;
 
     private GameObject effect;
     bool isInstantiable = true, isPlayerDamage_Death = false;
@@ -34,10 +36,12 @@ public class AfterGrowFactory : MonoBehaviour
     }
 
     [Inject]
-    public void Construct(LifeManager lifeManager , AfterGrowMain.Factory factory)
+    public void Construct(LifeManager lifeManager , AfterGrowMain.Factory factory, HPBar.EventMediator hpbarEventMediator, PlayerState.EventMediator stateEventMediator)
     {
         this.lifeManager = lifeManager;
         this.afterGrowMainFactory = factory;
+        this.hpbarEventMediator = hpbarEventMediator;
+        this.stateEventMediator = stateEventMediator;
     }
 
     private void Awake()
@@ -61,6 +65,18 @@ public class AfterGrowFactory : MonoBehaviour
             OnPlayerDeath_Damage();
         })
         .AddTo(this);
+
+        hpbarEventMediator.OnPlayerDamage.Subscribe(_ =>
+        {
+            OnPlayerDeath_Damage();
+        })
+        .AddTo(this);
+
+        stateEventMediator.OnPlayerDamageRecover.Subscribe(_ =>
+        {
+            OnPlayerRecoverDamage();
+        })
+        .AddTo(this);
     }
 
     private void Update()
@@ -77,20 +93,6 @@ public class AfterGrowFactory : MonoBehaviour
     void OnPlayerDeath_Damage() => isPlayerDamage_Death = true;
 
     void OnPlayerRecoverDamage() => isPlayerDamage_Death = false;
-
-    private void OnEnable()
-    {
-        HPBarHandler.onPlayerDamage += OnPlayerDeath_Damage;
-
-        PlayerState.DamageState.onPlayerDamageRecover += OnPlayerRecoverDamage;
-    }
-
-    private void OnDisable()
-    {
-        HPBarHandler.onPlayerDamage -= OnPlayerDeath_Damage;
-
-        PlayerState.DamageState.onPlayerDamageRecover -= OnPlayerRecoverDamage;
-    }
 
     //--Pool Methods--↓↓
 

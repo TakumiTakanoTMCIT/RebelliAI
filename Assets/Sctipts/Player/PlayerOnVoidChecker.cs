@@ -16,7 +16,7 @@ public class PlayerOnVoidChecker : MonoBehaviour
 
     private void OnBecameInvisible()
     {
-        if (!gamePlayerManager.isInGameArea) return;
+        if (gamePlayerManager.isInGameArea) return;
         onPlayerInVoid.OnNext(Unit.Default);
     }
 }

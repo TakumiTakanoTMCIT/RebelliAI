@@ -3,25 +3,32 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using HPBar;
 using Zenject;
+using UniRx;
 
 public class DamageTimeHandler : MonoBehaviour
 {
     [Inject]
     PlayerStats playerStatus;
 
+    //Inject
+    HPBar.EventMediator hpbarEventMediator;
+
     private bool isDamaging;
     public bool IsDamaging { get { return isDamaging; } }
 
-    //イベントの登録
-    private void OnEnable()
+    [Inject]
+    public void Construct(HPBar.EventMediator eventMediator)
     {
-        HPBarHandler.onPlayerDamage += StartDamageTime;
+        this.hpbarEventMediator = eventMediator;
     }
 
-    //イベントの登録解除
-    private void OnDisable()
+    private void Awake()
     {
-        HPBarHandler.onPlayerDamage -= StartDamageTime;
+        hpbarEventMediator.OnPlayerDamage.Subscribe(_ =>
+        {
+            StartDamageTime();
+        })
+        .AddTo(this);
     }
 
     //イベントハンドラー

@@ -9,6 +9,7 @@ namespace PlayerAnimCtrl
     {
         //Inject
         LifeManager lifeManager;
+        HPBar.EventMediator hpbarEventMediator;
 
         [SerializeField] float shotAnimTime = 0.5f;
 
@@ -17,9 +18,10 @@ namespace PlayerAnimCtrl
         bool isShoting = false;
 
         [Inject]
-        public void Construct(LifeManager lifeManager)
+        public void Construct(LifeManager lifeManager, HPBar.EventMediator eventMediator)
         {
             this.lifeManager = lifeManager;
+            this.hpbarEventMediator = eventMediator;
         }
 
         private void Awake()
@@ -34,17 +36,21 @@ namespace PlayerAnimCtrl
                 EndShotAnim();
             })
             .AddTo(this);
+
+            hpbarEventMediator.OnPlayerDamage.Subscribe(_ =>
+            {
+                EndShotAnim();
+            })
+            .AddTo(this);
         }
 
         private void OnEnable()
         {
-            HPBarHandler.onPlayerDamage += EndShotAnim;
             AllShellManager.onShotNow += OnShotNow;
         }
 
         private void OnDisable()
         {
-            HPBarHandler.onPlayerDamage -= EndShotAnim;
             AllShellManager.onShotNow -= OnShotNow;
         }
 

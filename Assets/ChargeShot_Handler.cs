@@ -8,6 +8,7 @@ public class ChargeShot_Handler : MonoBehaviour
 {
     //Inject
     LifeManager lifeManager;
+    HPBar.EventMediator hpbarEventMediator;
 
     [SerializeField] public GameObject levelLower_EnergyBall, fullLevel_EnergyBall;
 
@@ -30,9 +31,10 @@ public class ChargeShot_Handler : MonoBehaviour
     public static event Action onLowCharge, onFullCharge;
 
     [Inject]
-    public void Construct(LifeManager lifeManager)
+    public void Construct(LifeManager lifeManager, HPBar.EventMediator eventMediator)
     {
         this.lifeManager = lifeManager;
+        this.hpbarEventMediator = eventMediator;
     }
 
     private void Awake()
@@ -50,18 +52,22 @@ public class ChargeShot_Handler : MonoBehaviour
             ResetSettings();
         })
         .AddTo(this);
+
+        hpbarEventMediator.OnPlayerDamage.Subscribe(_ =>
+        {
+            ResetSettings();
+        })
+        .AddTo(this);
     }
 
     private void OnEnable()
     {
-        HPBarHandler.onPlayerDamage += ResetSettings;
         AllShellManager.onShootChargedShell += ResetSettings;
         PlayerWeapon_KeyController.onTooShortCharge += ResetSettings;
     }
 
     private void OnDisable()
     {
-        HPBarHandler.onPlayerDamage -= ResetSettings;
         AllShellManager.onShootChargedShell -= ResetSettings;
         PlayerWeapon_KeyController.onTooShortCharge -= ResetSettings;
     }

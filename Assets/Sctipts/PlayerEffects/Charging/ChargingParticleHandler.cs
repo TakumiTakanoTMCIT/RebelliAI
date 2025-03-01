@@ -18,6 +18,7 @@ public class ChargingParticleHandler : MonoBehaviour
 
     //Inject
     LifeManager lifeManager;
+    HPBar.EventMediator hpbarEventMediator;
 
     readonly string oneLowColorString = "#f164ff", twoLowColorString = "#ffde00", oneFullColorString = "#a6ffed", twoFullColorString = "#226cff";
     Color oneLowColor, twoLowColor, oneFullColor, twoFullColor;
@@ -25,9 +26,10 @@ public class ChargingParticleHandler : MonoBehaviour
     Animator animator;
 
     [Inject]
-    public void Construct(LifeManager lifeManager)
+    public void Construct(LifeManager lifeManager, HPBar.EventMediator eventMediator)
     {
         this.lifeManager = lifeManager;
+        this.hpbarEventMediator = eventMediator;
     }
 
     private void Awake()
@@ -48,6 +50,12 @@ public class ChargingParticleHandler : MonoBehaviour
             OnResetCharge();
         })
         .AddTo(this);
+
+        hpbarEventMediator.OnPlayerDamage.Subscribe(_ =>
+        {
+            OnResetCharge();
+        })
+        .AddTo(this);
     }
 
     void GetAnimator()
@@ -60,8 +68,6 @@ public class ChargingParticleHandler : MonoBehaviour
         ChargeShot_Handler.onLowCharge += OnLowCharge;
         ChargeShot_Handler.onFullCharge += OnFullCharge;
 
-        HPBarHandler.onPlayerDamage += OnResetCharge;
-
         AllShellManager.onShootChargedShell += OnResetCharge;
         PlayerWeapon_KeyController.onTooShortCharge += OnResetCharge;
 
@@ -72,8 +78,6 @@ public class ChargingParticleHandler : MonoBehaviour
     {
         ChargeShot_Handler.onLowCharge -= OnLowCharge;
         ChargeShot_Handler.onFullCharge -= OnFullCharge;
-
-        HPBarHandler.onPlayerDamage -= OnResetCharge;
 
         AllShellManager.onShootChargedShell -= OnResetCharge;
         PlayerWeapon_KeyController.onTooShortCharge -= OnResetCharge;

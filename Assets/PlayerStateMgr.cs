@@ -25,6 +25,7 @@ namespace PlayerState
         //Inject
         LifeManager lifeManager;
         EventStreamer eventStreamer;
+        HPBar.EventMediator hpbarEventMediator;
 
         private bool isChangeableState = true;
         private bool isExecutable;
@@ -37,7 +38,7 @@ namespace PlayerState
         public ReactiveProperty<IState> currentState = new ReactiveProperty<IState>();
 
         [Inject]
-        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death, LifeManager lifeManager, [Inject(Id = "JumpToFall")] IState jumpToFall, [Inject(Id = "WallKickToFall")] IState wallKickToFall, EventStreamer eventStreamer)
+        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death, LifeManager lifeManager, [Inject(Id = "JumpToFall")] IState jumpToFall, [Inject(Id = "WallKickToFall")] IState wallKickToFall, EventStreamer eventStreamer, HPBar.EventMediator hpbarEventMediator)
         {
             dashState = dash;
             idleState = idle;
@@ -53,6 +54,7 @@ namespace PlayerState
 
             this.lifeManager = lifeManager;
             this.eventStreamer = eventStreamer;
+            this.hpbarEventMediator = hpbarEventMediator;
         }
 
         private void Awake()
@@ -101,20 +103,23 @@ namespace PlayerState
                     Debug.Log("C: " + state);
                 })
                 .AddTo(this);
+
+            hpbarEventMediator.OnPlayerDamage.Subscribe(_ =>
+            {
+                OnDamage();
+            })
+            .AddTo(this);
         }
 
         //イベントの登録
         private void OnEnable()
         {
-            HPBarHandler.onPlayerDamage += OnDamage;
             wallKickDelayManager.OnWallKickRequest += () => ChangeState(wallKick);
         }
 
         //イベントの登録解除
         private void OnDisable()
         {
-            HPBarHandler.onPlayerDamage -= OnDamage;
-
             //責務に反してるのかな...?でもどこかでDisposeしないといけないのでここでやるしかない。検討の余地あり！UniRxを使えばこんなのいらないかもしれない!!
             actionHandler.Dispose();
 
@@ -1205,15 +1210,15 @@ namespace PlayerState
     public class DamageState : IState
     {
         private readonly PlayerStateData stateData;
-
-        public static event Action onPlayerDamageRecover;
+        private readonly PlayerState.EventMediator eventMediator;
 
         [Inject]
         private DamageTimeHandler damageTimeHandler;
 
-        public DamageState(PlayerStateData stateData)
+        public DamageState(PlayerStateData stateData, PlayerState.EventMediator eventMediator)
         {
             this.stateData = stateData;
+            this.eventMediator = eventMediator;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
@@ -1232,7 +1237,7 @@ namespace PlayerState
 
         public void Exit(PlayerStateMgr stateMgr)
         {
-            onPlayerDamageRecover?.Invoke();
+            eventMediator.PlayerDamageRecover.OnNext(Unit.Default);
         }
     }
 
@@ -1284,5 +1289,9 @@ namespace PlayerState
         private Subject<Unit> onEndWallKickToFallAnim = new Subject<Unit>();
         public IObservable<Unit> OnEndWallKickToFallAnim => onEndWallKickToFallAnim;
         public IObserver<Unit> EndWallKickToFallAnim => onEndWallKickToFallAnim;
+
+        private Subject<Unit> onPlayerDamageRecover = new Subject<Unit>();
+        public IObservable<Unit> OnPlayerDamageRecover => onPlayerDamageRecover;
+        public IObserver<Unit> PlayerDamageRecover => onPlayerDamageRecover;
     }
 }

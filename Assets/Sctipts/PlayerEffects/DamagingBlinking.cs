@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
+using UniRx;
 
 public class DamagingBlinking : MonoBehaviour
 {
@@ -11,8 +12,17 @@ public class DamagingBlinking : MonoBehaviour
 
     SpriteRenderer spriteRenderer;
 
-    [Inject]
     PlayerStats playerStats;
+
+    //Inject
+    private PlayerState.EventMediator stateEventMediator;
+
+    [Inject]
+    public void Construct(PlayerState.EventMediator eventMediator, PlayerStats playerStats)
+    {
+        stateEventMediator = eventMediator;
+        this.playerStats = playerStats;
+    }
 
     public void SctiptableObjectGetter(PlayerStats playerStats)
     {
@@ -23,16 +33,10 @@ public class DamagingBlinking : MonoBehaviour
     {
         isInvincible = false;
         spriteRenderer = gameObject.MyGetComponent_NullChker<SpriteRenderer>();
-    }
 
-    private void OnEnable()
-    {
-        PlayerState.DamageState.onPlayerDamageRecover += InvincibleTimer;
-    }
-
-    private void OnDisable()
-    {
-        PlayerState.DamageState.onPlayerDamageRecover -= InvincibleTimer;
+        stateEventMediator.OnPlayerDamageRecover.Subscribe(_ =>
+            InvincibleTimer())
+        .AddTo(this);
     }
 
     //イベントハンドラー

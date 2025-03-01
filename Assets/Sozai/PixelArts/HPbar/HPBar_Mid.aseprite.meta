@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: bfc50d5c77a1944e78a2bc382ac2c397
+guid: 3a2f39ef1ac93459185bfbb83c0a3a92
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -95,7 +95,7 @@ ScriptedImporter:
     addSortingGroup: 1
     addShadowCasters: 0
   importFileNodeState: 1
-  platformSettingsDirtyTick: 638764769908529490
+  platformSettingsDirtyTick: 638764806504841310
   textureAssetName: 
   singleSpriteImportData:
   - name: 
@@ -119,18 +119,18 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: HPBar_Unit
+  - name: HPBar_Mid_Frame_0
     originalName: 
-    pivot: {x: 0.8, y: -7}
+    pivot: {x: 0.5, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
       x: 0
       y: 0
-      width: 10
-      height: 2
-    spriteID: d273f68d773bd4eab9ee179b33159aaa
+      width: 16
+      height: 3
+    spriteID: b5499f2b88f2b4b7c90e5a2f6dfa6786
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -139,23 +139,219 @@ ScriptedImporter:
     edges: []
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
+  - name: HPBar_Mid_Frame_1
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 3
+      width: 16
+      height: 3
+    spriteID: 5f18d63f730694f279f72395ff3ceb16
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 3}
+  - name: HPBar_Mid_Frame_2
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 6
+      width: 16
+      height: 3
+    spriteID: 3439ffe932091453f8a71171fbf29bfe
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 6}
+  - name: HPBar_Mid_Frame_3
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 9
+      width: 16
+      height: 3
+    spriteID: 7496e889264a6442cb9d81924643adcd
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 9}
+  - name: HPBar_Mid_Frame_4
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 12
+      width: 16
+      height: 3
+    spriteID: 8a69555054cb34a33bbb2b0bf25c5cfd
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 12}
+  - name: HPBar_Mid_Frame_5
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 15
+      width: 16
+      height: 3
+    spriteID: 647f2174563484794b0897b5392aeedb
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 15}
+  - name: HPBar_Mid_Frame_6
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 18
+      width: 16
+      height: 3
+    spriteID: a33f8b244d5dc45438f57c076e769003
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 18}
+  - name: HPBar_Mid_Frame_7
+    originalName: 
+    pivot: {x: 0.5, y: 0}
+    alignment: 9
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 21
+      width: 16
+      height: 3
+    spriteID: 1fa5118ae18f34635bc7e9b7fc7ef277
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 21}
   spriteSheetImportData: []
   asepriteLayers:
   - layerIndex: 0
-    guid: 1133027934
-    name: HPBar_Unit
+    guid: 607617382
+    name: HPBar_Mid
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: HPBar_Unit
+    - name: HPBar_Mid_Frame_0
       frameIndex: 0
       cellRect:
         x: 0
-        y: 14
-        width: 10
-        height: 2
-      spriteId: d273f68d773bd4eab9ee179b33159aaa
+        y: 0
+        width: 16
+        height: 3
+      spriteId: b5499f2b88f2b4b7c90e5a2f6dfa6786
+    - name: HPBar_Mid_Frame_1
+      frameIndex: 1
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 3
+      spriteId: 5f18d63f730694f279f72395ff3ceb16
+    - name: HPBar_Mid_Frame_2
+      frameIndex: 2
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 3
+      spriteId: 3439ffe932091453f8a71171fbf29bfe
+    - name: HPBar_Mid_Frame_3
+      frameIndex: 3
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 3
+      spriteId: 7496e889264a6442cb9d81924643adcd
+    - name: HPBar_Mid_Frame_4
+      frameIndex: 4
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 3
+      spriteId: 8a69555054cb34a33bbb2b0bf25c5cfd
+    - name: HPBar_Mid_Frame_5
+      frameIndex: 5
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 3
+      spriteId: 647f2174563484794b0897b5392aeedb
+    - name: HPBar_Mid_Frame_6
+      frameIndex: 6
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 3
+      spriteId: a33f8b244d5dc45438f57c076e769003
+    - name: HPBar_Mid_Frame_7
+      frameIndex: 7
+      cellRect:
+        x: 0
+        y: 0
+        width: 16
+        height: 3
+      spriteId: 1fa5118ae18f34635bc7e9b7fc7ef277
     linkedCells: []
     parentIndex: -1
   platformSettings:

@@ -8,9 +8,7 @@ using PlayerFlip;
 
 public class AfterGrowMain : MonoBehaviour
 {
-    public class Factory : PlaceholderFactory<AfterGrowMain>
-    {
-    }
+    public class Factory : PlaceholderFactory<AfterGrowMain> { }
 
     [SerializeField]
     private float AddPosY = 0.5f;
@@ -21,23 +19,22 @@ public class AfterGrowMain : MonoBehaviour
 
     //Inject
     IDirection playerDirection;
+    HPBar.EventMediator hpbarEventMediator;
 
     [Inject]
-    public void Construct(IDirection direction1)
+    public void Construct(IDirection direction1, HPBar.EventMediator eventMediator)
     {
         this.playerDirection = direction1;
+        this.hpbarEventMediator = eventMediator;
     }
 
-    private void OnEnable()
+    private void Awake()
     {
-        //イベントの登録
-        HPBarHandler.onPlayerDamage += OnPlayerDeathAndEndAnim;
-    }
-
-    private void OnDisable()
-    {
-        //イベントの解除
-        HPBarHandler.onPlayerDamage -= OnPlayerDeathAndEndAnim;
+        hpbarEventMediator.OnPlayerDamage.Subscribe(_ =>
+        {
+            EndAnim();
+        })
+        .AddTo(this);
     }
 
     public void Init(ObjectPool<GameObject> pool, Transform transform)
@@ -62,11 +59,5 @@ public class AfterGrowMain : MonoBehaviour
     {
         if (!gameObject.activeSelf) return;
         pool.Release(this.gameObject);
-    }
-
-    //イベントハンドラー
-    void OnPlayerDeathAndEndAnim()
-    {
-        EndAnim();
     }
 }

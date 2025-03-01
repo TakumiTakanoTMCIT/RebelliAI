@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
@@ -6,9 +5,475 @@ using System;
 using System.Threading.Tasks;
 using UniRx;
 using Zenject;
+using System.Threading;
+using UnityEngine.UI;
+using UnityEditor.Compilation;
 
 namespace HPBar
 {
+    namespace Base
+    {
+        public class BaseHandler
+        {
+            public readonly RandomSpriteSetter randomSpriteSetter;
+            private readonly VisualLogic visualLogic;
+            private readonly HPBarInfo hPBarInfo;
+            private readonly PlayerState.EventMediator stateEventMediator;
+
+            private CancellationTokenSource cts;
+
+            public BaseHandler(RandomSpriteSetter randomSpriteSetter, VisualLogic visualLogic, HPBarInfo hPBarInfo, HPBar.EventMediator hpbarEventMediator, DisposableMgr disposableManager, PlayerState.EventMediator stateEventMediator)
+            {
+                this.randomSpriteSetter = randomSpriteSetter;
+                this.visualLogic = visualLogic;
+                this.hPBarInfo = hPBarInfo;
+                this.stateEventMediator = stateEventMediator;
+
+                hpbarEventMediator.OnPlayerDamage.Subscribe(_ =>
+                {
+                    Direction().Forget();
+                })
+                .AddTo(disposableManager.disposables);
+            }
+
+            /// <summary>
+            /// このメソッドが呼ばれたら、ランダムにBaseの見た目を変更し続けます
+            /// </summary>
+            private async UniTask Direction()
+            {
+                cts = new CancellationTokenSource();
+
+                UniTask.Void(async () =>
+                {
+                    try
+                    {
+                        await stateEventMediator.OnPlayerDamageRecover
+                            .First();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"エラー発生しました : {e.Message}");
+                        return;
+                    }
+                    finally
+                    {
+                        cts.Cancel();
+                        cts.Dispose();
+                    }
+                });
+
+                while (!cts.IsCancellationRequested)
+                {
+                    randomSpriteSetter.Direction();
+
+                    try
+                    {
+                        await UniTask.Delay(TimeSpan.FromSeconds(hPBarInfo.RandomWaitTime), cancellationToken: cts.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return;
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"エラー発生しました : {e.Message}");
+                        return;
+                    }
+                    finally
+                    {
+                        SetDefaultSprite();
+                    }
+                }
+            }
+
+            private void SetDefaultSprite()
+            {
+                visualLogic.SetSprite(hPBarInfo.defaultSprite);
+            }
+        }
+
+        public class RandomSpriteSetter
+        {
+            public readonly RandomLogic randomLogic;
+            public readonly VisualLogic visualLogic;
+
+            public RandomSpriteSetter(VisualLogic visualLogic, RandomLogic randomLogic)
+            {
+                this.visualLogic = visualLogic;
+                this.randomLogic = randomLogic;
+            }
+
+            /// <summary>
+            /// このメソッドが呼ばれたら、ランダムにBaseの見た目を変更します
+            /// </summary>
+            public void Direction()
+            {
+                //ランダムにSpriteを取得
+                var sprite = randomLogic.GetRandomSprite();
+                //Spriteをセット
+                visualLogic.SetSprite(sprite);
+            }
+        }
+
+        public class VisualLogic
+        {
+            private readonly Image baseImage;
+
+            public VisualLogic([Inject(Id = "Base")] Image baseiamge)
+            {
+                this.baseImage = baseiamge;
+            }
+
+            public void SetSprite(Sprite sprite)
+            {
+                baseImage.sprite = sprite;
+            }
+        }
+
+        public class RandomLogic
+        {
+            HPBarInfo hpBarInfo;
+
+            public RandomLogic(HPBarInfo hpBarInfo)
+            {
+                this.hpBarInfo = hpBarInfo;
+            }
+
+            public Sprite GetRandomSprite()
+            {
+                int random = UnityEngine.Random.Range(0, hpBarInfo.sprites.Count);
+                return hpBarInfo.sprites[random];
+            }
+        }
+    }
+
+    namespace Top
+    {
+        public class Handler
+        {
+            private readonly VisualLogic visualLogic;
+            private readonly RandomLogic randomLogic;
+            private readonly PlayerState.EventMediator stateEventMediator;
+            private readonly HPBarInfo hPBarInfo;
+
+            private CancellationTokenSource cts;
+
+            public Handler(HPBar.EventMediator hpbarEventMediator, DisposableMgr disposableMgr, PlayerState.EventMediator stateEventMediator, HPBarInfo hPBarInfo, VisualLogic visualLogic, RandomLogic randomLogic)
+            {
+                this.visualLogic = visualLogic;
+                this.randomLogic = randomLogic;
+                this.stateEventMediator = stateEventMediator;
+                this.hPBarInfo = hPBarInfo;
+
+                hpbarEventMediator.OnPlayerDamage.Subscribe(_ =>
+                {
+                    Direction().Forget();
+                })
+                .AddTo(disposableMgr.disposables);
+            }
+
+            //ダメージを食らったら演出を行います
+            //終了条件：ダメージから回復したら
+            private async UniTask Direction()
+            {
+                UniTask.Void(async () =>
+                {
+                    cts = new CancellationTokenSource();
+
+                    try
+                    {
+                        await stateEventMediator.OnPlayerDamageRecover
+                            .First();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"エラー発生しました : {e.Message}");
+                        return;
+                    }
+                    finally
+                    {
+                        cts.Cancel();
+                        cts.Dispose();
+                    }
+                });
+
+                while (true)
+                {
+                    ChangeSprite();
+
+                    try
+                    {
+                        await UniTask.Delay(TimeSpan.FromSeconds(hPBarInfo.RandomWaitTime), cancellationToken: cts.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"エラー発生しました : {e.Message}");
+                        return;
+                    }
+                    finally
+                    {
+                        visualLogic.SetSprite(hPBarInfo.topDefaultSprite);
+                    }
+                }
+            }
+
+            private void ChangeSprite()
+            {
+                var sprite = randomLogic.GetRandomSprite();
+                visualLogic.SetSprite(sprite);
+            }
+        }
+
+        public class RandomLogic
+        {
+            private readonly HPBarInfo hPBarInfo;
+
+            public RandomLogic(HPBarInfo hPBarInfo)
+            {
+                this.hPBarInfo = hPBarInfo;
+            }
+
+            public Sprite GetRandomSprite()
+            {
+                int random = UnityEngine.Random.Range(0, hPBarInfo.topSprites.Count);
+                return hPBarInfo.topSprites[random];
+            }
+        }
+
+        public class VisualLogic
+        {
+            private readonly Image topImage;
+
+            public VisualLogic([Inject(Id = "Top")] Image topImage)
+            {
+                this.topImage = topImage;
+            }
+
+            public void SetSprite(Sprite sprite)
+            {
+                topImage.sprite = sprite;
+            }
+        }
+    }
+
+    namespace Mid
+    {
+        /// <summary>
+        /// このクラスは、現在の中間バーを複数のグループに分ける責務を持ちます
+        /// </summary>
+        public class DivideLogic
+        {
+            //グループに分けるポイント(位置)
+            private List<int> devidePoint;// = new List<int> { 3, 5, 2 };
+
+            private List<List<GameObject>> grounpList = new List<List<GameObject>>();
+
+            //inject
+            private List<GameObject> midBarList;
+            private GroupSpriteSetter groupSpriteSetter;
+            private RandomDividePoint randomDividePoint;
+            private PlayerState.EventMediator playerStatsEventMediator;
+            private HPBarInfo hPBarInfo;
+
+            private CancellationTokenSource cts;
+
+            public DivideLogic(Mids mids, GroupSpriteSetter groupSpriteSetter, RandomDividePoint randomDividePoint, HPBar.EventMediator hpbarEventMediator, DisposableMgr disposableMgr, PlayerState.EventMediator playerStatsEventMediator, HPBarInfo hPBarInfo)
+            {
+                this.randomDividePoint = randomDividePoint;
+                this.groupSpriteSetter = groupSpriteSetter;
+                this.midBarList = mids.midBarList;
+                this.playerStatsEventMediator = playerStatsEventMediator;
+                this.hPBarInfo = hPBarInfo;
+
+                hpbarEventMediator.OnPlayerDamage.Subscribe(_ =>
+                {
+                    Direction().Forget();
+                })
+                .AddTo(disposableMgr.disposables);
+
+                /*Observable.Timer(TimeSpan.FromSeconds(0.01f)).Subscribe(_ =>
+                {
+                    Direction();
+                });*/
+            }
+
+            private async UniTask Direction()
+            {
+                UniTask.Void(async () =>
+                {
+                    cts = new CancellationTokenSource();
+
+                    try
+                    {
+                        await playerStatsEventMediator.OnPlayerDamageRecover
+                            .First();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"エラー発生しました : {e.Message}");
+                        return;
+                    }
+                    finally
+                    {
+                        cts.Cancel();
+                        cts.Dispose();
+                    }
+                });
+
+                while (!cts.IsCancellationRequested)
+                {
+                    devidePoint = randomDividePoint.GetRandomDividePoint();
+
+                    int count = 0;
+
+                    //まずグループに分けます
+
+                    //devedePointの数分だけグループを作成する
+                    for (int i = 0; i < devidePoint.Count; i++)
+                    {
+                        //グループを作る
+                        var group = new List<GameObject>();
+
+                        //そのグループに、devidePointの位置までの中間バーを追加する
+                        for (int j = 0; j < devidePoint[i]; j++)
+                        {
+                            group.Add(midBarList[count]);
+                            count++;
+                        }
+                        grounpList.Add(group);
+
+                        Debug.Log($"{i}番目のグループの要素は、{grounpList[i].Count}個です");
+                        SetSprite(i);
+                    }
+
+                    try
+                    {
+                        await UniTask.Delay(TimeSpan.FromSeconds(hPBarInfo.UnitRandomWaitTime), cancellationToken: cts.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return;
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError($"エラー発生しました : {e.Message}");
+                        return;
+                    }
+                    finally
+                    {
+                        //元に戻す
+                        //この処理は重要です！
+                        for (int i = 0; i < midBarList.Count; i++)
+                        {
+                            groupSpriteSetter.SetDefaultSprite(midBarList[i].GetComponent<Image>());
+                        }
+                    }
+                }
+            }
+
+            //指定のグループに対して、ランダムなSpriteをセットします
+            private void SetSprite(int groupNum)
+            {
+                groupSpriteSetter.SaveGroupRandomSprite();
+                for (int i = 0; i < grounpList[groupNum].Count; i++)
+                {
+                    groupSpriteSetter.Direction(grounpList[groupNum][i].GetComponent<Image>());
+                }
+            }
+        }
+
+        public class GroupSpriteSetter
+        {
+            private readonly RandomLogic randomLogic;
+            private readonly VisualLogic visualLogic;
+            private readonly HPBarInfo hPBarInfo;
+
+            private Sprite groupSprite;
+
+            public GroupSpriteSetter(RandomLogic randomLogic, VisualLogic visualLogic, HPBarInfo hPBarInfo)
+            {
+                this.randomLogic = randomLogic;
+                this.visualLogic = visualLogic;
+                this.hPBarInfo = hPBarInfo;
+            }
+
+            public void SaveGroupRandomSprite()
+            {
+                groupSprite = randomLogic.GetRandomSprite();
+            }
+
+            public void Direction(Image target)
+            {
+                visualLogic.SetSprite(target, groupSprite);
+            }
+
+            public void SetDefaultSprite(Image target)
+            {
+                visualLogic.SetSprite(target, hPBarInfo.midDefaultSprite);
+            }
+        }
+
+        public class VisualLogic
+        {
+            public void SetSprite(Image target, Sprite sprite)
+            {
+                target.sprite = sprite;
+            }
+        }
+
+        public class RandomLogic
+        {
+            private HPBarInfo hPBarInfo;
+
+            public RandomLogic(HPBarInfo hPBarInfo)
+            {
+                this.hPBarInfo = hPBarInfo;
+            }
+
+            public Sprite GetRandomSprite()
+            {
+                int random = UnityEngine.Random.Range(0, hPBarInfo.midSprites.Count);
+                return hPBarInfo.midSprites[random];
+            }
+        }
+
+        public class RandomDividePoint
+        {
+            private readonly HPBarInfo hPBarInfo;
+            private readonly Mids mids;
+
+            public RandomDividePoint(HPBarInfo hPBarInfo, Mids mids)
+            {
+                this.hPBarInfo = hPBarInfo;
+                this.mids = mids;
+            }
+
+            public List<int> GetRandomDividePoint()
+            {
+                int random = UnityEngine.Random.Range(0, hPBarInfo.devidePoints.Count);
+                var devidePoint = hPBarInfo.devidePoints[random].devidePoint;
+
+                int total = 0;
+                for (int i = 0; i < devidePoint.Count; i++)
+                {
+                    total += devidePoint[i];
+                }
+
+                if (total > mids.midBarList.Count)
+                {
+                    Debug.LogError("グループに分けるポイントの合計が中間バーの数を超えています");
+                    return new List<int> { };
+                }
+
+                return hPBarInfo.devidePoints[random].devidePoint;
+            }
+        }
+    }
+
     public abstract class HPBarBase : MonoBehaviour
     {
         [SerializeField] protected GameObject midPrefab, BaseObj, hpUnitPrefab;
@@ -105,14 +570,9 @@ namespace HPBar
 
     public class HPBarHandler : MonoBehaviour, IHealth
     {
-        [SerializeField] int InitialMaxLife = 1, InitialCurrentLife = 1;
-        [SerializeField] float intervalTime = 0.05f, addMidBarIntervalTime = 0.1f;
-        [SerializeField] GamePlayerManager gamePlayerManager;
-
         //Inject
         LifeManager lifeManager;
-
-        public static event Action onPlayerDamage;
+        EventMediator eventMediator;
 
         //プレイヤーのHPが0になったときに使用するSubject
         private Subject<Unit> onHPZero = new Subject<Unit>();
@@ -124,19 +584,20 @@ namespace HPBar
         PlayerStats playerStats = new PlayerStats();
 
         [Inject]
-        public void Construct(PlayerHP playerHP, PlayerHPVisual playerHPVisual, LifeManager lifeManager)
+        public void Construct(PlayerHP playerHP, PlayerHPVisual playerHPVisual, LifeManager lifeManager, HPBar.EventMediator eventMediator)
         {
             this.playerHP = playerHP;
             this.playerHPVisual = playerHPVisual;
             this.lifeManager = lifeManager;
+            this.eventMediator = eventMediator;
         }
 
         private void Awake()
         {
             lifeManager?.OnPlayerDead.Subscribe(_ =>
             {
-                    playerHP.Damage(playerHP.MaxLife);
-                    playerHPVisual.ChangeCurrentLife(-playerHP.MaxLife);
+                playerHP.Damage(playerHP.MaxLife);
+                playerHPVisual.ChangeCurrentLife(-playerHP.MaxLife);
             })
             .AddTo(this);
         }
@@ -185,9 +646,14 @@ namespace HPBar
             }
             else
             {
-                onPlayerDamage?.Invoke();
+                eventMediator.OnPlayerDamageObserver.OnNext(Unit.Default);
             }
         }
+    }
+
+    public class Mids
+    {
+        public List<GameObject> midBarList = new List<GameObject>();
     }
 
     /// <summary>
@@ -204,14 +670,14 @@ namespace HPBar
         int barHeight;
 
         List<GameObject> hpUnitList = new List<GameObject>();
-        List<GameObject> midBarList = new List<GameObject>();
+        List<GameObject> midBarList;
 
         RectTransform topTransform;
 
         int cachedMaxLifeYPos = 0;
 
         [Inject]
-        public PlayerHPVisual(PlayerHP playerHP, [Inject(Id = "Base")] GameObject Base, [Inject(Id = "Mid")] GameObject midPrefab, [Inject(Id = "Top")] GameObject TopObj, [Inject(Id = "HPUnit")] GameObject hpUnit, [Inject(Id = "BarHeight")] int barHeight)
+        public PlayerHPVisual(PlayerHP playerHP, [Inject(Id = "Base")] GameObject Base, [Inject(Id = "Mid")] GameObject midPrefab, [Inject(Id = "Top")] GameObject TopObj, [Inject(Id = "HPUnit")] GameObject hpUnit, [Inject(Id = "BarHeight")] int barHeight, Mids mids)
         {
             this.playerHP = playerHP;
             this.barHeight = barHeight;
@@ -220,6 +686,7 @@ namespace HPBar
             this.midPrefab = midPrefab;
             this.TopObj = TopObj;
             this.hpUnit = hpUnit;
+            this.midBarList = mids.midBarList;
         }
 
         public void InitVisual()
@@ -448,5 +915,12 @@ namespace HPBar
         {
             isDead = true;
         }
+    }
+
+    public class EventMediator
+    {
+        private Subject<Unit> onPlayerDamage = new Subject<Unit>();
+        public IObservable<Unit> OnPlayerDamage => onPlayerDamage;
+        public IObserver<Unit> OnPlayerDamageObserver => onPlayerDamage;
     }
 }

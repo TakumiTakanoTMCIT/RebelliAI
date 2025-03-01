@@ -20,13 +20,10 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
     ExplosionSpawner explosionSpawner;
     SpriteRenderer spriteRenderer;
 
-    [SerializeField] private bool isViewing = false, isInstanceAlive = false, isActive = false;
-
     [Inject]
     public void Construct(DanboruPool danboruPool)
     {
         this.danboruPool = danboruPool;
-        //Debug.Log("EnemySpawnPoser Constructed");
     }
 
     private void Awake()
@@ -84,28 +81,6 @@ public class EnemySpawnPoser : MonoBehaviour, IEnemyPosController
     {
         //スポナーが画面内に入ったら、インスタンスを生成する
         MakeInstance();
-    }
-
-    private void Update()
-    {
-        //画面内にスポナー（自身）が見えているかどうか
-        if (spriteRenderer.isVisible)
-            isViewing = true;
-        else
-            isViewing = false;
-
-        //インスタンスが生きているかどうか
-        if (instance == null)
-            isInstanceAlive = false;
-        else
-            isInstanceAlive = true;
-
-        //isActiveの更新
-        //生きていて、画面内に居て、インスタンスが生きている場合にtrue
-        /*if (instance != null && instance.IsVisible() && instance.IsAlivingNow)
-            isActive = true;
-        else
-            isActive = false;*/
     }
 
     private void OnDrawGizmos()

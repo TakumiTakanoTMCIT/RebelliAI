@@ -33,15 +33,17 @@ public class PlayerAnimStateHandler : MonoBehaviour
 
     EventStreamer eventStreamer;
     PlayerState.EventMediator eventMediator;
+    HPBar.EventMediator hpbarEventMediator;
 
     [Inject]
-    public void Construct(LifeManager lifeManager, AnimatorCtrl animatorCtrl, [Inject(Id = "Damage")] IPlayerAnimState damageState, EventStreamer eventStreamer, PlayerState.EventMediator eventMediator)
+    public void Construct(LifeManager lifeManager, AnimatorCtrl animatorCtrl, [Inject(Id = "Damage")] IPlayerAnimState damageState, EventStreamer eventStreamer, PlayerState.EventMediator eventMediator, HPBar.EventMediator hpbarEventMediator)
     {
         this.lifeManager = lifeManager;
         this.animatorCtrl = animatorCtrl;
         this.damageState = damageState;
         this.eventStreamer = eventStreamer;
         this.eventMediator = eventMediator;
+        this.hpbarEventMediator = hpbarEventMediator;
     }
 
     private void Awake()
@@ -103,21 +105,17 @@ public class PlayerAnimStateHandler : MonoBehaviour
             OnDeath();
         })
         .AddTo(this);
+
+        hpbarEventMediator.OnPlayerDamage.Subscribe(_ =>
+        {
+            OnDamage();
+        })
+        .AddTo(this);
     }
 
     public void OtherComponentGetter(GameFlowManager gameFlowManager)
     {
         this.gameFlowManager = gameFlowManager;
-    }
-
-    private void OnEnable()
-    {
-        HPBarHandler.onPlayerDamage += OnDamage;
-    }
-
-    private void OnDisable()
-    {
-        HPBarHandler.onPlayerDamage -= OnDamage;
     }
 
     public void ChangeAnimState(IPlayerAnimState newState)
