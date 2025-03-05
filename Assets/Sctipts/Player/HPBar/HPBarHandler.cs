@@ -493,7 +493,6 @@ namespace HPBar
 
             public void MoveGroup(List<GameObject> group)
             {
-                Debug.Log("MoveGroup");
                 for (int i = 0; i < group.Count; i++)
                 {
                     //50%の確率で移動する

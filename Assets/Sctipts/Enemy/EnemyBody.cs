@@ -1,4 +1,5 @@
 using System;
+using Item.HP;
 using ObjectPoolFactory;
 using UnityEngine;
 using Warp;
@@ -45,14 +46,16 @@ namespace Enemy
         ExplosionSpawner explosionSpawner;
         DanboruAnimStateMgr animStateMgr;
         SpriteRenderer spRenderer;
+        Item.HP.HPItemSpawner hPItemSpawner;
 
         //コールバック
         //Inject
         public Action<GameObject> releaseObject;
 
         [Inject]
-        public void Construct(PoolReleaser poolReleaser)
+        public void Construct(PoolReleaser poolReleaser, Item.HP.HPItemSpawner itemSpawner)
         {
+            hPItemSpawner = itemSpawner;
             releaseObject = obj => poolReleaser.ReleaseObj(obj);
         }
 
@@ -97,12 +100,15 @@ namespace Enemy
             {
                 DieAndReleaseObj();
                 explosionSpawner.MakeExplosion(transform.position);
+
+                //とりあえずHPアイテムを出す
+                hPItemSpawner.DropHPItem(transform.position);
             }
         }
 
         public void DieAndReleaseObj()
         {
-            if(!IsAlivingNow) return;
+            if (!IsAlivingNow) return;
 
             hp = 0;
             IsAlivingNow = false;
