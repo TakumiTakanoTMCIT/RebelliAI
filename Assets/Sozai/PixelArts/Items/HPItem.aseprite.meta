@@ -2,7 +2,22 @@ fileFormatVersion: 2
 guid: 25325659dd956494faa2e58de7b82b02
 ScriptedImporter:
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:AnimationClip
+      assembly: UnityEngine.AnimationModule
+      name: Idling
+    second: {fileID: 7400000, guid: 631c9cb7ed9344f58961551547a64f2d, type: 2}
+  - first:
+      type: UnityEngine:AnimationClip
+      assembly: UnityEngine.AnimationModule
+      name: Spawn
+    second: {fileID: 7400000, guid: 38b24de4931cb4623a3552b029ce1a72, type: 2}
+  - first:
+      type: UnityEngine:AnimationClip
+      assembly: UnityEngine.AnimationModule
+      name: SpawnBlinkng
+    second: {fileID: 7400000, guid: f83db8f9c0af54c669c33e291cb3548f, type: 2}
   serializedVersion: 2
   userData: 
   assetBundleName: 
@@ -95,7 +110,7 @@ ScriptedImporter:
     addSortingGroup: 1
     addShadowCasters: 0
   importFileNodeState: 1
-  platformSettingsDirtyTick: 638768320713025850
+  platformSettingsDirtyTick: 638769722006731560
   textureAssetName: 
   singleSpriteImportData:
   - name: 
