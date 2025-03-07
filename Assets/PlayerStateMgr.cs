@@ -14,11 +14,6 @@ namespace PlayerState
 {
     public class PlayerStateMgr : MonoBehaviour
     {
-        [Inject]
-        private DiContainer container;
-        [Inject]
-        private ActionHandler actionHandler;
-
         [SerializeField]
         private bool isDebugCurrentState = false;
 
@@ -26,10 +21,10 @@ namespace PlayerState
         LifeManager lifeManager;
         EventStreamer eventStreamer;
         HPBar.EventMediator hpbarEventMediator;
+        PlayerState.EventMediator playerStateEventMediator;
 
         private bool isChangeableState = true;
         private bool isExecutable;
-        private WallKickDelayManager wallKickDelayManager;
 
         public IState idleState, walkState, jumpState, jumpToFallState, fallState, wallFallState, wallKick, wallKickToFallState,
         dashState, damageState, deathState;
@@ -38,7 +33,7 @@ namespace PlayerState
         public ReactiveProperty<IState> currentState = new ReactiveProperty<IState>();
 
         [Inject]
-        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death, LifeManager lifeManager, [Inject(Id = "JumpToFall")] IState jumpToFall, [Inject(Id = "WallKickToFall")] IState wallKickToFall, EventStreamer eventStreamer, HPBar.EventMediator hpbarEventMediator)
+        public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death, LifeManager lifeManager, [Inject(Id = "JumpToFall")] IState jumpToFall, [Inject(Id = "WallKickToFall")] IState wallKickToFall, EventStreamer eventStreamer, HPBar.EventMediator hpbarEventMediator, PlayerState.EventMediator eventMediator)
         {
             dashState = dash;
             idleState = idle;
@@ -55,27 +50,18 @@ namespace PlayerState
             this.lifeManager = lifeManager;
             this.eventStreamer = eventStreamer;
             this.hpbarEventMediator = hpbarEventMediator;
+            this.playerStateEventMediator = eventMediator;
         }
 
         private void Awake()
         {
-            //コンポーネントを取得
-            wallKickDelayManager = gameObject.MyGetComponent_NullChker<WallKickDelayManager>();
-
-            //TODO : このInject書く意味なくね？
-            //Injectしています
-            container.Inject(dashState);
-            container.Inject(wallKick);
-            container.Inject(damageState);
-            container.Inject(wallFallState);
+            isExecutable = false;
 
             GameFlowManager.StartBattleAction.Subscribe(_ =>
             {
                 ChangeState(idleState);
             })
             .AddTo(this);
-
-            isExecutable = false;
 
             lifeManager.OnPlayerDead.Subscribe(_ =>
             {
@@ -109,35 +95,16 @@ namespace PlayerState
                 OnDamage();
             })
             .AddTo(this);
-        }
 
-        //イベントの登録
-        private void OnEnable()
-        {
-            wallKickDelayManager.OnWallKickRequest += () => ChangeState(wallKick);
-        }
-
-        //イベントの登録解除
-        private void OnDisable()
-        {
-            //責務に反してるのかな...?でもどこかでDisposeしないといけないのでここでやるしかない。検討の余地あり！UniRxを使えばこんなのいらないかもしれない!!
-            actionHandler.Dispose();
-
-            wallKickDelayManager.OnWallKickRequest += () => ChangeState(wallKick);
+            playerStateEventMediator.OnChangeToWallKickState.Subscribe(_ =>
+            {
+                ChangeState(wallKick);
+            })
+            .AddTo(this);
         }
 
         private void Update()
         {
-            //TODO: この処理は後で消す
-            if (Input.GetKeyDown(KeyCode.U))
-            {
-                Time.timeScale = 1f;
-            }
-            else if (Input.GetKeyDown(KeyCode.I))
-            {
-                Time.timeScale = 0.05f;
-            }
-
             if (!isExecutable) return;
             currentState.Value.Execute(this);
         }
@@ -550,11 +517,13 @@ namespace PlayerState
 
         private readonly PlayerStateData stateData;
         private readonly MuzzulePositionManager muzzulePositionManager;
+        private readonly WallKickHandler wallKickLogic;
 
-        public Jump(PlayerStateData stateData, MuzzulePositionManager muzzulePositionManager)
+        public Jump(PlayerStateData stateData, MuzzulePositionManager muzzulePositionManager, WallKickHandler wallKickLogic)
         {
             this.stateData = stateData;
             this.muzzulePositionManager = muzzulePositionManager;
+            this.wallKickLogic = wallKickLogic;
         }
 
         public void Enter(PlayerStateMgr stateMgr)
@@ -588,10 +557,9 @@ namespace PlayerState
                     stateMgr.ChangeState(stateMgr.walkState);
             }
 
-            if (stateData.InputHandler.IsJumpKeyDown())
+            if (wallKickLogic.Execute())
             {
-                if (stateData.ActionStatusChecker.IsFarWall(false) || stateData.ActionStatusChecker.IsFarWall(true))
-                    stateMgr.ChangeState(stateMgr.wallKick);
+                return;
             }
 
             if (!stateData.ActionStatusChecker.isJumpingNow() && stateData.ActionStatusChecker.IsFallingNow())
@@ -654,10 +622,12 @@ namespace PlayerState
     {
         //Inject
         private readonly PlayerStateData stateData;
+        private readonly WallKickHandler wallKickHandler;
 
-        public JumpToFall(PlayerStateData stateData, EventMediator eventMediator, DisposableMgr disposableMgr, PlayerStateMgr stateMgr)
+        public JumpToFall(PlayerStateData stateData, EventMediator eventMediator, DisposableMgr disposableMgr, PlayerStateMgr stateMgr, WallKickHandler wallKickHandler)
         {
             this.stateData = stateData;
+            this.wallKickHandler = wallKickHandler;
 
             //Mediatorを介して、JumpToFallアニメが終了したら遷移する購読です。
             eventMediator.OnEndJumpToFallAnim.Subscribe(_ =>
@@ -678,6 +648,11 @@ namespace PlayerState
             if (stateData.ActionStatusChecker.IsGround())
             {
                 stateMgr.ChangeState(stateMgr.idleState);
+                return;
+            }
+
+            if (wallKickHandler.Execute())
+            {
                 return;
             }
 
@@ -974,6 +949,8 @@ namespace PlayerState
             stateData.ActionHandler.StopY();
             wallKickManger.Start_JumpKey_AcceptingTime();
             stateMgr.ChangeState(stateMgr.fallState);
+
+            //Debug.Log("ChangeFallState");
         }
     }
 
@@ -998,6 +975,8 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
+            //Debug.Log("EnterWallKick");
+
             isWalkNow = false;
             isOneTimeAbleTo_TurnOn_KeepDashSpeed = false;
 
@@ -1047,6 +1026,8 @@ namespace PlayerState
                     return;
                 }
 
+                //これが実行される可能性はかなり低いです。
+                //Debug.Log("<color=yellow>FallStateに遷移します</color>");
                 stateMgr.ChangeState(stateMgr.fallState);
                 return;
             }
@@ -1142,16 +1123,20 @@ namespace PlayerState
         public bool isWalkNow { get; set; }
 
         public readonly PlayerStateData stateData;
+        private readonly WallKickHandler wallKickHandler;
 
-        public WallKickToFall(PlayerStateData playerStateData, EventMediator eventMediator, DisposableMgr disposableMgr, PlayerStateMgr playerStateMgr)
+        public WallKickToFall(PlayerStateData playerStateData, EventMediator eventMediator, DisposableMgr disposableMgr, PlayerStateMgr playerStateMgr, WallKickHandler wallKickHandler)
         {
             stateData = playerStateData;
+            this.wallKickHandler = wallKickHandler;
 
-            eventMediator.OnEndWallKickToFallAnim.Subscribe(_ =>
-            {
-                playerStateMgr.ChangeState(playerStateMgr.fallState);
-            })
-            .AddTo(disposableMgr.disposables);
+            eventMediator.OnEndWallKickToFallAnim
+                .Where(_ => playerStateMgr.WhatCurrentState(playerStateMgr.wallKickToFallState))
+                .Subscribe(_ =>
+                {
+                    playerStateMgr.ChangeState(playerStateMgr.fallState);
+                })
+                .AddTo(disposableMgr.disposables);
         }
 
         public void Enter(PlayerStateMgr stateMgr)
@@ -1173,6 +1158,11 @@ namespace PlayerState
                     stateMgr.ChangeState(stateMgr.walkState);
                     return;
                 }
+            }
+
+            if (wallKickHandler.Execute())
+            {
+                return;
             }
 
             ExecuteWalk(stateMgr);
@@ -1261,6 +1251,33 @@ namespace PlayerState
         }
     }
 
+    public class WallKickHandler
+    {
+        private readonly PlayerStateData stateData;
+
+        private readonly PlayerStateMgr stateMgr;
+
+        public WallKickHandler(PlayerStateData stateData, PlayerStateMgr stateMgr)
+        {
+            this.stateData = stateData;
+            this.stateMgr = stateMgr;
+        }
+
+        public bool Execute()
+        {
+            if (stateData.InputHandler.IsJumpKeyDown())
+            {
+                if (stateData.ActionStatusChecker.IsFarWall(false) || stateData.ActionStatusChecker.IsFarWall(true))
+                {
+                    stateMgr.ChangeState(stateMgr.wallKick);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
     //会話やワープの時に使うステート
     public class NeutralState : IState
     {
@@ -1293,5 +1310,9 @@ namespace PlayerState
         private Subject<Unit> onPlayerDamageRecover = new Subject<Unit>();
         public IObservable<Unit> OnPlayerDamageRecover => onPlayerDamageRecover;
         public IObserver<Unit> PlayerDamageRecover => onPlayerDamageRecover;
+
+        private Subject<Unit> onChangeToWallKickState = new Subject<Unit>();
+        public IObservable<Unit> OnChangeToWallKickState => onChangeToWallKickState;
+        public IObserver<Unit> ChangeToWallKickState => onChangeToWallKickState;
     }
 }

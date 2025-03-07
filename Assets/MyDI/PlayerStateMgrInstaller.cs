@@ -20,7 +20,11 @@ public class PlayerStateMgrInstaller : MonoInstaller
 
         Container.Bind<PlayerStateData>()
             .AsSingle()
-            .WithArguments(inputHandler, actionStatusChecker, animStateHandler, dashKeepManager);
+            .WithArguments(actionStatusChecker, animStateHandler, dashKeepManager);
+
+        Container.Bind<InputHandler>()
+            .FromInstance(inputHandler)
+            .AsSingle();
 
         Container.Bind<PlayerState.EventMediator>()
             .AsSingle();
@@ -58,6 +62,9 @@ public class PlayerStateMgrInstaller : MonoInstaller
         Container.Bind<IState>()
             .WithId("Fall")
             .To<PlayerState.Fall>()
+            .AsSingle();
+
+        Container.Bind<WallKickHandler>()
             .AsSingle();
 
         Container.Bind<PlayerState.WallFall>().AsSingle();//WallFallを明示的にBindすることで、FromResolveで取得できるようにしています。

@@ -6,8 +6,6 @@ using System;
 using UniRx;
 using Cysharp.Threading.Tasks;
 using System.Threading;
-using UnityEngine.InputSystem.LowLevel;
-using ObjectPoolFactory;
 
 namespace Item
 {
@@ -88,7 +86,7 @@ namespace Item
             public GameObject DropHPItem(Vector2 pos)
             {
                 var obj = objPoolLogic.Instantiate(pos);
-                actLogic.Jump(obj.GetComponent<Rigidbody2D>(), 5);
+                actLogic.Jump(obj.GetComponent<Rigidbody2D>(), 10);
                 return obj;
             }
         }
@@ -156,16 +154,12 @@ namespace Item
             private Animator animator;
             private Rigidbody2D rb;
 
-            bool isSpawn = false;
-
             public AnimHandler(AnimLogic animLogic, DisposableMgr disposableMgr, EventMediator eventMediator, RbLogic rbLogic)
             {
-                isSpawn = false;
-
                 this.animLogic = animLogic;
 
                 //上昇中だけど上昇スピードが遅くなったらSpawnのアニメーションを再生します
-                Observable.EveryUpdate()
+                /*Observable.EveryUpdate()
                     .Where(_ => !isSpawn)
                     .Where(_ => rbLogic.IsSlowlyJumping(rb, 2f))
                     .Subscribe(_ =>
@@ -173,7 +167,7 @@ namespace Item
                         animLogic.SetTrigger(animator, "onSpawn");
                         isSpawn = true;
                     })
-                    .AddTo(disposableMgr.disposables);
+                    .AddTo(disposableMgr.disposables);*/
             }
 
             public void Init(Animator animator, Rigidbody2D rb)

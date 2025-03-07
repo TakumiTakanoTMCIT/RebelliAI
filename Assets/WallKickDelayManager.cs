@@ -4,6 +4,7 @@ using KeyHandler;
 using System;
 using Cysharp.Threading.Tasks;
 using System.Threading;
+using UniRx;
 
 /// <summary>
 /// このクラスは、壁蹴りの受付時間を管理するクラスです。
@@ -12,19 +13,26 @@ using System.Threading;
 public class WallKickDelayManager : MonoBehaviour
 {
     [Inject]
-    PlayerStats playerStatus;
+    PlayerStats playerStats;
 
-    InputHandler inputHandler;
-
-    public Action OnWallKickRequest;
-
-    private bool isJumpKey_Accepting = false;
+    private IReactiveProperty<bool> isJumpKeyReactiveProperty = new ReactiveProperty<bool>();
 
     private CancellationTokenSource cts;
 
+    //Inject
+    private PlayerState.EventMediator eventMediator;
+    private InputHandler inputHandler;
+
+    [Inject]
+    public void Construct(PlayerState.EventMediator eventMediator, InputHandler inputHandler)
+    {
+        this.eventMediator = eventMediator;
+        this.inputHandler = inputHandler;
+    }
+
     private void Awake()
     {
-        inputHandler = this.gameObject.MyGetComponent_NullChker<InputHandler>();
+        isJumpKeyReactiveProperty.Value = false;
     }
 
     /// <summary>
@@ -32,10 +40,11 @@ public class WallKickDelayManager : MonoBehaviour
     /// </summary>
     private async UniTask JumpKey_Accepting(CancellationTokenSource cts)
     {
-        isJumpKey_Accepting = true;
+        //Debug.Log("<color=red>JumpKey_Accepting</color>");
+        isJumpKeyReactiveProperty.Value = true;
         try
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(playerStatus.delayKey_reception_time), cancellationToken: cts.Token);
+            await UniTask.Delay(TimeSpan.FromSeconds(playerStats.delayKey_reception_time), cancellationToken: cts.Token);
         }
         catch (OperationCanceledException)
         {
@@ -47,13 +56,13 @@ public class WallKickDelayManager : MonoBehaviour
         }
         finally
         {
-            isJumpKey_Accepting = false;
+            isJumpKeyReactiveProperty.Value = false;
         }
     }
 
     public void Start_JumpKey_AcceptingTime()
     {
-        if (isJumpKey_Accepting)
+        if (isJumpKeyReactiveProperty.Value)
         {
             Stop_JumpKey_AcceptingTime();
         }
@@ -63,25 +72,24 @@ public class WallKickDelayManager : MonoBehaviour
 
     public void Stop_JumpKey_AcceptingTime()
     {
-        if (isJumpKey_Accepting)
+        if (isJumpKeyReactiveProperty.Value)
         {
-            cts.Cancel();
+            cts?.Cancel();
         }
     }
 
     private void Update()
     {
-        //受付時間以外なら受け付けない
-        if (!isJumpKey_Accepting) return;
+        if (isJumpKeyReactiveProperty.Value == false) return;
 
-        //ジャンプキーが押されたら
         if (inputHandler.IsJumpKeyDown())
         {
             //コルーチンの受け付け時間を終了する
             Stop_JumpKey_AcceptingTime();
 
             //wallkickに遷移する
-            OnWallKickRequest?.Invoke();
+            eventMediator.ChangeToWallKickState.OnNext(Unit.Default);
+            //Debug.Log("<color=blue>WallKickStateに遷移させます</color>");
         }
     }
 }

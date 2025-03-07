@@ -28,7 +28,7 @@ namespace PlayerAction
         private Subject<bool> dashSubject = new Subject<bool>();
         public IObservable<bool> OnDash => dashSubject;
 
-        public ActionHandler(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerDashKeepManager dashKeepManager, LifeManager lifeManager, IDirection playerDirection, PlayerStats playerStatus, EventStreamer eventStreamer)
+        public ActionHandler(Rigidbody2D rb, ActionStatusChecker actionStatusChecker, PlayerDashKeepManager dashKeepManager, LifeManager lifeManager, IDirection playerDirection, PlayerStats playerStatus, EventStreamer eventStreamer, DisposableMgr disposableMgr)
         {
             this.rb = rb;
             this.actionStatusChecker = actionStatusChecker;
@@ -40,17 +40,16 @@ namespace PlayerAction
             {
                 OnPlayerDeath();
             })
-            .AddTo(lifeManager);
+            .AddTo(disposableMgr.disposables);
 
             eventStreamer.finishBossDoorCutScene.Subscribe(_ =>
             {
                 StopX();
                 StopY();
             })
-            .AddTo(lifeManager);
+            .AddTo(disposableMgr.disposables);
         }
 
-        //PlayerStateMgrが破棄されたときに呼ばれる
         public void Dispose()
         {
         }
