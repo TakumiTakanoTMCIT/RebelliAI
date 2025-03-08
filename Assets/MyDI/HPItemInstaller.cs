@@ -10,8 +10,16 @@ public class HPItemInstaller : MonoInstaller
     [SerializeField]
     Transform hpItemParent;
 
+    [SerializeField]
+    HPItemInfo hpItemInfo;
+
     public override void InstallBindings()
     {
+        Container.Bind<HPItemInfo>()
+            .WithId("HPItem")
+            .FromInstance(hpItemInfo)
+            .AsSingle();
+
         Container.BindFactory<HPItem, HPItem.Factory>()
             .FromComponentInNewPrefab(hpItemPrefab)
             .AsSingle()
@@ -46,12 +54,6 @@ public class HPItemInstaller : MonoInstaller
 
         Container.Bind<Item.HP.EventMediator>()
             .AsSingle();
-
-        Container.Bind<Item.HP.AnimLogic>()
-            .AsSingle();
-
-        Container.Bind<Item.HP.AnimHandler>()
-            .AsTransient();
 
         Container.Bind<Item.HP.RbLogic>()
             .AsTransient();

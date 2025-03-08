@@ -2207,7 +2207,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 68.18, y: 3.8099968, z: -6.011218}
+  m_LocalPosition: {x: 2.2402873, y: 4.160012, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -8846,7 +8846,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19c876e88935e4abfb91bef9625b6f97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isDebugCurrentState: 1
+  isDebugCurrentState: 0
 --- !u!50 &906999091
 Rigidbody2D:
   serializedVersion: 4
@@ -15900,6 +15900,7 @@ MonoBehaviour:
   hpItemPrefab: {fileID: 3295565572412452154, guid: 523a8cc7ca55146e0bbe2a249d0e5a51, type: 3}
   spawnerPrefab: {fileID: 7380216272231223751, guid: f708b4fe3ea5e48c29b0c2562ba1eb5e, type: 3}
   hpItemParent: {fileID: 2056078466}
+  hpItemInfo: {fileID: 11400000, guid: 6e41bbe6355be4b98bf535e9f8d25134, type: 2}
 --- !u!1001 &1134130826
 PrefabInstance:
   m_ObjectHideFlags: 0

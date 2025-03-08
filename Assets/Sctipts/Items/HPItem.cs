@@ -96,26 +96,21 @@ namespace Item
         {
             public class Factory : PlaceholderFactory<HPItem> { }
 
-            [SerializeField]
-            private int healAmount = 1;
-
             private SpriteRenderer spriteRenderer;
 
             //Inject
             IHealth playerHealth;
             EventMediator eventMediator;
             AutoDisappearLogic autoDisappearLogic;
-            AnimHandler animHandler;
+            HPItemInfo hpItemInfo;
 
             [Inject]
-            public void Construct(IHealth health, EventMediator eventMediator, AutoDisappearLogic autoDisappearLogic, AnimHandler animHandler, RbLogic rbLogic)
+            public void Construct(IHealth health, EventMediator eventMediator, AutoDisappearLogic autoDisappearLogic, RbLogic rbLogic, [Inject(Id = "HPItem")]HPItemInfo hpItemInfo)
             {
                 playerHealth = health;
                 this.eventMediator = eventMediator;
                 this.autoDisappearLogic = autoDisappearLogic;
-                this.animHandler = animHandler;
-
-                animHandler.Init(GetComponent<Animator>(), GetComponent<Rigidbody2D>());
+                this.hpItemInfo = hpItemInfo;
             }
 
             private void Awake()
@@ -125,7 +120,12 @@ namespace Item
 
             private void OnEnable()
             {
-                autoDisappearLogic.AutoDisappear(gameObject, spriteRenderer, 2f, 2f).Forget();
+                autoDisappearLogic.AutoDisappear(gameObject, spriteRenderer).Forget();
+            }
+
+            private void OnDisable()
+            {
+                autoDisappearLogic.CancellDirection();
             }
 
             private void OnTriggerEnter2D(Collider2D other)
@@ -133,7 +133,7 @@ namespace Item
                 if (other.gameObject.CompareTag("Player"))
                 {
                     //プレイヤーのHPを回復させる
-                    playerHealth.Heal(healAmount);
+                    playerHealth.Heal(hpItemInfo.healAmount);
 
                     //プールに自分を戻します
                     eventMediator.OnDisposeObserver.OnNext(gameObject);
@@ -141,61 +141,15 @@ namespace Item
                     // 点滅をキャンセルします
                     // この処理は重要です！やらないとバグるぞ！！
                     autoDisappearLogic.CancellDirection();
-                    animHandler.EndAnim();
                 }
-            }
-        }
-
-        public class AnimHandler
-        {
-            //Inject
-            private readonly AnimLogic animLogic;
-
-            private Animator animator;
-            private Rigidbody2D rb;
-
-            public AnimHandler(AnimLogic animLogic, DisposableMgr disposableMgr, EventMediator eventMediator, RbLogic rbLogic)
-            {
-                this.animLogic = animLogic;
-
-                //上昇中だけど上昇スピードが遅くなったらSpawnのアニメーションを再生します
-                /*Observable.EveryUpdate()
-                    .Where(_ => !isSpawn)
-                    .Where(_ => rbLogic.IsSlowlyJumping(rb, 2f))
-                    .Subscribe(_ =>
-                    {
-                        animLogic.SetTrigger(animator, "onSpawn");
-                        isSpawn = true;
-                    })
-                    .AddTo(disposableMgr.disposables);*/
-            }
-
-            public void Init(Animator animator, Rigidbody2D rb)
-            {
-                this.animator = animator;
-                this.rb = rb;
-
-                animLogic.SetTrigger(animator, "onSpawn");
-            }
-
-            public void EndAnim()
-            {
-                animLogic.SetTrigger(animator, "onEnding");
             }
         }
 
         public class RbLogic
         {
-            private Rigidbody2D rb;
-
-            public void Init(Rigidbody2D rb)
-            {
-                this.rb = rb;
-            }
-
             public bool IsSlowlyJumping(Rigidbody2D rb, float threshold)
             {
-                return rb.velocity.y < threshold && rb.velocity.y > 0;
+                return 0 < rb.velocity.y && rb.velocity.y < threshold;
             }
         }
 
@@ -204,13 +158,15 @@ namespace Item
             //Inject
             private readonly EventMediator eventMediator;
             private readonly BlinkingHandler blinkingHandler;
+            private readonly HPItemInfo hpItemInfo;
 
             private CancellationTokenSource cts;
 
-            public AutoDisappearLogic(EventMediator eventMediator, BlinkingHandler blinkingHandler)
+            public AutoDisappearLogic(EventMediator eventMediator, BlinkingHandler blinkingHandler, [Inject(Id = "HPItem")]HPItemInfo hpItemInfo)
             {
                 this.eventMediator = eventMediator;
                 this.blinkingHandler = blinkingHandler;
+                this.hpItemInfo = hpItemInfo;
             }
 
             public void CancellDirection()
@@ -219,7 +175,7 @@ namespace Item
                 cts = null;
             }
 
-            public async UniTask AutoDisappear(GameObject obj, SpriteRenderer spriteRenderer, float initialDisplayTime, float blinkingTime)
+            public async UniTask AutoDisappear(GameObject obj, SpriteRenderer spriteRenderer)
             {
                 //　初期化
                 blinkingHandler.SetSpriteRenderer(spriteRenderer);
@@ -230,7 +186,7 @@ namespace Item
                 // initialDisplayTime秒だけまつ
                 try
                 {
-                    await UniTask.Delay(TimeSpan.FromSeconds(initialDisplayTime), cancellationToken: cts.Token);
+                    await UniTask.Delay(TimeSpan.FromSeconds(hpItemInfo.initialDisplayTime), cancellationToken: cts.Token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -249,7 +205,7 @@ namespace Item
                 // つまりblinkingTime秒だけ待機します。
                 try
                 {
-                    await UniTask.Delay(TimeSpan.FromSeconds(blinkingTime), cancellationToken: cts.Token);
+                    await UniTask.Delay(TimeSpan.FromSeconds(hpItemInfo.blinkingTime), cancellationToken: cts.Token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -337,6 +293,11 @@ namespace Item
         {
             public void Visible(SpriteRenderer sr)
             {
+                if (sr == null)
+                {
+                    Debug.Log("SpriteRendererがnullです");
+                    return;
+                }
                 sr.color = Color.white;
             }
 
@@ -351,14 +312,6 @@ namespace Item
             public void Jump(Rigidbody2D targetRb, float force)
             {
                 targetRb.AddForce(Vector2.up * force, ForceMode2D.Impulse);
-            }
-        }
-
-        public class AnimLogic
-        {
-            public void SetTrigger(Animator animator, string triggerName)
-            {
-                animator.SetTrigger(triggerName);
             }
         }
 
