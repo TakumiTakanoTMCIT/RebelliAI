@@ -482,23 +482,32 @@ namespace PlayerState
             {
                 dashTimeCtrl.StopDashTimeCtrl();
 
-                /// <summary>
-                /// 向きをコンストラクタで渡し、ダッシュのステートに遷移する
-                /// </summary>
+                if (!stateData.InputHandler.IsMoveKey())
+                {
+                    //移動キーが押されずにダッシュキーのみ押されたら...
+                    //一応明示的にこの処理を書いておきます
+                    ChangeDashState(stateMgr, direction);
+                    return;
+                }
+
                 if (stateData.InputHandler.IsMoveLeftKey())
                 {
-                    (stateMgr.dashState as Dash)?.DirectionSetter(false);
-                    stateMgr.ChangeState(stateMgr.dashState);
+                    ChangeDashState(stateMgr, false);
                     return;
                 }
 
                 if (stateData.InputHandler.IsMoveRightKey())
                 {
-                    (stateMgr.dashState as Dash)?.DirectionSetter(true);
-                    stateMgr.ChangeState(stateMgr.dashState);
+                    ChangeDashState(stateMgr, true);
                     return;
                 }
             }
+        }
+
+        public void ChangeDashState(PlayerStateMgr stateMgr, bool direction)
+        {
+            (stateMgr.dashState as Dash)?.DirectionSetter(direction);
+            stateMgr.ChangeState(stateMgr.dashState);
         }
 
         public void Exit(PlayerStateMgr stateMgr)
@@ -813,8 +822,12 @@ namespace PlayerState
 
     public interface IWallFallSubject
     {
-        IObservable<Unit> OnEnteredWallFall { get; }
-        IObservable<Unit> OnExitWallFall { get; }
+        //ぶつかっている方向をboolで表します。
+        //Playerの右側をtrueとしたときに、PlayerがWallFallしている顔の向きをboolに入れる値とします
+        IObservable<bool> OnEnteredWallFall { get; }
+
+        IObservable<Unit> OnChangeToWallKick { get; }
+        IObservable<Unit> OnChangeToIdleOrFall { get; }
     }
 
     public class WallFall : IState, IWallFallSubject
@@ -835,11 +848,14 @@ namespace PlayerState
         [Inject]
         WallKickDelayManager wallKickManger;
 
-        private Subject<Unit> enteredWallFall = new Subject<Unit>();
-        public IObservable<Unit> OnEnteredWallFall => enteredWallFall;
+        private Subject<bool> enteredWallFall = new Subject<bool>();
+        public IObservable<bool> OnEnteredWallFall => enteredWallFall;
 
-        private Subject<Unit> exitWallFall = new Subject<Unit>();
-        public IObservable<Unit> OnExitWallFall => exitWallFall;
+        private Subject<Unit> changeToWallKick = new Subject<Unit>();
+        public IObservable<Unit> OnChangeToWallKick => changeToWallKick;
+
+        private Subject<Unit> changetoIdleorFall = new Subject<Unit>();
+        public IObservable<Unit> OnChangeToIdleOrFall => changetoIdleorFall;
 
         public WallFall(PlayerStateData stateData, MuzzulePositionManager muzzulePositionManager)
         {
@@ -870,7 +886,8 @@ namespace PlayerState
                 wall_facing_which = false;
             }
 
-            enteredWallFall?.OnNext(Unit.Default);
+            //Playerの向いている顔の向きが右ならtrueとする
+            enteredWallFall?.OnNext(!wall_facing_which);
         }
 
         public void Execute(PlayerStateMgr stateMgr)
@@ -879,6 +896,7 @@ namespace PlayerState
             if (stateData.ActionStatusChecker.IsGround())
             {
                 stateMgr.ChangeState(stateMgr.idleState);
+                changetoIdleorFall?.OnNext(Unit.Default);
                 return;
             }
 
@@ -919,6 +937,7 @@ namespace PlayerState
             //壁キック判定
             if (stateData.InputHandler.IsJumpKeyDown())
             {
+                changeToWallKick?.OnNext(Unit.Default);
                 stateMgr.ChangeState(stateMgr.wallKick);
                 return;
             }
@@ -941,16 +960,14 @@ namespace PlayerState
         {
             //ExitしたらfalseにしてWallFallの処理をできないようにする
             IsWallFallExecutable = false;
-            exitWallFall?.OnNext(Unit.Default);
         }
 
         private void ChangeFallState(PlayerStateMgr stateMgr)
         {
             stateData.ActionHandler.StopY();
             wallKickManger.Start_JumpKey_AcceptingTime();
+            changetoIdleorFall?.OnNext(Unit.Default);
             stateMgr.ChangeState(stateMgr.fallState);
-
-            //Debug.Log("ChangeFallState");
         }
     }
 

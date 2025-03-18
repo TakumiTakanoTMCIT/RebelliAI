@@ -182,7 +182,7 @@ namespace WallFallEffect
         {
             this.poolLogic = poolLogic;
 
-            TimeSpan timeSpan = TimeSpan.FromSeconds(0.08f);
+            TimeSpan timeSpan = TimeSpan.FromSeconds(0.15f);
             Observable.Interval(timeSpan)
                 .Where(_ => playerStateMgr.WhatCurrentState(playerStateMgr.wallFallState))//WallFallStateならば〜
                 .Subscribe(_ => CreateWallFallEffect())

@@ -24,7 +24,10 @@ public class CameraSwitcherKai : MonoBehaviour
     private void Start()
     {
         isInRange = false;
-        currentCameraRange = cameraRanges[0];
+        if(cameraRanges[0] != null)
+        {
+            currentCameraRange = cameraRanges[0];
+        }
     }
 
     private void Update()

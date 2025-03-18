@@ -34,8 +34,6 @@ namespace PlayerFlip
         //インターフェースを介して使用してください
         public IReadOnlyReactiveProperty<bool> Direction => _direction;
 
-        //[Inject] Examplerr examplerr;
-
         public void FlipX(bool direction)
         {
             _direction.Value = direction;
@@ -61,13 +59,19 @@ namespace PlayerFlip
             })
             .AddTo(_disposableMgr.disposables);
 
-            wallFallSubject.OnEnteredWallFall.Subscribe(_ =>
+            wallFallSubject.OnEnteredWallFall.Subscribe(direction =>
             {
-                playerFlipXLogic.Reverse();
+                playerFlipXLogic.FlipX(direction);
             })
             .AddTo(_disposableMgr.disposables);
 
-            wallFallSubject.OnExitWallFall.Subscribe(_ =>
+            wallFallSubject.OnChangeToIdleOrFall.Subscribe(_ =>
+            {
+
+            })
+            .AddTo(_disposableMgr.disposables);
+
+            wallFallSubject.OnChangeToWallKick.Subscribe(_ =>
             {
                 playerFlipXLogic.Reverse();
             })
