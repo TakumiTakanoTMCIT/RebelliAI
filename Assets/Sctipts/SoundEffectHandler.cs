@@ -7,7 +7,7 @@ using Cysharp.Threading.Tasks;
 public class SoundEffectHandler : MonoBehaviour
 {
     [SerializeField] private AudioClip[] shotSounds, damageSounds, doorSounds;
-    [SerializeField] private AudioClip hitSound, refrectSound, explosionSound, charShowSound, healHPSound, dashSound, jumpSound, landSound, passTheGreen, completedProcessSound;
+    [SerializeField] private AudioClip hitSound, refrectSound, explosionSound, charShowSound, healHPSound, dashSound, jumpSound, landSound, passTheGreen, completedProcessSound, chargingBlasterSound;
     [SerializeField] private AudioClip[] bgm;
 
     [SerializeField] AudioSource audioSourceSE, audioSourceBGM;
@@ -21,22 +21,12 @@ public class SoundEffectHandler : MonoBehaviour
 
     private void Start()
     {
-        /*Debug.LogWarning("SoundEffectHandler Start");
-        if (audioSourceSE == null)
-        {
-            Debug.Log("audioSourceSE is null");
-            audioSourceSE = audioSourceSEObj.GetComponent<AudioSource>();
-        }
-        if (audioSourceBGM == null)
-        {
-            Debug.Log("audioSourceBGM is null");
-            audioSourceBGM = audioSourceBGMObj.GetComponent<AudioSource>();
-        }*/
         bgmCtrl = new BGMCtrl(audioSourceBGM, bgm);
         soundEffectCtrl = new SoundEffectCtrl(audioSourceSE, shotSounds, damageSounds, hitSound, refrectSound, explosionSound, charShowSound, healHPSound);
         playerAcitonSECtrl = new PlayerAcitonSECtrl(audioSourceSE, dashSound, jumpSound, landSound);
         uiSoundCtrl = new UISoundCtrl(audioSourceSE, passTheGreen, completedProcessSound);
         doorSoundCtrl = new DoorSoundCtrl(audioSourceSE, doorSounds);
+        ChargingBlasterSoundCtrl chargingBlasterSoundCtrl = new ChargingBlasterSoundCtrl(chargingBlasterSound, audioSourceSE);
     }
 
     private void OnDestroy()
@@ -368,5 +358,43 @@ public class DoorSoundCtrl
     public void Dispose()
     {
         _disposables.Dispose();
+    }
+}
+
+public class ChargingBlasterSoundCtrl
+{
+    private readonly AudioClip chargingBlasterSound;
+    private readonly AudioSource audioSourceSE;
+
+    private Subject<Unit> onPlaySound = new Subject<Unit>();
+    public IObservable<Unit> OnPlaySound => onPlaySound;
+
+    private bool isPlaying = false;
+
+    public ChargingBlasterSoundCtrl(AudioClip chargingBlasterSound, AudioSource audioSourceSE)
+    {
+        this.chargingBlasterSound = chargingBlasterSound;
+        this.audioSourceSE = audioSourceSE;
+
+        PlaySound().Forget();
+
+        ChargeShot_Handler.onLowCharge += () => isPlaying = true;
+        AllShellManager.onShootChargedShell += () => isPlaying = false;
+    }
+
+    private async UniTask PlaySound()
+    {
+        if (!isPlaying) return;
+
+        try
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e);
+        }
+
+        audioSourceSE.PlayOneShot(chargingBlasterSound);
     }
 }

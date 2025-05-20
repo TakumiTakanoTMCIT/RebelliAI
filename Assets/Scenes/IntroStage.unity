@@ -17071,6 +17071,7 @@ MonoBehaviour:
   landSound: {fileID: 8300000, guid: d6c3d3f099b974cd7ba292983fd3422d, type: 3}
   passTheGreen: {fileID: 8300000, guid: 4ba61bb980ff745998e5820426ffe2f6, type: 3}
   completedProcessSound: {fileID: 8300000, guid: 1ea50e824bdfe430299a87a7b734a42d, type: 3}
+  chargingBlasterSound: {fileID: 0}
   bgm:
   - {fileID: 8300000, guid: 71dec78ba7e274eb4a0746977cfb5c2f, type: 3}
   audioSourceSE: {fileID: 519420036}
@@ -19651,7 +19652,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Path: {fileID: 1807062460}
-  m_PathPosition: 0
+  m_PathPosition: 1
   m_PositionUnits: 0
   m_PathOffset: {x: 0, y: 0, z: 0}
   m_XDamping: 0
@@ -20633,7 +20634,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Path: {fileID: 763531505}
-  m_PathPosition: 0
+  m_PathPosition: 1
   m_PositionUnits: 0
   m_PathOffset: {x: 0, y: 0, z: 0}
   m_XDamping: 0
