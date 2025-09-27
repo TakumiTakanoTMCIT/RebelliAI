@@ -4,7 +4,6 @@ using System;
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using KeyHandler;
-using ObjectPoolFactory;
 using UnityEngine.SceneManagement;
 
 public class GameFlowManager : MonoBehaviour
@@ -19,6 +18,7 @@ public class GameFlowManager : MonoBehaviour
     [SerializeField] SavePointHandler savePointHandler;
     [SerializeField] CameraGoBossStageController cameraGoBossStageController;
     [SerializeField] WarpDirection warpDirection;
+    [SerializeField] Parallax parallax;
 
     public static Subject<Unit> onCompletedShowStandbyTerminal = new Subject<Unit>();
     public static Subject<Unit> onCompletedPlayerWarpIn = new Subject<Unit>();
@@ -57,9 +57,6 @@ public class GameFlowManager : MonoBehaviour
             cameraGoBossStageController.SetCameraInBossRoom();
         }
 
-        //キャンセルトークンの生成
-        cts = new CancellationTokenSource();
-
         //プレイヤーをワープ登場演出まで非表示にして、操作不可能にする。
         gamePlayerManager.DeactivePlayer.OnNext(Unit.Default);
         inputHandler.DisableInput.OnNext(Unit.Default);
@@ -68,9 +65,15 @@ public class GameFlowManager : MonoBehaviour
         //スタンバイターミナルを表示
         gameStartTerminalCtrl.onStartStandbyTerminal.OnNext(Unit.Default);
 
+        //背景を正しい位置にする
+        parallax.Init();
+
         //表示完了するまで待機
         try
         {
+            //キャンセルトークンの生成
+            cts = new CancellationTokenSource();
+
             await onCompletedShowStandbyTerminal
             .First()
             .ToUniTask(cancellationToken: cts.Token);
@@ -85,6 +88,7 @@ public class GameFlowManager : MonoBehaviour
             Debug.LogError($"awaitでエラーが起きました。{e}");
             return;
         }
+
         //Debug.LogAssertion("スタンバイターミナルを表示完了");
         //BGMを再生
         BGMCtrl.onPlayBGM.OnNext(0);

@@ -16580,6 +16580,7 @@ GameObject:
   - component: {fileID: 1261535916}
   - component: {fileID: 1261535917}
   - component: {fileID: 1261535918}
+  - component: {fileID: 1261535919}
   m_Layer: 0
   m_Name: HighWayBuildings
   m_TagString: Untagged
@@ -16661,13 +16662,26 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1261535915}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 534f056802e12461bb3e029084eaf444, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 0.9
   player: {fileID: 906999080}
+--- !u!114 &1261535919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1261535915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 748c930f8723c43b9b477381b5dddf55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parallaxFactor: 0.5
 --- !u!1 &1264633627
 GameObject:
   m_ObjectHideFlags: 0
@@ -16920,6 +16934,7 @@ MonoBehaviour:
   savePointHandler: {fileID: 1264633640}
   cameraGoBossStageController: {fileID: 1264633633}
   warpDirection: {fileID: 765369151}
+  parallax: {fileID: 1261535919}
 --- !u!114 &1264633640
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19652,7 +19667,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Path: {fileID: 1807062460}
-  m_PathPosition: 0
+  m_PathPosition: 0.7254993
   m_PositionUnits: 0
   m_PathOffset: {x: 0, y: 0, z: 0}
   m_XDamping: 0
@@ -20634,7 +20649,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Path: {fileID: 763531505}
-  m_PathPosition: 0
+  m_PathPosition: 1
   m_PositionUnits: 0
   m_PathOffset: {x: 0, y: 0, z: 0}
   m_XDamping: 0
