@@ -3,7 +3,6 @@ using ActionStatusChk;
 using KeyHandler;
 using PlayerAction;
 using UnityEngine;
-using HPBar;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using Zenject;
@@ -27,10 +26,16 @@ namespace PlayerState
         private bool isExecutable;
 
         public IState idleState, walkState, jumpState, jumpToFallState, fallState, wallFallState, wallKick, wallKickToFallState,
-        dashState, damageState, deathState;
+        dashState, damageState, deathState, skateBoardState;
 
         [HideInInspector]
         public ReactiveProperty<IState> currentState = new ReactiveProperty<IState>();
+
+        [SerializeField]
+        public InputHandler inputHandler;
+
+        //Validator一覧！
+        public SkateBoardValidator skateBoardValidator;
 
         [Inject]
         public void Construct([Inject(Id = "Idle")] IState idle, [Inject(Id = "Walk")] IState walk, [Inject(Id = "Jump")] IState jump, [Inject(Id = "Fall")] IState fall, [Inject(Id = "WallFall")] IState wallFall, [Inject(Id = "WallKick")] IState wallKick, [Inject(Id = "Dash")] IState dash, [Inject(Id = "Damage")] IState damage, [Inject(Id = "Death")] IState death, LifeManager lifeManager, [Inject(Id = "JumpToFall")] IState jumpToFall, [Inject(Id = "WallKickToFall")] IState wallKickToFall, EventStreamer eventStreamer, HPBar.EventMediator hpbarEventMediator, PlayerState.EventMediator eventMediator)
@@ -46,6 +51,7 @@ namespace PlayerState
             deathState = death;
             jumpToFallState = jumpToFall;
             wallKickToFallState = wallKickToFall;
+            skateBoardState = new SkateBoardRiding(FindObjectOfType<SkateBoardCtrl>());
 
             this.lifeManager = lifeManager;
             this.eventStreamer = eventStreamer;
@@ -55,6 +61,8 @@ namespace PlayerState
 
         private void Awake()
         {
+            skateBoardValidator = new SkateBoardValidator(inputHandler);
+
             isExecutable = false;
 
             GameFlowManager.StartBattleAction.Subscribe(_ =>
@@ -186,6 +194,24 @@ namespace PlayerState
         }
     }
 
+    /// <summary>
+    /// スケボーに乗りたいときにこのメソッドを参照するだけで乗れるかどうかわかります
+    /// </summary>
+    public class SkateBoardValidator
+    {
+        private readonly InputHandler inputHandler;
+
+        public SkateBoardValidator(InputHandler inputHandler)
+        {
+            this.inputHandler = inputHandler;
+        }
+
+        public bool IsRideSkateBoardKeyDown()
+        {
+            return inputHandler.IsHandleSkateBoardKeyDown();
+        }
+    }
+
     public class Idle : IState
     {
         //Inject
@@ -214,6 +240,16 @@ namespace PlayerState
 
         public void Execute(PlayerStateMgr stateMgr)
         {
+            /// <summary>
+            /// スケボーに乗る判定
+            /// </summary>
+            if (stateMgr.skateBoardValidator.IsRideSkateBoardKeyDown())
+            {
+                //スケボーに乗る
+                stateMgr.ChangeState(stateMgr.skateBoardState);
+                return;
+            }
+
             /// <summary>
             /// 地面についておらず、落下中ならfallstateに遷移
             /// なぜ地面の判定を取るのかというと、落ちる床に乗っている時にプレイヤーも落下中と判定されてしまうので、それでは不自然なので判定しました
@@ -1292,6 +1328,39 @@ namespace PlayerState
             }
 
             return false;
+        }
+    }
+
+    public class SkateBoardRiding : IState
+    {
+        private readonly SkateBoardCtrl skateBoardCtrl;
+
+        public SkateBoardRiding(SkateBoardCtrl skateBoardCtrl)
+        {
+            this.skateBoardCtrl = skateBoardCtrl;
+        }
+
+        public void Enter(PlayerStateMgr stateMgr)
+        {
+            skateBoardCtrl.Ride();
+        }
+
+        public void Execute(PlayerStateMgr stateMgr)
+        {
+            //スケボーの処理はすべてMove()に書いています
+            skateBoardCtrl.HandleMove();
+
+            //スケボーボタンを押したら降りる
+            if (stateMgr.inputHandler.IsHandleSkateBoardKeyDown())
+            {
+                stateMgr.ChangeState(stateMgr.idleState);
+                return;
+            }
+        }
+
+        public void Exit(PlayerStateMgr stateMgr)
+        {
+            skateBoardCtrl.GetOff();
         }
     }
 

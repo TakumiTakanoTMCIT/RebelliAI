@@ -39,6 +39,11 @@ namespace KeyHandler
         public static event Action onAcceptInputCtrl;
         public static event Action onJumpKeyReleased;
 
+        //スケボー
+        public event Action onRideSkateBoard;
+        private bool isRideSkateBoardKeyDown = false;
+        private bool isBrakeSkateBoardKey = false;
+
         public Subject<Unit> EnableInput = new Subject<Unit>();
         public Subject<Unit> DisableInput = new Subject<Unit>();
 
@@ -209,6 +214,24 @@ namespace KeyHandler
                 return false;
         }
 
+        public bool IsHandleSkateBoardKeyDown()
+        {
+            if (isRideSkateBoardKeyDown)
+            {
+                isRideSkateBoardKeyDown = false;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool IsBrakeSkateBoardKey()
+        {
+            return isBrakeSkateBoardKey;
+        }
+
         /// <summary>
         /// InputSystemでUnityEventを使っています
         /// </summary>
@@ -281,6 +304,33 @@ namespace KeyHandler
             if (context.canceled)
             {
                 isattackinKeyNow = false;
+            }
+        }
+
+        public void OnRideSkateBoard(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                isRideSkateBoardKeyDown = true;
+            }
+
+            if (context.canceled)
+            {
+                isRideSkateBoardKeyDown = false;
+            }
+        }
+
+        public void OnBrake(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                //ブレーキをかける
+                isBrakeSkateBoardKey = true;
+            }
+
+            if (context.canceled)
+            {
+                isBrakeSkateBoardKey = false;
             }
         }
     }
