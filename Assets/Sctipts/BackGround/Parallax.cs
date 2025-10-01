@@ -21,7 +21,7 @@ public class Parallax : MonoBehaviour
 
         isInit = true;
 
-        Debug.Log("呼ばれた！");
+        //Debug.Log("呼ばれた！");
     }
 
     private void LateUpdate()

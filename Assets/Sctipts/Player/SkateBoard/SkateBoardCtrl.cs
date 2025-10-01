@@ -2,6 +2,7 @@ using UnityEngine;
 using KeyHandler;
 using PlayerFlip;
 using Zenject;
+using PlayerState;
 
 public class SkateBoardCtrl : MonoBehaviour
 {
@@ -12,8 +13,9 @@ public class SkateBoardCtrl : MonoBehaviour
     private InputHandler inputHandler;
 
     [SerializeField]
-    private GameObject playerObj;
-    Rigidbody2D rb;
+    private PlayerStateMgr playerStateMgr;
+
+    Rigidbody2D playerRb;
 
     [SerializeField]
     private float moveSpeed = 5f, maxSpeed = 10f, speedDamping = 0.1f;
@@ -33,119 +35,36 @@ public class SkateBoardCtrl : MonoBehaviour
         this.playerDirection = direction;
     }
 
-    //スケボーのモードを定義
-    public enum Mode
-    {
-        Independent, //独立して動く
-        isControlledByPlayer, //プレイヤーに合わせて動く
-        holdByPlayer, //プレイヤーに掴まれている状態
-        isBoardInactive // スケボーがしまわれている状態
-    }
-    private Mode currentMode;
-
     private void Start()
     {
-        rb = playerObj.GetComponent<Rigidbody2D>();
-
-        currentMode = Mode.isBoardInactive;
+        playerRb = playerStateMgr.GetComponent<Rigidbody2D>();
 
         skateBoard.SetActive(false);
+    }
+
+    //PlayerStateMgrクラスでSkateBoardステートに入った瞬間に呼び出されます
+    //つまり自前の初期化メソッド！
+    public void Launch()
+    {
+        skateBoard.SetActive(true);
     }
 
     public void Ride()
     {
-        currentMode = Mode.isControlledByPlayer;
-        skateBoard.SetActive(true);
-
-        //プレイヤーの位置にスケボーを移動させる
-        skateBoard.transform.position = playerObj.transform.position;
-    }
-
-    public void GetOff()
-    {
-        //乗っている状態から降りる
-        currentMode = Mode.isBoardInactive;
-        skateBoard.SetActive(false);
-    }
-
-    private void Update()
-    {
-        if (currentMode == Mode.isControlledByPlayer)
+        //すでに最大速度に達していたら何もしない
+        if (playerRb.velocity.magnitude > maxSpeed)
         {
-            skateBoard.transform.position = playerObj.transform.position;
+            //プレイヤーの位置にスケボーを移動させる
+            skateBoard.transform.position = playerStateMgr.transform.position;
+            return;
         }
-    }
 
-    public void HandleMove()
-    {
-        switch (currentMode)
-        {
-            case Mode.isControlledByPlayer:
-                OnControlledByPlayer();
-                break;
-
-            case Mode.holdByPlayer:
-                if (playerDirection.Direction.Value)
-                {
-                    skateBoard.transform.position = playerObj.transform.position + (Vector3)posOffset;
-                }
-                else
-                {
-                    skateBoard.transform.position = playerObj.transform.position + new Vector3(-posOffset.x, posOffset.y, 0);
-                }
-                break;
-
-            case Mode.Independent:
-                break;
-
-            case Mode.isBoardInactive:
-
-                //まだ処理を書いてないです。
-
-                break;
-            default:
-                Debug.LogError("致命的なバグが発生しました。SkateBoardCtrlのcurrentModeが不正です");
-                return;
-        }
-    }
-
-    public void ChangeMode(Mode mode)
-    {
-        switch (mode)
-        {
-            case Mode.isControlledByPlayer:
-                break;
-            default:
-                Debug.LogError("致命的なバグが発生しました。SkateBoardCtrlのChangeModeの引数が不正です");
-                break;
-        }
-    }
-
-    private void Brake()
-    {
-        if (rb.velocity.magnitude > 0.1f) // ほぼ止まったら完全に止める
-        {
-            Vector2 oppositeForce = -rb.velocity.normalized * brakeForce;
-            rb.AddForce(oppositeForce, ForceMode2D.Force);
-        }
-        else
-        {
-            rb.velocity = Vector2.zero; // 完全停止
-        }
-    }
-
-    private void Damping()
-    {
-        //徐々に速度を落とす
-        rb.velocity = Vector2.Lerp(rb.velocity, Vector2.zero, speedDamping);
-    }
-
-    private void OnControlledByPlayer()
-    {
         //ブレーキを押されてたらブレーキ処理
         if (inputHandler.IsBrakeSkateBoardKey())
         {
             Brake();
+            //プレイヤーの位置にスケボーを移動させる
+            skateBoard.transform.position = playerStateMgr.transform.position;
             return;
         }
 
@@ -153,6 +72,8 @@ public class SkateBoardCtrl : MonoBehaviour
         if (inputHandler.IsMoveLeftKey() && inputHandler.IsMoveRightKey())
         {
             Damping();
+            //プレイヤーの位置にスケボーを移動させる
+            skateBoard.transform.position = playerStateMgr.transform.position;
             return;
         }
 
@@ -160,25 +81,49 @@ public class SkateBoardCtrl : MonoBehaviour
         if (!inputHandler.IsMoveKey())
         {
             Damping();
-            return;
-        }
-
-        //すでに最大速度に達していたら何もしない
-        if (rb.velocity.magnitude > maxSpeed)
-        {
-            Damping();
+            //プレイヤーの位置にスケボーを移動させる
+            skateBoard.transform.position = playerStateMgr.transform.position;
             return;
         }
 
         if (inputHandler.IsMoveLeftKey())
         {
             //左に移動
-            rb.AddForce(Vector2.left * moveSpeed);
+            playerRb.AddForce(Vector2.left * moveSpeed);
         }
         else if (inputHandler.IsMoveRightKey())
         {
             //右に移動
-            rb.AddForce(Vector2.right * moveSpeed);
+            playerRb.AddForce(Vector2.right * moveSpeed);
         }
+
+        //プレイヤーの位置にスケボーを移動させる
+        skateBoard.transform.position = playerStateMgr.transform.position;
+    }
+
+    //PlayerStateMgeクラスからSkate状態を解除したExitの瞬間に呼び出されます。
+    public void GetOff()
+    {
+        //乗っている状態から降りる
+        skateBoard.SetActive(false);
+    }
+
+    private void Brake()
+    {
+        if (playerRb.velocity.magnitude > 0.1f) // ほぼ止まったら完全に止める
+        {
+            Vector2 oppositeForce = -playerRb.velocity.normalized * brakeForce;
+            playerRb.AddForce(oppositeForce, ForceMode2D.Force);
+        }
+        else
+        {
+            playerRb.velocity = Vector2.zero; // 完全停止
+        }
+    }
+
+    private void Damping()
+    {
+        //徐々に速度を落とす
+        playerRb.velocity = Vector2.Lerp(playerRb.velocity, Vector2.zero, speedDamping);
     }
 }

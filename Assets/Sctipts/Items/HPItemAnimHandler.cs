@@ -42,7 +42,7 @@ public class HPItemAnimHandler : MonoBehaviour
         {
             isPlaySpawnAnim = true;
             animCtrl.Play("Spawn");
-            Debug.Log("Spawnアニメーションを再生します");
+            //Debug.Log("Spawnアニメーションを再生します");
         }
     }
 

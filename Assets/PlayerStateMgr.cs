@@ -1335,6 +1335,14 @@ namespace PlayerState
     {
         private readonly SkateBoardCtrl skateBoardCtrl;
 
+        private State currentState;
+
+        public enum State
+        {
+            Ride,
+            GetOff,
+        }
+
         public SkateBoardRiding(SkateBoardCtrl skateBoardCtrl)
         {
             this.skateBoardCtrl = skateBoardCtrl;
@@ -1342,13 +1350,26 @@ namespace PlayerState
 
         public void Enter(PlayerStateMgr stateMgr)
         {
-            skateBoardCtrl.Ride();
+            //skateBoardCtrl.Ride();
+
+            currentState = State.Ride;
+            skateBoardCtrl.Launch();
         }
 
         public void Execute(PlayerStateMgr stateMgr)
         {
-            //スケボーの処理はすべてMove()に書いています
-            skateBoardCtrl.HandleMove();
+            switch (currentState)
+            {
+                case State.Ride:
+                    skateBoardCtrl.Ride();
+                    break;
+                case State.GetOff:
+                    stateMgr.ChangeState(stateMgr.idleState);
+                    break;
+                default:
+                    Debug.LogError("例外が発生しました。");
+                    break;
+            }
 
             //スケボーボタンを押したら降りる
             if (stateMgr.inputHandler.IsHandleSkateBoardKeyDown())
@@ -1361,6 +1382,7 @@ namespace PlayerState
         public void Exit(PlayerStateMgr stateMgr)
         {
             skateBoardCtrl.GetOff();
+            currentState = State.GetOff;
         }
     }
 

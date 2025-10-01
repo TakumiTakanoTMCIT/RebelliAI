@@ -958,11 +958,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skateBoard: {fileID: 1913322178}
   inputHandler: {fileID: 906999083}
-  playerObj: {fileID: 906999080}
+  playerStateMgr: {fileID: 906999089}
   moveSpeed: 5
   maxSpeed: 10
   speedDamping: 0.1
   brakeForce: 20
+  posOffset: {x: 0, y: 0}
 --- !u!4 &277261933
 Transform:
   m_ObjectHideFlags: 0
