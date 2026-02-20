@@ -51,18 +51,18 @@ public class SkateBoardCtrl : MonoBehaviour
 
     public void Ride()
     {
-        //すでに最大速度に達していたら何もしない
-        if (playerRb.velocity.magnitude > maxSpeed)
+        //ブレーキを押されてたらブレーキ処理
+        if (inputHandler.IsBrakeSkateBoardKey() && playerRb.velocity.x > 0.1f)
         {
+            Brake();
             //プレイヤーの位置にスケボーを移動させる
             skateBoard.transform.position = playerStateMgr.transform.position;
             return;
         }
 
-        //ブレーキを押されてたらブレーキ処理
-        if (inputHandler.IsBrakeSkateBoardKey())
+        //すでに最大速度に達していたら何もしない
+        if (playerRb.velocity.magnitude > maxSpeed)
         {
-            Brake();
             //プレイヤーの位置にスケボーを移動させる
             skateBoard.transform.position = playerStateMgr.transform.position;
             return;
