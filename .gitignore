@@ -52,6 +52,9 @@ ExportedObj/
 *.pdb.meta
 *.mdb.meta
 
+# Zenject package-generated project meta files can be recreated/removed by Unity.
+/[Aa]ssets/Plugins/Zenject/**/*.csproj.meta
+
 # Unity3D generated file on crash reports
 sysinfo.txt
 
