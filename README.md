@@ -1,4 +1,6 @@
 ゲームクリエイター甲子園 2024 総合大賞ノミネート作品
+<img width="1500" height="500" alt="image" src="https://github.com/user-attachments/assets/1a3bae06-852e-4953-a0b4-811fe093be9c" />
+
 # RebelliAI
 
 ロックマンXにインスパイアされた2Dアクションゲームです。
